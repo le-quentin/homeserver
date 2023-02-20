@@ -1,0 +1,17 @@
+services:
+  gateway:
+    build: ./gateway
+    ports: 
+        - "80:80"
+    networks:
+      - homeserver
+  free-stock-tickers:
+    image: ghcr.io/le-quentin/free-stock-tickers:latest
+    environment:
+      APP_PORT: 3000
+    networks:
+      - homeserver
+
+networks:
+  homeserver: {}
+      
