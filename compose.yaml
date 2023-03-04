@@ -15,6 +15,8 @@ services:
     restart: unless-stopped
   cocobot:
     image: ghcr.io/le-quentin/cocobot:latest
+    volumes:
+      - /home/pi/cocobot:/app/data:ro
     environment:
       BOT_TOKEN: ${COCOBOT_TOKEN}
     restart: unless-stopped
