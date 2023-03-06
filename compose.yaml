@@ -14,7 +14,7 @@ services:
       - homeserver
     restart: unless-stopped
   cocobot:
-    image: ghcr.io/le-quentin/cocobot:latest
+    image: ghcr.io/le-quentin/cocobot:nightly
     volumes:
       - /home/pi/cocobot:/app/data:ro
     environment:
