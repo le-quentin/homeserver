@@ -19,6 +19,7 @@ services:
       - /home/pi/cocobot:/app/data:ro
     environment:
       BOT_TOKEN: ${COCOBOT_TOKEN}
+      LANGUAGE: fr
     restart: unless-stopped
 
 networks:
