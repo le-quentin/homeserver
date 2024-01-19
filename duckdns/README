@@ -1,0 +1,3 @@
+chmod a+x ./duck.sh
+crontab -e 
+*/5 * * * * ~/duckdns/duck.sh >/dev/null 2>&1
