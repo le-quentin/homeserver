@@ -38,3 +38,20 @@ ansible-playbook -i hosts.yaml playbook.yaml -k --tags services
 - [ ] Logstash for log aggregation and Kibana for reading logs in web UI
 - [ ] Open source smart home server (HomeAssistant?)
 - [ ] Test it with a first device (temperature sensor in office?)
+
+## Proxmox PoC
+
+Install proxmox as an OS.
+
+Log into proxmox http interface as an admin, and:
+1. Create an API token for the admin user, with all privileges (uncheck "privilege separation"); TODO: find the minimal set of privileges, define a role with those, and attribute it to the token
+2. Pull the iso image for VMs, can't be done with terraform proxmox provider yet (double click the storage>ISO Images>Download from URL>https://dl-cdn.alpinelinux.org/alpine/v3.19/releases/x86_64/alpine-standard-3.19.0-x86_64.iso)
+3. Create a default bridge network (double click the node>System>Network>Create>Linux bridge, should create vmbr0)
+
+Then, the terraform config can be applied:
+```sh
+cd proxmox
+terraform init
+terraform plan
+terraform apply
+```
