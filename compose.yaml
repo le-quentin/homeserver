@@ -19,6 +19,7 @@ services:
       - /home/pi/cocobot:/app/data:ro
     environment:
       COCOBOT_TOKEN: ${COCOBOT_TOKEN}
+      COCOBOT_LOG_LEVEL: ${COCOBOT_LOG_LEVEL}
       COCOBOT_LANGUAGE: fr
     restart: unless-stopped
 
