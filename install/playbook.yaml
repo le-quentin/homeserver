@@ -1,0 +1,15 @@
+---
+- name: Install packages
+  hosts: piserv
+  become: true
+  vars:
+    arch_mapping:  # Map ansible architecture {{ ansible_architecture }} names to Docker's architecture names
+      x86_64: amd64
+      aarch64: arm64
+  tasks:
+   - name: Install git
+     become: yes
+     package:
+       name: git
+       state: present
+   - include_tasks: "tasks/install-docker-{{ ansible_os_family }}.yaml"
