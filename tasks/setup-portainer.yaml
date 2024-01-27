@@ -1,0 +1,7 @@
+- name: Copy portainer files
+  copy:
+    src: ../services/portainer/
+    dest: ~/portainer/
+- name: Run portainer in docker compose
+  community.docker.docker_compose:
+    project_src: ~/portainer/

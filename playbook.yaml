@@ -1,4 +1,3 @@
----
 - name: Install packages
   hosts: piserv
   become: true
@@ -12,4 +11,5 @@
      package:
        name: git
        state: present
-   - include_tasks: "tasks/install-docker-{{ ansible_os_family }}.yaml"
+   - include_tasks: "tasks/install-docker.yaml"
+   - include_tasks: "tasks/setup-portainer.yaml"
