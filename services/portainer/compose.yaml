@@ -1,0 +1,11 @@
+services:
+  portainer:
+    image: portainer/portainer-ce:2.19.4-alpine
+    ports: 
+      - "8000:8000"
+      - "9443:9443"
+    command: --admin-password '$$2y$$05$$hmHnnv2/bCsvaE1ByKkw9OGm4lEAufJhvOtrCL/UvzwQRoXzWi2yO'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /home/pi/portainer/data:/data
+    restart: unless-stopped
