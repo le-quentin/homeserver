@@ -9,6 +9,8 @@
       host: localhost:9443
       # encrypted with htpasswd https://portainer-notes.readthedocs.io/en/stable/configuration.html
       password: $2y$05$hmHnnv2/bCsvaE1ByKkw9OGm4lEAufJhvOtrCL/UvzwQRoXzWi2yO
+  vars_files:
+    - ./.passwords.yaml # Encrypted with GPG via git-crypt
   tasks:
    - name: Install git
      become: yes
