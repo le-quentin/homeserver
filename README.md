@@ -11,6 +11,7 @@ Requirements on the hosts:
 
 Then, from the control node (typically linux laptop):
 - Install Ansible (2.16.2+) 
+- Make sure you have the GPG key in your keyring (passwords are encrypted via git-crypt)
 - Simply run the playbook with:
 
 ```sh
