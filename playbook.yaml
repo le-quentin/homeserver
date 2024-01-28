@@ -1,10 +1,14 @@
-- name: Install packages
+- name: Setup piserv
   hosts: piserv
   become: true
   vars:
     arch_mapping:  # Map ansible architecture {{ ansible_architecture }} names to Docker's architecture names
       x86_64: amd64
       aarch64: arm64
+    portainer:
+      host: localhost:9443
+      # encrypted with htpasswd https://portainer-notes.readthedocs.io/en/stable/configuration.html
+      password: $2y$05$hmHnnv2/bCsvaE1ByKkw9OGm4lEAufJhvOtrCL/UvzwQRoXzWi2yO
   tasks:
    - name: Install git
      become: yes
@@ -12,4 +16,8 @@
        name: git
        state: present
    - include_tasks: "tasks/install-docker.yaml"
+     tags: 
+       - docker
    - include_tasks: "tasks/setup-portainer.yaml"
+     tags:
+       - portainer
