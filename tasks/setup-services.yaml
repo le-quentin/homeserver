@@ -10,3 +10,17 @@
     - services
   docker_compose:
     project_src: "{{ home_dir }}/services"
+- name: Make duckdns script executable
+  tags:
+    - services
+  file:
+    path: "{{ home_dir }}/services/duckdns/duck.sh"
+    mode: u+x 
+- name: Setup duckdns cron job
+  become: no
+  tags:
+    - services
+  ansible.builtin.cron:
+    name: "duckdns"
+    minute: "*/5"
+    job: "{{ home_dir }}/services/duckdns/duck.sh {{ duckdns_token }} >~/duck.lastrun.log 2>&1"
