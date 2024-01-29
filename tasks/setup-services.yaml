@@ -1,0 +1,43 @@
+# - name: Create services directory
+#   tags:
+#     - services
+#   file:
+#     path: "{{home_dir}}/services"
+#     state: directory
+- name: Copy services files
+  become: no
+  tags:
+    - services
+  copy:
+    src: "./services"
+    dest: "{{ home_dir }}"
+- name: Run services in docker compose
+  tags:
+    - services
+  docker_compose:
+    project_src: "{{ home_dir }}/services"
+# - name: Authenticate in portainer API
+#   tags: 
+#     - services
+#   uri:
+#     url: "https://{{ portainer.host }}/api/auth"
+#     method: POST
+#     validate_certs: no
+#     body_format: json
+#     body: '{ "username": "admin", "password": "{{ portainer_password }}" }'
+#   register: auth_token
+# - name: Run services as a portainer stack
+#   tags: 
+#     - services
+#   uri:
+#     url: "https://{{ portainer.host }}/api/stacks/create/standalone/file?endpointId=2"
+#     method: POST
+#     validate_certs: no
+#     headers: 
+#       Authorization: "Bearer {{ auth_token.json.jwt }}"
+#     body_format: form-multipart
+#     body:
+#       Name: services
+#       file: 
+#         filename: "{{ home_dir }}/services/compose.yaml"
+#         mime_type: multipart/form-data

@@ -14,14 +14,3 @@
       - /var/run/docker.sock:/var/run/docker.sock
       - "{{ home_dir }}/portainer/data:/data"
     command: "--admin-password='{{ portainer.password }}'"
-# - name: Setup portainer admin password 
-#   tags: 
-#     - portainer
-#   uri:
-#     url: "https://{{ portainer.host }}/api/users/admin/init"
-#     method: POST
-#     validate_certs: no
-#     body_format: json
-#     body:
-#       username: "{{ portainer.username }}"
-#       password: "{{ portainer.password }}"
