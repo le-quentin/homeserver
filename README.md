@@ -19,3 +19,8 @@ ansible-playbook -i hosts.yaml playbook.yaml -k
 ```
 
 If there are errors, debug will be easier with the -v(erbose) option.
+
+You can also run some specific steps of the playbook with tags:
+```sh
+ansible-playbook -i hosts.yaml playbook.yaml -k --tags services
+```
