@@ -19,6 +19,7 @@
   uri:
     url: "https://{{ portainer.host }}/api/users/admin/init"
     method: POST
+    status_code: [200, 409] # Allow 409 for idempotence of the playbook
     validate_certs: no
     body_format: json
     body:
