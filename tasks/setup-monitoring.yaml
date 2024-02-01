@@ -1,0 +1,13 @@
+- name: Copy monitoring services files
+  become: no
+  tags:
+    - monitoring
+  copy:
+    src: "./monitoring"
+    dest: "{{ home_dir }}"
+- name: Run monitoring services in docker compose
+  tags:
+    - monitoring
+  docker_compose:
+    project_src: "{{ home_dir }}/monitoring"
+    recreate: always # so that changes in config are applied

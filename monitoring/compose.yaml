@@ -1,0 +1,30 @@
+services:
+  prometheus:
+    image: prom/prometheus:v2.45.3
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    depends_on:
+      - cadvisor
+    networks:
+      - monitoring
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: cadvisor
+    ports:
+    - 9091:8080
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - monitoring
+volumes:
+  prometheus-data:
+
+networks:
+  monitoring: {}
+      
