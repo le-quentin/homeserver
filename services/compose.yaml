@@ -3,15 +3,11 @@ services:
     build: ./gateway
     ports: 
         - "80:80"
-    networks:
-      - homeserver
     restart: unless-stopped
   free-stock-tickers:
     image: ghcr.io/le-quentin/free-stock-tickers:latest
     environment:
       APP_PORT: 3000
-    networks:
-      - homeserver
     restart: unless-stopped
   cocobot:
     image: ghcr.io/le-quentin/cocobot:nightly
@@ -24,7 +20,3 @@ services:
       COCOBOT_DISCORD4J_LOG_LEVEL: ${COCOBOT_DISCORD4J_LOG_LEVEL}
       COCOBOT_LANGUAGE: fr
     restart: unless-stopped
-
-networks:
-  homeserver: {}
-      
