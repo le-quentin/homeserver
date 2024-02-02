@@ -5,7 +5,9 @@ services:
     ports: 
       - "9000:3000"
     volumes:
-      - ./prometheus-datasource.yaml:/etc/grafana/provisioning/datasources/prometheus-datasource.yaml
+      - ./grafana/prometheus-datasource.yaml:/etc/grafana/provisioning/datasources/prometheus-datasource.yaml
+      - ./grafana/dashboards-config.yaml:/etc/grafana/provisioning/dashboards/default.yaml
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
     depends_on:
       - prometheus
   prometheus:
