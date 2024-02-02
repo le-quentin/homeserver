@@ -1,6 +1,16 @@
 services:
+  grafana:
+    image: grafana/grafana:10.3.1
+    restart: unless-stopped
+    ports: 
+      - "9000:3000"
+    volumes:
+      - ./prometheus-datasource.yaml:/etc/grafana/provisioning/datasources/prometheus-datasource.yaml
+    depends_on:
+      - prometheus
   prometheus:
     image: prom/prometheus:v2.45.3
+    restart: unless-stopped
     ports:
       - "9090:9090"
     volumes:
@@ -10,7 +20,7 @@ services:
       - cadvisor
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
-    container_name: cadvisor
+    restart: unless-stopped
     ports:
     - 9091:8080
     volumes:
