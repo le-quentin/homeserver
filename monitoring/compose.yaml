@@ -18,6 +18,8 @@ services:
       - prometheus-data:/prometheus
     depends_on:
       - cadvisor
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
     restart: unless-stopped

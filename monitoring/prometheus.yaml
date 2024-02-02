@@ -33,6 +33,10 @@ scrape_configs:
     static_configs:
       - targets: ['cadvisor:8080']
 
+  - job_name: 'host'
+
+    static_configs:
+      - targets: ['host.docker.internal:9100']
   # An uncompressed response body larger than this many bytes will cause the
   # scrape to fail. 0 means no limit. Example: 100MB.
   # This is an experimental feature, this behaviour could
