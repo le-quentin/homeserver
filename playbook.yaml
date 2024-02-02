@@ -26,3 +26,8 @@
    - include_tasks: "tasks/setup-monitoring.yaml"
      tags:
        - monitoring
+   - name: Run the node-exporter role
+     tags:
+       - monitoring
+     include_role:
+       name: prometheus.prometheus.node_exporter
