@@ -1,3 +1,10 @@
+- name: Delete previous monitoring services files
+  become: no
+  tags:
+    - monitoring
+  file:
+    state: absent
+    path: "{{ home_dir }}/monitoring"
 - name: Copy monitoring services files
   become: no
   tags:
