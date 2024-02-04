@@ -1,2 +1,0 @@
-smtp_tls_wrappermode = yes
-smtp_tls_security_level = encrypt

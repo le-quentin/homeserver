@@ -23,7 +23,6 @@
    - include_tasks: "tasks/setup-services.yaml"
      tags:
        - services
-       - mailing
    - include_tasks: "tasks/setup-monitoring.yaml"
      tags:
        - monitoring
