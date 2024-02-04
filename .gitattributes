@@ -1,2 +1,4 @@
 passwords.yaml filter=git-crypt diff=git-crypt
 services/.env filter=git-crypt diff=git-crypt
+**/secrets.tfvars filter=git-crypt diff=git-crypt
+
