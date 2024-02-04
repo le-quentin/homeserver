@@ -2,6 +2,7 @@
   become: no
   tags:
     - services
+    - mailing
   copy:
     src: "./services"
     dest: "{{ home_dir }}"
@@ -10,3 +11,25 @@
     - services
   docker_compose:
     project_src: "{{ home_dir }}/services"
+    recreate: always # So that changes in config are applied
+- name: Run mailing services in docker compose
+  tags:
+    - services
+    - mailing
+  docker_compose:
+    project_name: "services"
+    project_src: "{{ home_dir }}/services/mailing"
+    recreate: always # So that changes in config are applied
+- name: Setup mail addresses in mailserver
+  tags:
+    - services
+    - mailing
+  command: docker exec -it services_mailserver_1 setup email add {{ item.email }} {{ item.password }}
+  loop: "{{ users }}"
+  register: result
+  failed_when:
+    - result.rc != 0
+    - '"already exists" not in result.stderr'
+    - '"already exists" not in result.stdout'
+  changed_when: result.rc == 0
+

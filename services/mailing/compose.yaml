@@ -1,0 +1,47 @@
+services:
+  mailclient:
+    image:  roundcube/roundcubemail:1.6.6-apache
+    restart: unless-stopped
+    environment:
+      - ROUNDCUBEMAIL_DEFAULT_HOST=mailserver
+      - ROUNDCUBEMAIL_SMTP_SERVER=mailserver
+    ports:
+      - "4000:80" 
+    depends_on: 
+      - mailserver
+  mailserver:
+    image: mailserver/docker-mailserver:13.3.1
+    # Provide the FQDN of your mail server here (Your DNS MX record should point to this value)
+    hostname: mail.bonnet.family
+    env_file:
+      - ./config.env
+      - ./secrets.env
+    # More information about the mail-server ports:
+    # https://docker-mailserver.github.io/docker-mailserver/latest/config/security/understanding-the-ports/
+    # To avoid conflicts with yaml base-60 float, DO NOT remove the quotation marks.
+    ports:
+      - "25:25"    # SMTP  (explicit TLS => STARTTLS, Authentication is DISABLED => use port 465/587 instead)
+      - "143:143"  # IMAP4 (explicit TLS => STARTTLS)
+      - "465:465"  # ESMTP (implicit TLS)
+      - "587:587"  # ESMTP (explicit TLS => STARTTLS)
+      - "993:993"  # IMAP4 (implicit TLS)
+    volumes:
+      - dms-mail-data:/var/mail/
+      - dms-mail-state:/var/mail-state/
+      - dms-mail-logs:/var/log/mail/
+      - ./postfix-main.cf:/tmp/docker-mailserver/postfix-main.cf
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    stop_grace_period: 1m
+    # Uncomment if using `ENABLE_FAIL2BAN=1`:
+    # cap_add:
+    #   - NET_ADMIN
+    healthcheck:
+      test: "ss --listening --tcp | grep -P 'LISTEN.+:smtp' || exit 1"
+      timeout: 3s
+      retries: 0
+volumes:
+  dms-mail-data:
+  dms-mail-state:
+  dms-mail-logs:
+  dms-config:
