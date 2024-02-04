@@ -1,3 +1,2 @@
 passwords.yaml filter=git-crypt diff=git-crypt
 services/.env filter=git-crypt diff=git-crypt
-services/mailing/secrets.env filter=git-crypt diff=git-crypt
