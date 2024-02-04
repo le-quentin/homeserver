@@ -10,3 +10,4 @@
     - services
   docker_compose:
     project_src: "{{ home_dir }}/services"
+    recreate: always # so that changes in config are applied
