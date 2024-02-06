@@ -3,21 +3,22 @@ services:
     build: ./gateway
     ports: 
       - "80:80"
-    restart: unless-stopped
-  keycloack:
-    image: quay.io/keycloak/keycloak:23.0.6
-    ports:
+      - "443:443"
       - "8080:8080"
     restart: unless-stopped
     environment:
-      KEYCLOAK_ADMIN: admin 
-      KEYCLOAK_ADMIN_PASSWORD: admin
-    command: start-dev
+      TZ: 'France/Paris'
+    networks:
+      - public-net
+      - services-net
+      - monitoring-net
   free-stock-tickers:
     image: ghcr.io/le-quentin/free-stock-tickers:latest
     environment:
       APP_PORT: 3000
     restart: unless-stopped
+    networks:
+      - public-net
   cocobot:
     image: ghcr.io/le-quentin/cocobot:nightly
     volumes:
@@ -29,3 +30,10 @@ services:
       COCOBOT_DISCORD4J_LOG_LEVEL: ${COCOBOT_DISCORD4J_LOG_LEVEL}
       COCOBOT_LANGUAGE: fr
     restart: unless-stopped
+networks:
+  public-net:
+    external: true
+  services-net:
+    external: true
+  monitoring-net:
+    external: true

@@ -16,6 +16,9 @@
        state: present
    - include_tasks: "tasks/install-docker.yaml"
      tags: 
+       - docker-install
+   - include_tasks: "tasks/setup-docker.yaml"
+     tags:
        - docker
    - include_tasks: "tasks/setup-portainer.yaml"
      tags:

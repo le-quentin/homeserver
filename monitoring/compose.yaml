@@ -4,12 +4,18 @@ services:
     restart: unless-stopped
     ports: 
       - "9000:3000"
+    environment:
+      GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s:%(http_port)s/grafana/"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
     volumes:
       - ./grafana/prometheus-datasource.yaml:/etc/grafana/provisioning/datasources/prometheus-datasource.yaml
       - ./grafana/dashboards-config.yaml:/etc/grafana/provisioning/dashboards/default.yaml
       - ./grafana/dashboards:/var/lib/grafana/dashboards
     depends_on:
       - prometheus
+    networks:
+      - monitoring-net
   prometheus:
     image: prom/prometheus:v2.45.3
     restart: unless-stopped
@@ -22,6 +28,8 @@ services:
       - cadvisor
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - monitoring-net
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
     restart: unless-stopped
@@ -32,6 +40,10 @@ services:
     - /var/run:/var/run:rw
     - /sys:/sys:ro
     - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - monitoring-net
 volumes:
   prometheus-data:
-
+networks:
+  monitoring-net:
+    external: true
