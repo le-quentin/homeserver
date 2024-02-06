@@ -1,7 +1,7 @@
  - include_tasks: "install-docker-{{ ansible_os_family }}.yaml"
  - name: Install docker python dependencies
    tags:
-     - docker
+     - docker-install
    package:
      name: 
        - python3-docker

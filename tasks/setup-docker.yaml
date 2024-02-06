@@ -1,0 +1,9 @@
+- name: Setup docker networks
+  tags:
+    - docker
+  community.docker.docker_network:
+    name: "{{ item }}"
+  loop:
+    - public-net
+    - services-net
+    - monitoring-net
