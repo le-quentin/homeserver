@@ -11,7 +11,14 @@ Requirements on the hosts:
 
 Then, from the control node (typically linux laptop):
 - Install Ansible (2.16.2+) 
+- Install git-crypt
 - Make sure you have the GPG key in your keyring (passwords are encrypted via git-crypt)
+
+Then, unlock the repository's secrets with:
+
+```sh
+git-crypt unlock
+```
 
 Then, install the dependencies and run the playbook:
 ```sh
