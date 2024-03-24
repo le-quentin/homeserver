@@ -32,3 +32,9 @@ You can also run some specific steps of the playbook with tags:
 ```sh
 ansible-playbook -i hosts.yaml playbook.yaml -k --tags services
 ```
+
+## TODO
+
+- [ ] Logstash for log aggregation and Kibana for reading logs in web UI
+- [ ] Open source smart home server (HomeAssistant?)
+- [ ] Test it with a first device (temperature sensor in office?)
