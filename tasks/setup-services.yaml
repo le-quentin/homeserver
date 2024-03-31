@@ -1,6 +1,7 @@
 - name: Delete previous services files
   become: no
   tags:
+    - mautic
     - services
   file:
     state: absent
@@ -8,11 +9,20 @@
 - name: Copy services files
   become: no
   tags:
+    - mautic
     - services
   copy:
     src: "./services"
     dest: "{{ home_dir }}"
-- name: Run services in docker compose
+- name: Run mautic services in docker compose
+  tags:
+    - mautic
+    - services
+  docker_compose:
+    project_src: "{{ home_dir }}/services/mautic"
+    recreate: always # so that changes in config are applied
+    build: true # rebuild mautic if changes are detected
+- name: Run other services in docker compose
   tags:
     - services
   docker_compose:
