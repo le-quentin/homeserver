@@ -1,8 +1,21 @@
-# Installation
+# Quentin's Homeserver
 
-Install the homeserver infra with ansible.
+<p><img alt="gitleaks badge" src="https://img.shields.io/badge/protected%20by-gitleaks-blue"></p>
 
-## How to
+This is a long living DIY homeserver project that I build over the years in my spare time. My end goal is to replace most of my third-party cloud dependencies (Spotify, Netflix, Newsfeeds...) by self-hosted, open source alternatives. I'd also like to try some smart home solutions.
+
+This is the IaC repository for said homeserver, currently using:
+- Ansible for infrastructure deployment and setup
+- [git-crypt](https://github.com/AGWA/git-crypt) for secrets encryption
+- [gitleaks](https://github.com/gitleaks/gitleaks) to detect secrets possibly slipping through the net
+
+## Hardware configuration
+
+Currently my needs are met with a very cheap solution: a Raspberry Pi 4 (ARM).
+
+At some point, I'll opt for a more powerfull machine, and at that time I think I will migrate the infrastructure to a type 1 hypervisor (probably [proxmox](https://www.proxmox.com/en/), which I cannot use at the time because it doesn't work properly on RaspberryPi). I'll then be able to use the Proxmox Terraform provider to easily set it up. Until then, my infrastructure is deployed using good old docker and Ansible playbooks.
+
+## How to install
 
 Requirements on the hosts:
 - Linux OS installed 
