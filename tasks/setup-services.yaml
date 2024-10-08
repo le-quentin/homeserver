@@ -18,14 +18,14 @@
   tags:
     - mautic
     - services
-  docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ home_dir }}/services/mautic"
     recreate: always # so that changes in config are applied
-    build: true # rebuild mautic if changes are detected
+    build: always # rebuild mautic if changes are detected
 - name: Run other services in docker compose
   tags:
     - services
-  docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ home_dir }}/services"
     recreate: always # so that changes in config are applied
-    build: true # rebuild gateway if changes are detected
+    build: always # rebuild gateway if changes are detected

@@ -15,6 +15,7 @@
 - name: Run monitoring services in docker compose
   tags:
     - monitoring
-  docker_compose:
+  community.docker.docker_compose_v2:
     project_src: "{{ home_dir }}/monitoring"
     recreate: always # so that changes in config are applied
+    build: always
