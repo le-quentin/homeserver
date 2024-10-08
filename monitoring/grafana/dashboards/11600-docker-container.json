@@ -97,7 +97,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "avg(time() - container_last_seen{name=~\"services_.*\"}) by (name)",
+          "expr": "avg(time() - container_last_seen{name=~\"services.*\"}) by (name)",
           "format": "time_series",
           "instant": true,
           "legendFormat": "{{name}}",
@@ -110,7 +110,7 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "services_(.*)_[0-9]+",
+            "regex": "services[_-](.*)[_-][0-9]+",
             "renamePattern": "$1"
           }
         }
@@ -189,11 +189,11 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "avg(time() - container_last_seen{name=~\"monitoring_.*|portainer\"}) by (name)",
+          "expr": "avg(time() - container_last_seen{name=~\"monitoring.*|portainer\"}) by (name)",
           "format": "time_series",
-          "instant": false,
+          "instant": true,
           "legendFormat": "{{name}}",
-          "range": true,
+          "range": false,
           "refId": "A"
         }
       ],
@@ -202,7 +202,7 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "monitoring_(.*)_[0-9]+",
+            "regex": "monitoring[_-](.*)[_-][0-9]+",
             "renamePattern": "$1"
           }
         }
@@ -1020,7 +1020,7 @@
             "uid": "homeserver-prometheus-datasource"
           },
           "editorMode": "code",
-          "expr": "sum by (type) (\n  label_replace(\n    label_replace(rate(container_cpu_usage_seconds_total{instance=~\"$node\",name=~\".+\"}[1m]), \"type\", \"monitoring\", \"name\", \"monitoring_.*|portainer\"),\n    \"type\", \"services\", \"name\", \"services_.*\"\n  )\n) * 100",
+          "expr": "sum by (type) (\n  label_replace(\n    label_replace(rate(container_cpu_usage_seconds_total{instance=~\"$node\",name=~\".+\"}[1m]), \"type\", \"monitoring\", \"name\", \"monitoring.*|portainer\"),\n    \"type\", \"services\", \"name\", \"services.*\"\n  )\n) * 100",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -1181,7 +1181,7 @@
             "uid": "homeserver-prometheus-datasource"
           },
           "editorMode": "code",
-          "expr": "sum by (type) (\n  label_replace(\n    label_replace(container_memory_usage_bytes, \"type\", \"monitoring\", \"name\", \"monitoring_.*|portainer\"),\n    \"type\", \"services\", \"name\", \"services_.*\"\n  )\n)",
+          "expr": "sum by (type) (\n  label_replace(\n    label_replace(container_memory_usage_bytes, \"type\", \"monitoring\", \"name\", \"monitoring.*|portainer\"),\n    \"type\", \"services\", \"name\", \"services.*\"\n  )\n)",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,

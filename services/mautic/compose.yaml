@@ -1,12 +1,10 @@
 services:
   mautic:
-    container_name: services_mautic
+    container_name: services-mautic
     image: mautic/mautic:5-apache
     restart: unless-stopped
     networks:
       - services-net
-    depends_on:
-      - mautic-database
     ports:
       - "4000:80"
     environment:
@@ -30,7 +28,7 @@ services:
         condition: service_healthy
 
   mautic-database:
-    container_name: services_mautic-database
+    container_name: services-mautic-database
     image: mysql:8.0
     restart: unless-stopped
     ports:
@@ -52,7 +50,7 @@ services:
       retries: 10
 
   mautic-mailhog:
-    container_name: services_mautic-mailhog
+    container_name: services-mautic-mailhog
     image: mailhog/mailhog
     restart: unless-stopped
     ports:
