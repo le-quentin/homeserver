@@ -1,19 +1,39 @@
 - name: Delete previous services files
   become: no
   tags:
-    - mautic
-    - services
+    - always
   file:
     state: absent
     path: "{{ home_dir }}/services"
 - name: Copy services files
   become: no
   tags:
-    - mautic
-    - services
+    - always
   copy:
     src: "./services"
     dest: "{{ home_dir }}"
+- name: Ensure directory for home-assistant config exists
+  tags:
+    - always
+  ansible.builtin.file:
+    path: "{{ home_dir }}/home-assistant/config"
+    state: directory
+    mode: '0755'
+- name: Interpert home-assistant docker compose template 
+  tags:
+    - home-assistant
+    - services
+  template:
+    src: ./services/home-assistant/compose.yaml.j2
+    dest: "{{ home_dir }}/services/home-assistant/compose.yaml"
+- name: Run home-assistant in docker compose
+  tags:
+    - home-assistant
+    - services
+  community.docker.docker_compose_v2:
+    project_src: "{{ home_dir }}/services/home-assistant"
+    recreate: always # so that changes in config are applied
+    build: always # rebuild home-assistant if changes are detected
 - name: Run mautic services in docker compose
   tags:
     - mautic

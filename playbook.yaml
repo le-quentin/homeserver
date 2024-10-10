@@ -25,6 +25,7 @@
        - portainer
    - include_tasks: "tasks/setup-services.yaml"
      tags:
+       - home-assistant
        - mautic
        - services
    - include_tasks: "tasks/setup-monitoring.yaml"
