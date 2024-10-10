@@ -14,8 +14,11 @@
     state: started
     recreate: yes
     restart_policy: unless-stopped
+    network_mode: monitoring-net
+    env:
+      VIRTUAL_HOST: portainer.home
     published_ports:
-      - "8000:8000"
+      - "8000:9000"
       - "9443:9443"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
