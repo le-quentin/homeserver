@@ -30,6 +30,7 @@
      tags:
        - home-assistant
        - mautic
+       - gateway
        - services
    - include_tasks: "tasks/setup-monitoring.yaml"
      tags:
