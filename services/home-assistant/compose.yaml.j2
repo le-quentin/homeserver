@@ -11,7 +11,7 @@ services:
       - "{{ home_dir }}/home-assistant/config:/config"
       - /etc/localtime:/etc/localtime:ro
       - /run/dbus:/run/dbus:ro
-    # privileged: true
+    privileged: true # Not ideal, but sadly required for access to hardware... will feel safer on Proxmox!
 
 networks:
   services-net:
