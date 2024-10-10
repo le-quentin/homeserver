@@ -1,0 +1,22 @@
+- name: Install dnsmasq
+  become: yes
+  tags:
+    - always
+  package:
+    name: 
+      - dnsmasq
+- name: Copy dnsmasq config file
+  become: yes
+  tags:
+    - always
+  copy:
+   src: "./dnsmasq/dnsmasq.conf"
+   dest: "/etc/dnsmasq.conf"
+- name: Restart dnsmasq service
+  become: yes
+  tags:
+    - always
+  ansible.builtin.systemd:
+    name: "dnsmasq"
+    enabled: true
+    state: restarted

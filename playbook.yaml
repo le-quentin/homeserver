@@ -14,6 +14,9 @@
      package:
        name: git
        state: present
+   - include_tasks: "tasks/setup-dnsmasq.yaml"
+     tags:
+       - dnsmasq
    - include_tasks: "tasks/install-docker.yaml"
      tags: 
        - docker-install
