@@ -1,3 +1,10 @@
+- name: Ensure directory for portainer data exists
+  tags:
+    - portainer
+  ansible.builtin.file:
+    path: "{{ home_dir }}/portainer/data"
+    state: directory
+    mode: '0755'
 - name: Create portainer container
   tags: 
     - portainer
