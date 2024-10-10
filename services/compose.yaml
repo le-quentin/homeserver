@@ -1,17 +1,4 @@
 services:
-  gateway:
-    build: ./gateway
-    ports: 
-      - "80:80"
-      - "443:443"
-      - "8080:8080"
-    restart: unless-stopped
-    environment:
-      TZ: 'France/Paris'
-    networks:
-      - public-net
-      - services-net
-      - monitoring-net
   free-stock-tickers:
     image: ghcr.io/le-quentin/free-stock-tickers:latest
     environment:
@@ -32,8 +19,4 @@ services:
     restart: unless-stopped
 networks:
   public-net:
-    external: true
-  services-net:
-    external: true
-  monitoring-net:
     external: true

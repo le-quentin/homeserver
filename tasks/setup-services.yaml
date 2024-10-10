@@ -42,6 +42,14 @@
     project_src: "{{ home_dir }}/services/mautic"
     recreate: always # so that changes in config are applied
     build: always # rebuild mautic if changes are detected
+- name: Run gateway in docker compose
+  tags:
+    - gateway
+    - services
+  community.docker.docker_compose_v2:
+    project_src: "{{ home_dir }}/services/gateway"
+    recreate: always # so that changes in config are applied
+    build: always # rebuild gateway if changes are detected
 - name: Run other services in docker compose
   tags:
     - services
