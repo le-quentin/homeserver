@@ -110,7 +110,14 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "services[_-](.*)[_-][0-9]+",
+            "regex": "(.*)[_-][0-9]+",
+            "renamePattern": "$1"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "services[_-](.*)",
             "renamePattern": "$1"
           }
         }
@@ -202,7 +209,14 @@
         {
           "id": "renameByRegex",
           "options": {
-            "regex": "monitoring[_-](.*)[_-][0-9]+",
+            "regex": "(.*)[_-][0-9]+",
+            "renamePattern": "$1"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": "monitoring[_-](.*)",
             "renamePattern": "$1"
           }
         }
