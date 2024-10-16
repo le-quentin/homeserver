@@ -17,6 +17,9 @@
    - include_tasks: "tasks/setup-dnsmasq.yaml"
      tags:
        - dnsmasq
+   - include_tasks: "tasks/setup-backups.yaml"
+     tags:
+       - backups
    - include_tasks: "tasks/install-docker.yaml"
      tags: 
        - docker-install
