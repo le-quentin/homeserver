@@ -1,0 +1,19 @@
+- name: Install rclone (used for syncing backups in the cloud)
+  become: yes
+  tags:
+    - always
+  script: "./backups/install-rclone.sh {{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
+  args:
+    creates: "/usr/local/bin/rclone"
+
+- name: Ensure backup folder exists, with required nested folders
+  tags:
+    - always
+  ansible.builtin.file:
+    path: "{{ home_dir }}/backups/{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - homeassistant
+    - prometheus
+    - portainer
