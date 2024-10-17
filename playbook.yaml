@@ -14,6 +14,8 @@
      package:
        name: git
        state: present
+     tags:
+       - git
    - include_tasks: "tasks/setup-dnsmasq.yaml"
      tags:
        - dnsmasq
@@ -44,3 +46,17 @@
        - monitoring
      include_role:
        name: prometheus.prometheus.node_exporter
+   - name: Copy scripts
+     tags:
+       - scripts
+     copy:
+       src: "./scripts"
+       dest: "{{ home_dir }}"
+   - name: Make all scripts executable
+     tags:
+       - scripts
+     file:
+       path: "{{ home_dir }}/scripts/{{ item | basename }}"
+       mode: "0775"
+     with_fileglob:
+       - "./scripts/*"
