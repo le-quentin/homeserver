@@ -17,3 +17,7 @@
     - homeassistant
     - prometheus
     - portainer
+- name: Run one-shot backup if demanded
+  tags: 
+    - do_backup
+

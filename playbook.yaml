@@ -20,6 +20,9 @@
    - include_tasks: "tasks/setup-backups.yaml"
      tags:
        - backups
+   - include_tasks: "tasks/do-backups.yaml"
+     tags:
+       - do-backups
    - include_tasks: "tasks/install-docker.yaml"
      tags: 
        - docker-install
@@ -31,6 +34,7 @@
        - portainer
    - include_tasks: "tasks/setup-services.yaml"
      tags:
+       - copy
        - home-assistant
        - mautic
        - gateway
