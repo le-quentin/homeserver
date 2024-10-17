@@ -18,6 +18,8 @@ services:
   prometheus:
     image: prom/prometheus:v2.45.3
     restart: unless-stopped
+    labels:
+      - docker-volume-backup.stop-during-backup=true
     ports:
       - "9090:9090"
     volumes:
@@ -43,6 +45,7 @@ services:
       - monitoring-net
 volumes:
   prometheus-data:
+    external: true
 networks:
   monitoring-net:
     external: true

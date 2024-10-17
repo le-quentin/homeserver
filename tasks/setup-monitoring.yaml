@@ -12,6 +12,11 @@
   copy:
     src: "./monitoring"
     dest: "{{ home_dir }}"
+- name: Make sure the prometheus volume exists
+  community.docker.docker_volume:
+    name: prometheus-data
+  tags:
+    - monitoring
 - name: Run monitoring services in docker compose
   tags:
     - monitoring

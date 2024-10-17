@@ -6,14 +6,10 @@
   args:
     creates: "/usr/local/bin/rclone"
 
-- name: Ensure backup folder exists, with required nested folders
+- name: Ensure backup folder exists
   tags:
     - always
   ansible.builtin.file:
-    path: "{{ home_dir }}/backups/{{ item }}"
+    path: "{{ home_dir }}/backups"
     state: directory
     mode: '0755'
-  loop:
-    - homeassistant
-    - prometheus
-    - portainer
