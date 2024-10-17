@@ -31,6 +31,7 @@
        - portainer
    - include_tasks: "tasks/setup-services.yaml"
      tags:
+       - copy
        - home-assistant
        - mautic
        - gateway
