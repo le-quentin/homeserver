@@ -5,7 +5,13 @@
   script: "./backups/install-rclone.sh {{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
   args:
     creates: "/usr/local/bin/rclone"
-
+- name: Copy rclone config
+  become: yes
+  tags:
+    - always
+  copy:
+     src: "./backups/rclone.conf"
+     dest: "{{ home_dir }}/.config/rclone/rclone.conf"
 - name: Ensure backup folder exists
   tags:
     - always
