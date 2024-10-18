@@ -19,3 +19,39 @@
     path: "{{ home_dir }}/backups"
     state: directory
     mode: '0755'
+- name: Interpret docker-volume-backup compose template
+  tags:
+    - always
+  template:
+    src: ./services/docker-volume-backup/compose.yaml.j2
+    dest: "{{ home_dir }}/services/docker-volume-backup/compose.yaml"
+- name: Setup the local backups cron
+  tags:
+    - always
+  ansible.builtin.cron:
+    name: "local backups"
+    user: "{{ ansible_user }}"
+    minute: "0"
+    hour: "6"
+    job: "docker compose -f {{ home_dir }}/services/docker-volume-backup/compose.yaml up --force-recreate"
+- name: Setup the remote backups cron (pushing to Proton)
+  tags:
+    - always
+  ansible.builtin.cron:
+    name: "remote backups"
+    user: "{{ ansible_user }}"
+    minute: "0"
+    hour: "7"
+    job: "/usr/local/bin/rclone copy {{ home_dir }}/backups/ proton:backups/homeserver"
+# Delete backup files older than 7 days
+# Not a good solution because it doesn't ensure the files were uploaded, which could get bad in case of 
+# TODO - Proper solution that keeps N files for each service, and delete the older ones
+- name: Setup the cron to cleanup old backups locally
+  tags:
+    - always
+  ansible.builtin.cron:
+    name: "Cleanup local backups"
+    user: "{{ ansible_user }}"
+    minute: "30"
+    hour: "7"
+    job: "find {{ home_dir }}/backups -name 'backup*.tar.gz' -type f -mtime +7 -delete"
