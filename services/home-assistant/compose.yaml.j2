@@ -8,11 +8,15 @@ services:
     ports:
       - "5000:8123"
     volumes:
-      - "{{ home_dir }}/home-assistant/config:/config"
+      - home-assistant-data:/config
       - /etc/localtime:/etc/localtime:ro
       - /run/dbus:/run/dbus:ro
     privileged: true # Not ideal, but sadly required for access to hardware... will feel safer on Proxmox!
 
+volumes:
+  home-assistant-data:
+    external: true
+  
 networks:
   services-net:
     external: true
