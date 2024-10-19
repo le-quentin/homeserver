@@ -1,5 +1,5 @@
 services:
-  backup:
+  backup-prometheus:
     # In production, it is advised to lock your image tag to a proper
     # release version instead of using `latest`.
     # Check https://github.com/offen/docker-volume-backup/releases
@@ -24,6 +24,17 @@ services:
       # location inside of the container by setting `BACKUP_ARCHIVE`.
       # You can omit this if you do not want to keep local backups.
       - "{{ home_dir }}/backups:/archive"
+  backup-home-assistant:
+    image: offen/docker-volume-backup:v2.43.0
+    entrypoint: backup
+    environment:
+      BACKUP_FILENAME: "backup-home-assistant-%Y-%m-%dT%H-%M-%S.tar.gz"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - home-assistant-data:/backup/home-assistant:ro
+      - "{{ home_dir }}/backups:/archive"
 volumes:
   prometheus-data:
+    external: true
+  home-assistant-data:
     external: true
