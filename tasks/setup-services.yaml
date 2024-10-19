@@ -12,13 +12,12 @@
   copy:
     src: "./services"
     dest: "{{ home_dir }}"
-- name: Ensure directory for home-assistant config exists
+- name: Make sure the home-assistant volume exists
+  community.docker.docker_volume:
+    name: home-assistant-data
   tags:
-    - always
-  ansible.builtin.file:
-    path: "{{ home_dir }}/home-assistant/config"
-    state: directory
-    mode: '0755'
+    - home-assistant
+    - services
 - name: Interpert home-assistant docker compose template 
   tags:
     - home-assistant
