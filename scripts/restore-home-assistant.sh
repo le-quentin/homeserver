@@ -21,14 +21,14 @@ done
 
 echo "Stopping the container..."
 docker compose -f ~/services/docker-volume-backup/compose.yaml rm -f
-docker compose -f ~/monitoring/compose.yaml down prometheus
-docker compose -f ~/monitoring/compose.yaml rm prometheus
+docker compose -f ~/services/home-assistant/compose.yaml down home-assistant
+docker compose -f ~/services/home-assistant/compose.yaml rm home-assistant
 
 echo "Recreating the docker volume..."
-docker volume rm prometheus-data
-docker volume create prometheus-data
+docker volume rm home-assistant-data
+docker volume create home-assistant-data
 echo "Unzipping the backup to the new volume"
-docker run --rm -it -v prometheus-data:/backup/prometheus -v ~/backups/:/archive:ro alpine tar -xvzf /archive/$BACKUP_NAME
+docker run --rm -it -v home-assistant-data:/backup/home-assistant -v ~/backups/:/archive:ro alpine tar -xvzf /archive/$BACKUP_NAME
 echo "Restarting the container..."
-docker compose -f ~/monitoring/compose.yaml up -d
+docker compose -f ~/services/home-assistant/compose.yaml up -d
 echo "Completed."
