@@ -4,11 +4,23 @@
     docker_volume_backup_root: "{{ ansible_files_root }}/docker-volume-backup"
     backups_dir: "{{ home_dir }}/backups"
   tasks:
+    - include_tasks: "tasks/install-docker.yaml"
+    - name: Install unzip
+      become: yes
+      package:
+        name: 
+          - unzip
     - name: Install rclone (used for syncing backups in the cloud)
       become: yes
       script: "./backups/install-rclone.sh {{ ansible_architecture_alt }}"
       args:
         creates: "/usr/local/bin/rclone"
+    - name: Ensure rclone config folder exists
+      ansible.builtin.file:
+        path:  "{{ home_dir }}/.config/rclone"
+        state: directory
+        mode: '0755'
+        recurse: yes
     - name: Copy rclone config
       become: yes
       copy:

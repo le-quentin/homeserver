@@ -1,4 +1,4 @@
-ansible_host: 192.168.122.45 #VM ip, all quick and dirty for now
+ansible_host: 192.168.122.231 #VM ip, all quick and dirty for now
 ansible_user: test
 home_dir: /home/test
 ansible_files_root: /home/test/ansible-files
