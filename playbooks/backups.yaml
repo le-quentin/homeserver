@@ -1,0 +1,54 @@
+- name: Setup backups
+  hosts: backupservs
+  vars:
+    docker_volume_backup_root: "{{ ansible_files_root }}/docker-volume-backup"
+    backups_dir: "{{ home_dir }}/backups"
+  tasks:
+    - name: Install rclone (used for syncing backups in the cloud)
+      become: yes
+      script: "./backups/install-rclone.sh {{ ansible_architecture_alt }}"
+      args:
+        creates: "/usr/local/bin/rclone"
+    - name: Copy rclone config
+      become: yes
+      copy:
+         src: "./backups/rclone.conf"
+         dest: "{{ home_dir }}/.config/rclone/rclone.conf"
+    - name: Ensure backup folder exists
+      ansible.builtin.file:
+        path: "{{ backups_dir }}"
+        state: directory
+        mode: '0755'
+    - name: Ensure docker-volume-backup folder exists
+      ansible.builtin.file:
+        path: "{{ docker_volume_backup_root }}"
+        state: directory
+        mode: '0755'
+    - name: Interpret docker-volume-backup compose template
+      template:
+        src: ./backups/local-backups-compose.yaml.j2
+        dest: "{{ docker_volume_backup_root }}/compose.yaml"
+    - name: Setup the local backups cron
+      ansible.builtin.cron:
+        name: "local backups"
+        user: "{{ ansible_user }}"
+        minute: "0"
+        hour: "6"
+        job: "docker compose -f {{ docker_volume_backup_root }}/compose.yaml up --force-recreate"
+    - name: Setup the remote backups cron (pushing to Proton)
+      ansible.builtin.cron:
+        name: "remote backups"
+        user: "{{ ansible_user }}"
+        minute: "0"
+        hour: "7"
+        job: "/usr/local/bin/rclone copy {{ backups_dir }}/ proton:backups/homeserver"
+    # Delete backup files older than 7 days
+    # Not a good solution because it doesn't ensure the files were uploaded, which could get bad in case of 
+    # TODO - Proper solution that keeps N files for each service, and delete the older ones
+    - name: Setup the cron to cleanup old backups locally
+      ansible.builtin.cron:
+        name: "Cleanup local backups"
+        user: "{{ ansible_user }}"
+        minute: "30"
+        hour: "7"
+        job: "find {{ backups_dir }} -name 'backup*.tar.gz' -type f -mtime +7 -delete"
