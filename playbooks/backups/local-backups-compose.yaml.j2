@@ -1,0 +1,40 @@
+services:
+  backup-prometheus:
+    # In production, it is advised to lock your image tag to a proper
+    # release version instead of using `latest`.
+    # Check https://github.com/offen/docker-volume-backup/releases
+    # for a list of available releases.
+    image: offen/docker-volume-backup:v2.43.0
+    # restart: always
+    # env_file: ./backup.env # see below for configuration reference
+    entrypoint: backup
+    environment:
+      BACKUP_FILENAME: "backup-prometheus-%Y-%m-%dT%H-%M-%S.tar.gz"
+    volumes:
+      # Mounting the Docker socket allows the script to stop and restart
+      # the container during backup and to access the container labels to
+      # specify custom commands. You can omit this if you don't want to
+      # stop the container or run custom commands. In case you need to
+      # proxy the socket, you can also provide a location by setting
+      # `DOCKER_HOST` in the container
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - prometheus-data:/backup/prometheus:ro # backup of a volume
+      # If you mount a local directory or volume to `/archive` a local
+      # copy of the backup will be stored there. You can override the
+      # location inside of the container by setting `BACKUP_ARCHIVE`.
+      # You can omit this if you do not want to keep local backups.
+      - "{{ home_dir }}/backups:/archive"
+  backup-home-assistant:
+    image: offen/docker-volume-backup:v2.43.0
+    entrypoint: backup
+    environment:
+      BACKUP_FILENAME: "backup-home-assistant-%Y-%m-%dT%H-%M-%S.tar.gz"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - home-assistant-data:/backup/home-assistant:ro
+      - "{{ home_dir }}/backups:/archive"
+volumes:
+  prometheus-data:
+    external: true
+  home-assistant-data:
+    external: true

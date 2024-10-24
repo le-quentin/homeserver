@@ -1,4 +1,4 @@
-- hosts: piserv
+- hosts: all
   become: false
   tasks:
     - name: user
@@ -6,7 +6,7 @@
     - name: architecture
       debug: msg="{{ansible_architecture}}"
     - name: architecture alt
-      debug: msg="{{ 'amd64' if ansible_architecture == 'x86_64' else 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
+      debug: msg="{{ ansible_architecture_alt }}"
     - name: distribution
       debug: msg="{{ansible_distribution}}"
     - name: os_family
