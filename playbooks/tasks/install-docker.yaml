@@ -1,11 +1,12 @@
-- name: Check if docker is installed
+- name: Check If Docker Is Installed
   command: docker --version
   register: docker_installed
-  ignore_errors: true
-  failed_when: false
+  ignore_errors: yes
+  failed_when: no
 - include_tasks: "install-docker-{{ ansible_os_family }}.yaml"
   when: docker_installed.rc != 0
 - name: Install docker python dependencies
+  become: yes
   package:
     name: 
       - python3-docker
