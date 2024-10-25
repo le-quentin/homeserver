@@ -63,6 +63,20 @@ http {
         server mautic:80;
     }
 
+    # Default servers when nothing is found, because nginx always return the first server for the current port by default,
+    # and we don't want to default on the first service
+    server {
+        listen      8080 default_server;
+        server_name "";
+        return      444;
+    }
+
+    server {
+        listen      80 default_server;
+        server_name "";
+        return      444;
+    }
+
     ###############################
     #   Public API definition
     ###############################
