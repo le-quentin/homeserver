@@ -40,29 +40,6 @@ http {
         ''      close;
     }
 
-    ###############################
-    #   Services list
-    ###############################
-    upstream home-assistant {
-        server home-assistant:8123;
-    }
-
-    upstream free-stock-tickers {
-        server free-stock-tickers:3000;
-    }
-
-    upstream portainer {
-        server portainer:9000;
-    }
-
-    upstream grafana {
-        server grafana:3000;
-    }
-
-    upstream mautic {
-        server mautic:80;
-    }
-
     # Default servers when nothing is found, because nginx always return the first server for the current port by default,
     # and we don't want to default on the first service
     server {
@@ -80,26 +57,28 @@ http {
     ###############################
     #   Public API definition
     ###############################
-    server {
-        listen 8080;
+    # server {
+    #     listen 8080;
 
-        location /free-stock-tickers {
-            rewrite ^/free-stock-tickers$ / break;
-            rewrite ^/free-stock-tickers(.*)$ $1 break;
-            proxy_pass http://free-stock-tickers;
-        }
-    }
+    #     location /free-stock-tickers {
+    #         rewrite ^/free-stock-tickers$ / break;
+    #         rewrite ^/free-stock-tickers(.*)$ $1 break;
+    #         proxy_pass http://free-stock-tickers;
+    #     }
+    # }
 
     ###############################
     #   Private API definition
     ###############################
 
     server {
-	server_name assistant.{{ gateway_domain }};
+	server_name assistant.{{ homeserver_domain }};
         listen 80;
 
+	set $target "http://home-assistant:8123";
+
         location / {
-            proxy_pass http://home-assistant;
+            proxy_pass $target;
 
             proxy_http_version 1.1;
             proxy_set_header Host $http_host;
@@ -110,41 +89,47 @@ http {
     }
 
     server {
-	server_name mautic.{{ gateway_domain }};
+	server_name mautic.{{ homeserver_domain }};
 	listen 80;
 
+	set $target "http://mautic:80";
+
         location / {
+            proxy_pass $target;
             proxy_set_header Host $http_host;
-            proxy_pass http://mautic;
 	}
     }
 
     server {
-	server_name portainer.{{ gateway_domain }};
+	server_name portainer.{{ homeserver_domain }};
 	listen 80;
 
+	set $target "http://portainer:9000";
+
         location / {
+            proxy_pass $target;
             proxy_set_header Host $http_host;
-            proxy_pass http://portainer;
 	}
     }
 
     server {
-	server_name grafana.{{ gateway_domain }};
+	server_name grafana.{{ homeserver_domain }};
 	listen 80;
+
+	set $target "http://grafana:3000";
 
 	location / {
+            proxy_pass $target;
             proxy_set_header Host $http_host;
-            proxy_pass http://grafana;
 	}
 
         # Proxy Grafana Live WebSocket connections.
         location /grafana/api/live/ {
+            proxy_pass $target;
             proxy_http_version 1.1;
             proxy_set_header Upgrade $http_upgrade;
             proxy_set_header Connection $connection_upgrade;
             proxy_set_header Host $http_host;
-            proxy_pass http://grafana;
         }
     }
 }
