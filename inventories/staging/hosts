@@ -6,3 +6,6 @@ mainhost
 
 [portainerservs]
 mainhost
+
+[mauticservs]
+mainhost
