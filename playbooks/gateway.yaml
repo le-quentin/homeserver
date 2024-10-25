@@ -10,7 +10,7 @@
     - name: Interpret dnsmasq conf template
       become: yes
       template:
-        src: ./dnsmasq/dnsmasq.conf.j2
+        src: ./resources/dnsmasq/dnsmasq.conf.j2
         dest: "/etc/dnsmasq.conf"
       notify: 
         - Restart dnsmasq service
@@ -25,12 +25,12 @@
     - block:
       - name: Copy gateway files
         copy:
-          src: "./gateway"
+          src: "./resources/gateway"
           dest: "{{ ansible_files_root }}"
       - name: Interpret gateway conf template
         become: yes
         template:
-          src: ./gateway/nginx.conf.j2
+          src: ./resources/gateway/nginx.conf.j2
           dest: "{{ ansible_files_root }}/gateway/nginx.conf"
       notify:
         - Run gateway
