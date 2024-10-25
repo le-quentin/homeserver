@@ -4,11 +4,15 @@ mainhost
 [gatewayservs]
 mainhost
 
-[portainerservs]
-mainhost
-
 [homeassistantservs]
 mainhost
 
 [mauticservs]
 mainhost
+
+[monitoringservs]
+mainhost
+
+[portainerservs]
+mainhost
+

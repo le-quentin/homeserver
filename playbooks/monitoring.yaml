@@ -1,0 +1,23 @@
+- name: Install monitoring services
+  hosts: monitoringservs
+  tasks:
+    - include_tasks: "tasks/install-docker.yaml"
+    - name: Make sure the docker network exists
+      become: yes
+      community.docker.docker_network:
+        name: "monitoring-net"
+    - name: Make sure the prometheus volume exists
+      become: yes
+      community.docker.docker_volume:
+        name: prometheus-data
+    - name: Copy monitoring services files
+      copy:
+        src: "./resources/monitoring"
+        dest: "{{ ansible_files_root }}"
+      notify: Run monitoring services
+  handlers:
+    - name: Run monitoring services
+      become: yes
+      community.docker.docker_compose_v2:
+        project_src: "{{ ansible_files_root }}/monitoring"
+        recreate: always # so that changes in config are applied
