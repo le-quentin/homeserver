@@ -12,7 +12,7 @@
           - unzip
     - name: Install rclone (used for syncing backups in the cloud)
       become: yes
-      script: "./backups/install-rclone.sh {{ ansible_architecture_alt }}"
+      script: "./resources/backups/install-rclone.sh {{ ansible_architecture_alt }}"
       args:
         creates: "/usr/local/bin/rclone"
     - name: Ensure rclone config folder exists
@@ -22,9 +22,8 @@
         mode: '0755'
         recurse: yes
     - name: Copy rclone config
-      become: yes
       copy:
-         src: "./backups/rclone.conf"
+         src: "./resources/backups/rclone.conf"
          dest: "{{ home_dir }}/.config/rclone/rclone.conf"
     - name: Ensure backup folder exists
       ansible.builtin.file:
@@ -38,7 +37,7 @@
         mode: '0755'
     - name: Interpret docker-volume-backup compose template
       template:
-        src: ./backups/local-backups-compose.yaml.j2
+        src: ./resources/backups/local-backups-compose.yaml.j2
         dest: "{{ docker_volume_backup_root }}/compose.yaml"
     - name: Setup the local backups cron
       ansible.builtin.cron:
