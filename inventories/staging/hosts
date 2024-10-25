@@ -1,2 +1,5 @@
 [backupservs]
 mainhost
+
+[gatewayservs]
+mainhost
