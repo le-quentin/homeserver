@@ -3,3 +3,6 @@ mainhost
 
 [gatewayservs]
 mainhost
+
+[portainerservs]
+mainhost
