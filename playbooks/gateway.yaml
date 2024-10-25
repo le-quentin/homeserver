@@ -12,12 +12,8 @@
       template:
         src: ./dnsmasq/dnsmasq.conf.j2
         dest: "/etc/dnsmasq.conf"
-    - name: Restart dnsmasq service
-      become: yes
-      ansible.builtin.systemd:
-        name: "dnsmasq"
-        enabled: true
-        state: restarted
+      notify: 
+        - Restart dnsmasq service
     - name: Setup docker networks
       become: yes
       community.docker.docker_network:
@@ -26,18 +22,29 @@
         - public-net
         - services-net
         - monitoring-net
-    - name: Copy gateway files
-      copy:
-        src: "./gateway"
-        dest: "{{ ansible_files_root }}"
-    - name: Interpret gateway conf template
+    - block:
+      - name: Copy gateway files
+        copy:
+          src: "./gateway"
+          dest: "{{ ansible_files_root }}"
+      - name: Interpret gateway conf template
+        become: yes
+        template:
+          src: ./gateway/nginx.conf.j2
+          dest: "{{ ansible_files_root }}/gateway/nginx.conf"
+      notify:
+        - Run gateway
+  handlers:
+    - name: Restart dnsmasq service
       become: yes
-      template:
-        src: ./gateway/nginx.conf.j2
-        dest: "{{ ansible_files_root }}/gateway/nginx.conf"
-    - name: Run gateway in docker compose
+      ansible.builtin.systemd:
+        name: "dnsmasq"
+        enabled: true
+        state: restarted
+    - name: Run gateway
       become: yes
       community.docker.docker_compose_v2:
         project_src: "{{ ansible_files_root }}/gateway"
         recreate: always # so that changes in config are applied
         build: always # rebuild gateway if changes are detected
+      
