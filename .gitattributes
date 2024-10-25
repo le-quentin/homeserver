@@ -1,4 +1,6 @@
-passwords.yaml filter=git-crypt diff=git-crypt
+**secrets/** filter=git-crypt diff=git-crypt
+**secrets.yaml filter=git-crypt diff=git-crypt
+**passwords.yaml filter=git-crypt diff=git-crypt
 **/rclone.conf filter=git-crypt diff=git-crypt
 services/.env filter=git-crypt diff=git-crypt
 services/mautic/.env filter=git-crypt diff=git-crypt
