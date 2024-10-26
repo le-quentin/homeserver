@@ -16,3 +16,6 @@ mainhost
 [portainerservs]
 mainhost
 
+[cocobotservs]
+mainhost
+
