@@ -1,0 +1,26 @@
+- name: Install mautic
+  hosts: mauticservs
+  tasks:
+    - include_tasks: "tasks/install-docker.yaml"
+    - name: Make sure the docker network exists
+      become: yes
+      community.docker.docker_network:
+        name: "services-net"
+    - block:
+        - name: Copy mautic files
+          copy:
+            src: "./resources/mautic"
+            dest: "{{ ansible_files_root }}"
+        - name: Interpret Mautic compose template
+          template:
+            src: ./resources/mautic/compose.yaml.j2
+            dest: "{{ ansible_files_root }}/mautic/compose.yaml"
+      notify: 
+        - Run Mautic
+  handlers:
+    - name: Run Mautic
+      become: yes
+      community.docker.docker_compose_v2:
+        project_src: "{{ ansible_files_root }}/mautic"
+        recreate: always # so that changes in config are applied
+      

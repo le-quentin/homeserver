@@ -1,0 +1,31 @@
+- name: Install Home Assistant
+  hosts: homeassistantservs
+  tasks:
+    - include_tasks: "tasks/install-docker.yaml"
+    - name: Make sure the docker network exists
+      become: yes
+      community.docker.docker_network:
+        name: "services-net"
+    - name: Make sure the home-assistant volume exists
+      become: yes
+      community.docker.docker_volume:
+        name: home-assistant-data
+    - name: Ensure home-assistant config folder exists
+      ansible.builtin.file:
+        path: "{{ ansible_files_root }}/home-assistant"
+        state: directory
+        mode: '0755'
+        recurse: yes
+    - name: Interpret home-assistant docker compose template 
+      template:
+        src: ./resources/home-assistant/compose.yaml.j2
+        dest: "{{ ansible_files_root }}/home-assistant/compose.yaml"
+      notify: 
+        - Run Home Assistant
+  handlers:
+    - name: Run Home Assistant
+      become: yes
+      community.docker.docker_compose_v2:
+        project_src: "{{ ansible_files_root }}/home-assistant"
+        recreate: always # so that changes in config are applied
+      

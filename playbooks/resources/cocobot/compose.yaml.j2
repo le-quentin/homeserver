@@ -1,0 +1,15 @@
+services:
+  cocobot:
+    container_name: cocobot
+    labels:
+      - homeserver.container-category=service
+    image: ghcr.io/le-quentin/cocobot:nightly
+    volumes:
+      - "{{ home_dir }}/cocobot:/app/data"
+    environment:
+      COCOBOT_TOKEN: {{ cocobot_token }}
+      COCOBOT_LOG_LEVEL: {{ cocobot_log_level | default('info') }}
+      COCOBOT_REACTOR_LOG_LEVEL: {{ cocobot_reactor_log_level | default('info') }}
+      COCOBOT_DISCORD4J_LOG_LEVEL: {{ cocobot_discord4j_log_level | default('info') }}
+      COCOBOT_LANGUAGE: fr
+    restart: unless-stopped

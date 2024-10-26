@@ -1,0 +1,21 @@
+- hosts: all
+  become: false
+  tasks:
+    - name: user
+      debug: msg="{{ansible_user_id}}"
+    - name: architecture
+      debug: msg="{{ansible_architecture}}"
+    - name: architecture alt
+      debug: msg="{{ ansible_architecture_alt }}"
+    - name: distribution
+      debug: msg="{{ansible_distribution}}"
+    - name: os_family
+      debug: msg="{{ansible_os_family}}"
+    - name: HOME
+      debug: msg="{{ansible_env.HOME}}"
+    - name: home_dir
+      debug: msg="{{home_dir}}"
+    - name: ansible_user
+      debug: msg="{{ansible_user}}"
+    - name: ansible_user_id
+      debug: msg="{{ansible_user_id}}"

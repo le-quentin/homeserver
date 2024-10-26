@@ -1,8 +1,0 @@
-- name: Interpert docker-volume-backup compose template
-  template:
-    src: ./services/docker-volume-backup/compose.yaml.j2
-    dest: "{{ home_dir }}/services/docker-volume-backup/compose.yaml"
-- name: Do backup via compose file
-  community.docker.docker_compose_v2:
-    project_src: "{{ home_dir }}/services/docker-volume-backup"
-    recreate: always # so that changes in config are applied
