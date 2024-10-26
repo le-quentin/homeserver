@@ -1,4 +1,5 @@
 - import_playbook: "./backups.yaml"
+- import_playbook: "./home-assistant.yaml"
 - import_playbook: "./mautic.yaml"
 - import_playbook: "./portainer.yaml"
 - import_playbook: "./gateway.yaml"
