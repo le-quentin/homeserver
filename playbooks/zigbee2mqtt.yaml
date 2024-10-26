@@ -1,0 +1,41 @@
+- name: Install Zigbee2MQTT
+  hosts: zigbee2mqttservs
+  tasks:
+    - include_tasks: "tasks/install-docker.yaml"
+    - name: Make sure the docker network exists
+      become: yes
+      community.docker.docker_network:
+        name: "services-net"
+    - name: Make sure the mqtt volume exists
+      become: yes
+      community.docker.docker_volume:
+        name: mosquitto-data
+    - name: Make sure the Zigbee2MQTT volume exists
+      become: yes
+      community.docker.docker_volume:
+        name: zigbee2mqtt-data
+    - name: Ensure Zigbee2MQTT config folder exists
+      ansible.builtin.file:
+        path: "{{ ansible_files_root }}/zigbee2mqtt"
+        state: directory
+        mode: '0755'
+        recurse: yes
+    - block:
+      - name: Interpret Zigbee2MQTT docker compose template 
+        template:
+          src: ./resources/zigbee2mqtt/compose.yaml.j2
+          dest: "{{ ansible_files_root }}/zigbee2mqtt/compose.yaml"
+      - name: Copy Zigbee2MQTT configuration file
+        copy:
+          src: ./resources/zigbee2mqtt/initial-configuration.yaml
+          dest: "{{ ansible_files_root }}/zigbee2mqtt/configuration.yaml"
+          force: false
+      notify: 
+        - Run Zigbee2MQTT 
+  handlers:
+    - name: Run Zigbee2MQTT
+      become: yes
+      community.docker.docker_compose_v2:
+        project_src: "{{ ansible_files_root }}/zigbee2mqtt"
+        recreate: always # so that changes in config are applied
+      
