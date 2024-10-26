@@ -1,0 +1,50 @@
+- name: Install gateway
+  hosts: gatewayservs
+  tasks:
+    - include_tasks: "tasks/install-docker.yaml"
+    - name: Install dnsmasq
+      become: yes
+      package:
+        name: 
+          - dnsmasq
+    - name: Interpret dnsmasq conf template
+      become: yes
+      template:
+        src: ./resources/dnsmasq/dnsmasq.conf.j2
+        dest: "/etc/dnsmasq.conf"
+      notify: 
+        - Restart dnsmasq service
+    - name: Setup docker networks
+      become: yes
+      community.docker.docker_network:
+        name: "{{ item }}"
+      loop:
+        - public-net
+        - services-net
+        - monitoring-net
+    - block:
+      - name: Copy gateway files
+        copy:
+          src: "./resources/gateway"
+          dest: "{{ ansible_files_root }}"
+      - name: Interpret gateway conf template
+        become: yes
+        template:
+          src: ./resources/gateway/nginx.conf.j2
+          dest: "{{ ansible_files_root }}/gateway/nginx.conf"
+      notify:
+        - Run gateway
+  handlers:
+    - name: Restart dnsmasq service
+      become: yes
+      ansible.builtin.systemd:
+        name: "dnsmasq"
+        enabled: true
+        state: restarted
+    - name: Run gateway
+      become: yes
+      community.docker.docker_compose_v2:
+        project_src: "{{ ansible_files_root }}/gateway"
+        recreate: always # so that changes in config are applied
+        build: always # rebuild gateway if changes are detected
+      

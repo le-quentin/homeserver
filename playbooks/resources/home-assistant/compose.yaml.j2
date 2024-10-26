@@ -1,0 +1,25 @@
+services:
+  home-assistant:
+    container_name: home-assistant
+    labels:
+      - homeserver.container-category=service
+      - docker-volume-backup.stop-during-backup=true
+    image: "ghcr.io/home-assistant/home-assistant:2024.10"
+    restart: unless-stopped
+    networks:
+      - services-net
+    ports:
+      - "5000:8123"
+    volumes:
+      - home-assistant-data:/config
+      - /etc/localtime:/etc/localtime:ro
+      - /run/dbus:/run/dbus:ro
+    privileged: true # Not ideal, but sadly required for access to hardware... will feel safer on Proxmox!
+
+volumes:
+  home-assistant-data:
+    external: true
+  
+networks:
+  services-net:
+    external: true
