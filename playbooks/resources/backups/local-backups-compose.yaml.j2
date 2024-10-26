@@ -1,5 +1,8 @@
 services:
   backup-prometheus:
+    container_name: backup-prometheus
+    labels:
+      - homeserver.container-category=backup
     # In production, it is advised to lock your image tag to a proper
     # release version instead of using `latest`.
     # Check https://github.com/offen/docker-volume-backup/releases
@@ -25,6 +28,9 @@ services:
       # You can omit this if you do not want to keep local backups.
       - "{{ home_dir }}/backups:/archive"
   backup-home-assistant:
+    container_name: backup-home-assistant
+    labels:
+      - homeserver.container-category=backup
     image: offen/docker-volume-backup:v2.43.0
     entrypoint: backup
     environment:

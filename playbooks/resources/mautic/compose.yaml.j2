@@ -1,6 +1,8 @@
 services:
   mautic:
-    container_name: services-mautic
+    container_name: mautic
+    labels:
+      - homeserver.container-category=service
     image: mautic/mautic:5-apache
     restart: unless-stopped
     networks:
@@ -28,7 +30,9 @@ services:
         condition: service_healthy
 
   mautic-database:
-    container_name: services-mautic-database
+    container_name: mautic-database
+    labels:
+      - homeserver.container-category=service
     image: mysql:8.0
     restart: unless-stopped
     ports:
@@ -50,7 +54,9 @@ services:
       retries: 10
 
   mautic-mailhog:
-    container_name: services-mautic-mailhog
+    container_name: mautic-mailhog
+    labels:
+      - homeserver.container-category=service
     image: mailhog/mailhog
     restart: unless-stopped
     ports:

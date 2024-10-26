@@ -1,10 +1,11 @@
 services:
   home-assistant:
-    container_name: services-home-assistant
+    container_name: home-assistant
+    labels:
+      - homeserver.container-category=service
+      - docker-volume-backup.stop-during-backup=true
     image: "ghcr.io/home-assistant/home-assistant:2024.10"
     restart: unless-stopped
-    labels:
-      - docker-volume-backup.stop-during-backup=true
     networks:
       - services-net
     ports:
