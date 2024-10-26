@@ -8,6 +8,7 @@ fail() {
 
 BACKUP_ARCHIVE_PATH="$1"
 BACKUP_NAME="$(basename $BACKUP_ARCHIVE_PATH)"
+HOME_DIR={{ home_dir }}
 
 file $BACKUP_ARCHIVE_PATH | grep -q 'gzip compressed' || fail "Argument must be a tar.gz archive containing a backup"
 
@@ -20,15 +21,15 @@ select yn in "Yes" "No"; do
 done
 
 echo "Stopping the container..."
-docker compose -f ~/services/docker-volume-backup/compose.yaml rm -f
-docker compose -f ~/monitoring/compose.yaml down prometheus
-docker compose -f ~/monitoring/compose.yaml rm prometheus
+docker compose -f $HOME_DIR/ansible-files/docker-volume-backup/compose.yaml rm -f
+docker compose -f $HOME_DIR/ansible-files/monitoring/compose.yaml down prometheus
+docker compose -f $HOME_DIR/ansible-files/monitoring/compose.yaml rm prometheus
 
 echo "Recreating the docker volume..."
 docker volume rm prometheus-data
 docker volume create prometheus-data
 echo "Unzipping the backup to the new volume"
-docker run --rm -it -v prometheus-data:/backup/prometheus -v ~/backups/:/archive:ro alpine tar -xvzf /archive/$BACKUP_NAME
+docker run --rm -it -v prometheus-data:/backup/prometheus -v $HOME_DIR/backups/:/archive:ro alpine tar -xvzf /archive/$BACKUP_NAME
 echo "Restarting the container..."
-docker compose -f ~/monitoring/compose.yaml up -d
+docker compose -f $HOME_DIR/ansible-files/monitoring/compose.yaml up -d
 echo "Completed."

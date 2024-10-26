@@ -63,13 +63,15 @@
         minute: "30"
         hour: "7"
         job: "find {{ backups_dir }} -name 'backup*.tar.gz' -type f -mtime +7 -delete"
-    - name: Copy scripts to restore backups
-      copy:
-        src: "./resources/backups/scripts"
-        dest: "{{ home_dir }}"
+    - name: Interpret scripts templates to restore backups
+      template:
+        src: "./resources/backups/scripts/{{ item | basename }}"
+        dest: "{{ home_dir }}/scripts/{{ item | basename | splitext | first }}"
+      with_fileglob:
+        - "./resources/backups/scripts/*"
     - name: Make all scripts executable
       file:
-        path: "{{ home_dir }}/scripts/{{ item | basename }}"
+        path: "{{ home_dir }}/scripts/{{ item | basename | splitext | first }}"
         mode: "0775"
       with_fileglob:
         - "./resources/backups/scripts/*"
