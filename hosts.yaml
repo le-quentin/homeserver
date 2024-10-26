@@ -1,7 +1,0 @@
-homeserver:
-  hosts:
-    piserv:
-      # ansible_host: piserv - use this when name differs from yaml name, or when using an ip
-      ansible_user: pi
-      home_dir: /home/pi
-
