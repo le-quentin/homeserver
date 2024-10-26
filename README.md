@@ -13,7 +13,7 @@ This is the IaC repository for said homeserver, currently using:
 
 Currently my needs are met with a very cheap solution: a Raspberry Pi 4 (ARM).
 
-At some point, I'll opt for a more powerfull machine, and at that time I think I will migrate the infrastructure to a type 1 hypervisor (probably [proxmox](https://www.proxmox.com/en/), which I cannot use at the time because it doesn't work properly on RaspberryPi). I'll then be able to use the Proxmox Terraform provider to easily set it up. Until then, my infrastructure is deployed using good old docker and Ansible playbooks.
+At some point, I'll opt for a more powerfull machine, and at that time I think I will migrate the infrastructure to a type 1 hypervisor (probably [proxmox](https://www.proxmox.com/en/), which I cannot use at the time because it doesn't work properly on RaspberryPi). I'll then be able to use the Proxmox Terraform provider to easily set it up. Until then, everything runs on the Pi's bare metal, via docker containers.
 
 ## How to install
 
@@ -33,21 +33,10 @@ Then, unlock the repository's secrets with:
 git-crypt unlock
 ```
 
-Then, install the dependencies and run the playbook:
+Then, install the dependencies and run the desired playbook in the desired environement. `all.yaml` playbook deploys everything:
 ```sh
 ansible-galaxy install -r requirements.yml
-ansible-playbook -i hosts.yaml playbook.yaml -k
+ansible-playbook -i inventories/[prod|staging] playbooks/all.yaml -kK
 ```
 
 If there are errors, debug will be easier with the -v(erbose) option.
-
-You can also run some specific steps of the playbook with tags:
-```sh
-ansible-playbook -i hosts.yaml playbook.yaml -k --tags services
-```
-
-## TODO
-
-- [ ] Logstash for log aggregation and Kibana for reading logs in web UI
-- [ ] Open source smart home server (HomeAssistant?)
-- [ ] Test it with a first device (temperature sensor in office?)
