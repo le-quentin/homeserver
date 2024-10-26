@@ -1,5 +1,8 @@
 services:
   cocobot:
+    container_name: cocobot
+    labels:
+      - homeserver.container-category=service
     image: ghcr.io/le-quentin/cocobot:nightly
     volumes:
       - "{{ home_dir }}/cocobot:/app/data"

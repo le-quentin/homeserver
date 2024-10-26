@@ -1,5 +1,8 @@
 services:
   grafana:
+    container_name: grafana
+    labels:
+      - homeserver.container-category=monitoring
     image: grafana/grafana:10.3.1
     restart: unless-stopped
     ports: 
@@ -16,10 +19,12 @@ services:
     networks:
       - monitoring-net
   prometheus:
+    container_name: prometheus
+    labels:
+      - homeserver.container-category=monitoring
+      - docker-volume-backup.stop-during-backup=true
     image: prom/prometheus:v2.45.3
     restart: unless-stopped
-    labels:
-      - docker-volume-backup.stop-during-backup=true
     ports:
       - "9090:9090"
     volumes:
@@ -32,6 +37,9 @@ services:
     networks:
       - monitoring-net
   cadvisor:
+    container_name: cadvisor
+    labels:
+      - homeserver.container-category=monitoring
     image: gcr.io/cadvisor/cadvisor:v0.47.2
     restart: unless-stopped
     ports:

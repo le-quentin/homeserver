@@ -22,6 +22,7 @@
   "fiscalYearStartMonth": 0,
   "gnetId": 11600,
   "graphTooltip": 1,
+  "id": 1,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -97,7 +98,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "avg(time() - container_last_seen{name=~\"services.*\"}) by (name)",
+          "expr": "avg(time() - container_last_seen{container_label_homeserver_container_category=\"service\"}) by (name)",
           "format": "time_series",
           "instant": true,
           "legendFormat": "{{name}}",
@@ -106,22 +107,7 @@
         }
       ],
       "title": "Services status",
-      "transformations": [
-        {
-          "id": "renameByRegex",
-          "options": {
-            "regex": "(.*)[_-][0-9]+",
-            "renamePattern": "$1"
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "options": {
-            "regex": "services[_-](.*)",
-            "renamePattern": "$1"
-          }
-        }
-      ],
+      "transformations": [],
       "type": "stat"
     },
     {
@@ -196,7 +182,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "avg(time() - container_last_seen{name=~\"monitoring.*|portainer\"}) by (name)",
+          "expr": "avg(time() - container_last_seen{container_label_homeserver_container_category=\"monitoring\"}) by (name)",
           "format": "time_series",
           "instant": true,
           "legendFormat": "{{name}}",
@@ -205,22 +191,7 @@
         }
       ],
       "title": "Monitoring services status",
-      "transformations": [
-        {
-          "id": "renameByRegex",
-          "options": {
-            "regex": "(.*)[_-][0-9]+",
-            "renamePattern": "$1"
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "options": {
-            "regex": "monitoring[_-](.*)",
-            "renamePattern": "$1"
-          }
-        }
-      ],
+      "transformations": [],
       "type": "stat"
     },
     {
@@ -958,39 +929,39 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byName",
-              "options": "monitoring (sum)"
+              "id": "byFrameRefID",
+              "options": "A"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Monitoring"
+              },
               {
                 "id": "color",
                 "value": {
                   "fixedColor": "red",
                   "mode": "fixed"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Monitoring"
               }
             ]
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "services (sum)"
+              "id": "byFrameRefID",
+              "options": "B"
             },
             "properties": [
               {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              },
-              {
                 "id": "displayName",
                 "value": "Services"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
               }
             ]
           }
@@ -1034,63 +1005,28 @@
             "uid": "homeserver-prometheus-datasource"
           },
           "editorMode": "code",
-          "expr": "sum by (type) (\n  label_replace(\n    label_replace(rate(container_cpu_usage_seconds_total{instance=~\"$node\",name=~\".+\"}[1m]), \"type\", \"monitoring\", \"name\", \"monitoring.*|portainer\"),\n    \"type\", \"services\", \"name\", \"services.*\"\n  )\n) * 100",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{instance=~\"$node\",container_label_homeserver_container_category=\"monitoring\"}[1m])*100)",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "homeserver-prometheus-datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(container_cpu_usage_seconds_total{instance=~\"$node\",container_label_homeserver_container_category=\"service\"}[1m])*100)",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Monitoring CPU footprint",
-      "transformations": [
-        {
-          "id": "renameByRegex",
-          "options": {
-            "regex": "services(.*)",
-            "renamePattern": "services"
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "options": {
-            "regex": "monitoring(.*)",
-            "renamePattern": "monitoring"
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "options": {
-            "regex": "portainer",
-            "renamePattern": "monitoring"
-          }
-        },
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "Time": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "monitoring": {
-                "aggregations": [
-                  "sum"
-                ],
-                "operation": "aggregate"
-              },
-              "services": {
-                "aggregations": [
-                  "sum"
-                ],
-                "operation": "aggregate"
-              },
-              "sum(container_memory_usage_bytes{instance=~\"cadvisor:8080\"}) by (name)": {
-                "aggregations": []
-              }
-            }
-          }
-        }
-      ],
+      "transformations": [],
       "type": "piechart"
     },
     {
@@ -1119,39 +1055,39 @@
         "overrides": [
           {
             "matcher": {
-              "id": "byName",
-              "options": "monitoring (sum)"
+              "id": "byFrameRefID",
+              "options": "A"
             },
             "properties": [
+              {
+                "id": "displayName",
+                "value": "Monitoring"
+              },
               {
                 "id": "color",
                 "value": {
                   "fixedColor": "red",
                   "mode": "fixed"
                 }
-              },
-              {
-                "id": "displayName",
-                "value": "Monitoring"
               }
             ]
           },
           {
             "matcher": {
-              "id": "byName",
-              "options": "services (sum)"
+              "id": "byFrameRefID",
+              "options": "B"
             },
             "properties": [
               {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              },
-              {
                 "id": "displayName",
                 "value": "Services"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
               }
             ]
           }
@@ -1195,63 +1131,28 @@
             "uid": "homeserver-prometheus-datasource"
           },
           "editorMode": "code",
-          "expr": "sum by (type) (\n  label_replace(\n    label_replace(container_memory_usage_bytes, \"type\", \"monitoring\", \"name\", \"monitoring.*|portainer\"),\n    \"type\", \"services\", \"name\", \"services.*\"\n  )\n)",
+          "expr": "sum(rate(container_memory_usage_bytes{instance=~\"$node\",container_label_homeserver_container_category=\"monitoring\"}[1m])*100)",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "homeserver-prometheus-datasource"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(container_memory_usage_bytes{instance=~\"$node\",container_label_homeserver_container_category=\"service\"}[1m])*100)",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Monitoring memory footprint",
-      "transformations": [
-        {
-          "id": "renameByRegex",
-          "options": {
-            "regex": "services(.*)",
-            "renamePattern": "services"
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "options": {
-            "regex": "monitoring(.*)",
-            "renamePattern": "monitoring"
-          }
-        },
-        {
-          "id": "renameByRegex",
-          "options": {
-            "regex": "portainer",
-            "renamePattern": "monitoring"
-          }
-        },
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "Time": {
-                "aggregations": [],
-                "operation": "groupby"
-              },
-              "monitoring": {
-                "aggregations": [
-                  "sum"
-                ],
-                "operation": "aggregate"
-              },
-              "services": {
-                "aggregations": [
-                  "sum"
-                ],
-                "operation": "aggregate"
-              },
-              "sum(container_memory_usage_bytes{instance=~\"cadvisor:8080\"}) by (name)": {
-                "aggregations": []
-              }
-            }
-          }
-        }
-      ],
+      "transformations": [],
       "type": "piechart"
     }
   ],

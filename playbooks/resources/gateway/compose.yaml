@@ -1,6 +1,8 @@
 services:
   gateway:
-    container_name: services-gateway
+    container_name: gateway
+    labels:
+      - homeserver.container-category=service
     build: ./
     image: services-gateway
     ports: 
