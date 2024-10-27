@@ -39,8 +39,36 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - home-assistant-data:/backup/home-assistant:ro
       - "{{ home_dir }}/backups:/archive"
+  backup-zigbee2mqtt:
+    container_name: backup-zigbee2mqtt
+    labels:
+      - homeserver.container-category=backup
+    image: offen/docker-volume-backup:v2.43.0
+    entrypoint: backup
+    environment:
+      BACKUP_FILENAME: "backup-zigbee2mqtt-%Y-%m-%dT%H-%M-%S.tar.gz"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - zigbee2mqtt-data:/backup/zigbee2mqtt:ro
+      - "{{ home_dir }}/backups:/archive"
+  backup-mosquitto:
+    container_name: backup-mosquitto
+    labels:
+      - homeserver.container-category=backup
+    image: offen/docker-volume-backup:v2.43.0
+    entrypoint: backup
+    environment:
+      BACKUP_FILENAME: "backup-mosquitto-%Y-%m-%dT%H-%M-%S.tar.gz"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - mosquitto-data:/backup/mosquitto:ro
+      - "{{ home_dir }}/backups:/archive"
 volumes:
   prometheus-data:
     external: true
   home-assistant-data:
+    external: true
+  zigbee2mqtt-data:
+    external: true
+  mosquitto-data:
     external: true

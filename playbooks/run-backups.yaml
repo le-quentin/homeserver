@@ -4,6 +4,7 @@
     docker_volume_backup_root: "{{ ansible_files_root }}/docker-volume-backup"
   tasks:
     - name: Run backups via compose file
+      become: yes
       community.docker.docker_compose_v2:
         project_src: "{{ docker_volume_backup_root }}"
         recreate: always # so that changes in config are applied
