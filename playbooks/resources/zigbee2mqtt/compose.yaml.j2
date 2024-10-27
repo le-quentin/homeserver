@@ -25,7 +25,6 @@ services:
     image: koenkk/zigbee2mqtt:1.40.2
     volumes:
       - zigbee2mqtt-data:/app/data
-      - "{{ ansible_files_root }}/zigbee2mqtt/configuration.yaml:/app/data/configuration.yaml"
       - /run/udev:/run/udev:ro
     ports:
       - 8124:8080
