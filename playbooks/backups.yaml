@@ -52,7 +52,8 @@
         user: "{{ ansible_user }}"
         minute: "0"
         hour: "7"
-        job: "/usr/local/bin/rclone copy {{ backups_dir }}/ proton:backups/homeserver"
+        job: "/usr/local/bin/rclone copy {{ backups_dir }}/ proton:{{ remote_backups_path }}"
+        state: "{{ remote_backups_enabled | ternary('present', 'absent') }}"
     # Delete backup files older than 7 days
     # Not a good solution because it doesn't ensure the files were uploaded, which could get bad in case of 
     # TODO - Proper solution that keeps N files for each service, and delete the older ones
