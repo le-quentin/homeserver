@@ -4,9 +4,6 @@ mainhost
 [gatewayservs]
 mainhost
 
-[zigbee2mqttservs]
-mainhost
-
 [homeassistantservs]
 mainhost
 
