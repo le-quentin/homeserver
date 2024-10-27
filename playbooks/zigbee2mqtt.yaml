@@ -10,7 +10,13 @@
       become: yes
       community.docker.docker_volume:
         name: mosquitto-data
-    - name: Make sure the Zigbee2MQTT volume exists
+      register: volume
+    - name: Check if the Zigbee2MQTT volume exists
+      become: yes
+      docker_volume_info:
+        name: zigbee2mqtt-data
+      register: volume
+    - name: Create the volume if needed
       become: yes
       community.docker.docker_volume:
         name: zigbee2mqtt-data
@@ -20,18 +26,46 @@
         state: directory
         mode: '0755'
         recurse: yes
-    - block:
-      - name: Interpret Zigbee2MQTT docker compose template 
-        template:
-          src: ./resources/zigbee2mqtt/compose.yaml.j2
-          dest: "{{ ansible_files_root }}/zigbee2mqtt/compose.yaml"
-      - name: Copy Zigbee2MQTT configuration file
-        copy:
-          src: ./resources/zigbee2mqtt/initial-configuration.yaml
-          dest: "{{ ansible_files_root }}/zigbee2mqtt/configuration.yaml"
-          force: false
+    - name: Interpret Zigbee2MQTT docker compose template 
+      template:
+        src: ./resources/zigbee2mqtt/compose.yaml.j2
+        dest: "{{ ansible_files_root }}/zigbee2mqtt/compose.yaml"
       notify: 
         - Run Zigbee2MQTT 
+
+    # Initialise the configuration file only when the volume is new
+    - block:
+      - name: Copy Zigbee2MQTT initial configuration file
+        copy:
+          src: ./resources/zigbee2mqtt/initial-configuration.yaml
+          dest: "{{ ansible_files_root }}/zigbee2mqtt/"
+      - name: Use ephemeral container to mount the volume
+        become: yes
+        docker_container:
+          name: initialise-zigbee2mqtt-config
+          labels:
+            homeserver.container-category: ephemeral
+          image: alpine # A tiny container that stays up and do nothing
+          state: started
+          recreate: yes
+          tty: true # So that it stays up
+          volumes:
+            - zigbee2mqtt-data:/data
+      - name: Copy the initial configuration file to the volume
+        become: yes
+        community.docker.docker_container_copy_into:
+          container: initialise-zigbee2mqtt-config
+          path: "{{ ansible_files_root }}/zigbee2mqtt/initial-configuration.yaml"
+          container_path: /data/configuration.yaml
+      - name: stop and remove the ephemeral container
+        become: yes
+        docker_container:
+          name: initialise-zigbee2mqtt-config
+          state: absent
+      when: not volume.exists
+      notify:
+        - Run Zigbee2MQTT
+
   handlers:
     - name: Run Zigbee2MQTT
       become: yes
