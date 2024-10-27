@@ -1,0 +1,36 @@
+#!/bin/bash
+set -e 
+
+fail() {
+    echo "$1" >&2
+    exit "${2-1}"
+}
+
+BACKUP_ARCHIVE_PATH="$1"
+BACKUP_NAME="$(basename $BACKUP_ARCHIVE_PATH)"
+HOME_DIR={{ home_dir }}
+SERVICE_NAME=zigbee2mqtt
+
+file $BACKUP_ARCHIVE_PATH | grep -q 'gzip compressed' || fail "Argument must be a tar.gz archive containing a backup"
+
+echo "This will erase the current container data completely. Are you sure?"
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) break;;
+        No ) exit;;
+    esac
+done
+
+echo "Stopping the container..."
+docker compose -f $HOME_DIR/ansible-files/docker-volume-backup/compose.yaml rm -f
+docker compose -f $HOME_DIR/ansible-files/$SERVICE_NAME/compose.yaml down $SERVICE_NAME
+docker compose -f $HOME_DIR/ansible-files/$SERVICE_NAME/compose.yaml rm $SERVICE_NAME
+
+echo "Recreating the docker volume..."
+docker volume rm $SERVICE_NAME-data
+docker volume create $SERVICE_NAME-data
+echo "Unzipping the backup to the new volume"
+docker run --rm -it -v $SERVICE_NAME-data:/backup/$SERVICE_NAME -v $HOME_DIR/backups/:/archive:ro alpine tar -xvzf /archive/$BACKUP_NAME
+echo "Restarting the container..."
+docker compose -f $HOME_DIR/ansible-files/$SERVICE_NAME/compose.yaml up -d
+echo "Completed."
