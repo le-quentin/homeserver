@@ -45,7 +45,7 @@
         user: "{{ ansible_user }}"
         minute: "0"
         hour: "6"
-        job: "docker compose -f {{ docker_volume_backup_root }}/compose.yaml up --force-recreate"
+        job: "sudo docker compose -f {{ docker_volume_backup_root }}/compose.yaml up --force-recreate"
     - name: Setup the remote backups cron (pushing to Proton)
       ansible.builtin.cron:
         name: "remote backups"
