@@ -1,0 +1,6 @@
+ansible_host: 192.168.121.101 #VM static ip
+ansible_user: vagrant
+home_dir: /home/vagrant
+ansible_files_root: /home/vagrant/ansible-files
+ansible_ssh_user: vagrant
+ansible_ssh_private_key_file: "{{ inventory_dir }}/../../test/.vagrant/machines/default/libvirt/private_key"
