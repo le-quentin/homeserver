@@ -7,6 +7,9 @@ mainhost
 [homeassistantservs]
 mainhost
 
+[zigbee2mqttservs]
+mainhost
+
 [mauticservs]
 mainhost
 
