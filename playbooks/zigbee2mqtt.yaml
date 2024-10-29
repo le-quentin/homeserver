@@ -35,10 +35,10 @@
 
     # Initialise the configuration file only when the volume is new
     - block:
-      - name: Copy Zigbee2MQTT initial configuration file
-        copy:
-          src: ./resources/zigbee2mqtt/initial-configuration.yaml
-          dest: "{{ ansible_files_root }}/zigbee2mqtt/"
+      - name: Interpret Zigbee2MQTT initial configuration template
+        template:
+          src: ./resources/zigbee2mqtt/initial-configuration.yaml.j2
+          dest: "{{ ansible_files_root }}/zigbee2mqtt/initial-configuration.yaml"
       - name: Use ephemeral container to mount the volume
         become: yes
         docker_container:

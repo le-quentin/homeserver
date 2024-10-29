@@ -1,0 +1,3 @@
+zigbee_device_path: "/dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_de53198d5fe7ed11898e666262c613ac-if00-port0"
+zigbee_port_path: "/dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_de53198d5fe7ed11898e666262c613ac-if00-port0"
+zigbee2mqtt_frontend_url: "http://zigbee2mqtt.home"
