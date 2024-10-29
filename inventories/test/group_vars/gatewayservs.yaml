@@ -1,0 +1,1 @@
+gateway_ip: {{ ansible_host }}
