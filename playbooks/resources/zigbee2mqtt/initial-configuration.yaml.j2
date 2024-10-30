@@ -8,7 +8,7 @@ mqtt:
     server: mqtt://mqtt
 # Zigbee adapter path
 serial:
-  port: /dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_de53198d5fe7ed11898e666262c613ac-if00-port0
+  port: {{ zigbee_device_path }}
   adapter: ember
   # Optional: Baud rate speed for serial port, this can be anything firmware support but default is 115200 for Z-Stack and EZSP, 38400 for Deconz, however note that some EZSP firmware need 57600.
   baudrate: 115200
@@ -16,7 +16,7 @@ serial:
   rtscts: false
 # Enable the Zigbee2MQTT frontend on given port 
 frontend:
-    url: "http://zigbee2mqtt.home"
+    url: {{ zigbee2mqtt_frontend_url }}
     port: 8080
 # Let Zigbee2MQTT generate a new network key on first start
 advanced:

@@ -1,4 +1,6 @@
-ansible_host: 192.168.122.231 #VM ip, all quick and dirty for now
-ansible_user: test
-home_dir: /home/test
-ansible_files_root: /home/test/ansible-files
+ansible_host: homeserver-staging # set in /etc/hosts file
+ansible_user: staging
+ansible_password: 1234
+ansible_become_password: 1234
+home_dir: /home/staging
+ansible_files_root: /home/staging/ansible-files
