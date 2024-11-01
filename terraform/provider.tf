@@ -8,21 +8,21 @@ terraform {
 }
 
 variable "proxmox_endpoint" {
-  type = string
+  type        = string
   description = "Complete URL of the proxmox server, with port number"
-  sensitive = true
+  sensitive   = true
 }
 
 variable "proxmox_username" {
-  type = string
+  type        = string
   description = "Username with admin access to Proxmox"
-  sensitive = true
+  sensitive   = true
 }
 
 variable "proxmox_password" {
-  type = string
+  type        = string
   description = "Password for the Proxmox user"
-  sensitive = true
+  sensitive   = true
 }
 
 provider "proxmox" {

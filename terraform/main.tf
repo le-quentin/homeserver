@@ -1,60 +1,69 @@
 variable "environment" {
-  type = string
+  type        = string
   description = "The current environment"
 }
 
 variable "pool" {
-  type = string
+  type        = string
   description = "The resources pool for this environment"
 }
 
 variable "node_name" {
-  type = string
+  type        = string
   description = "The name of the node (physical server) on which we'll deploy"
 }
 
-variable "bridge_lan_interface" {
-  type = string
-  description = "The name of the network interface for the global bridge LAN"
+variable "legacy_homeserver_address" {
+  type        = string
+  description = "Address of legacy homeserver"
+  sensitive   = true
 }
 
-variable "bridge_lan_network_ip" {
-  type = string
-  description = "The ip address of the network for the the global bridge LAN"
+variable "legacy_homeserver_username" {
+  type        = string
+  description = "Username of legacy homeserver"
+  sensitive   = true
 }
 
-resource "proxmox_virtual_environment_pool" pool {
-  comment = "Staging environment pool"
-  pool_id = var.pool
+variable "legacy_homeserver_password" {
+  type        = string
+  description = "Password of legacy homeserver"
+  sensitive   = true
 }
 
-resource "proxmox_virtual_environment_network_linux_bridge" bridge_lan_interface {
-  # depends_on = [
-  #   proxmox_virtual_environment_network_linux_vlan.vlan99
-  # ]
+module "downloads" {
+  source = "./modules/downloads"
 
   node_name = var.node_name
-  name = var.bridge_lan_interface 
-  comment = "The global LAN for the ${var.environment} env"
 
-  address = var.bridge_lan_network_ip
-
-  vlan_aware = false
-
-  ports = [
-    # Network (or VLAN) interfaces to attach to the bridge, specified by their interface name
-    # (e.g. "ens18.99" for VLAN 99 on interface ens18).
-    # For VLAN interfaces with custom names, use the interface name without the VLAN tag, e.g. "vlan_lab"
-  ]
+  img_storage           = "local"
+  debian_12_raw_img_url = "https://cloud.debian.org/images/cloud/bookworm/20241004-1890/debian-12-generic-amd64-20241004-1890.raw"
+  # debian_12_raw_img_url = "https://cloud.debian.org/images/cloud/bookworm/20241004-1890/debian-12-generic-amd64-20241004-1890.tar.xz"
 }
 
-resource "proxmox_virtual_environment_network_linux_vlan" "vlan_legacy" {
-  node_name = var.node_name
-  comment = "The LAN for legacy (=all dockers on hone host) homeserver"
-  # name      = "vlan_legacy"
+module "legacy" {
+  source = "./modules/legacy"
 
-  ## or alternatively, use custom name:
-  name      = "vlan_legacy"
-  interface = var.bridge_lan_interface
-  vlan      = 1001
+  environment = var.environment
+  pool        = var.pool
+  node_name   = var.node_name
+
+  images                = module.downloads.images
+  bridge_lan_interface  = "vmbr1001"
+  bridge_lan_network_ip = "10.142.142.1"
+  vlan_legacy = {
+    id   = 1001
+    name = "vlan_legacy"
+    address = "10.142.142.1"
+  }
+
+  disk_storage = "local-lvm"
+
+  legacy_homeserver_vm = {
+    address = var.legacy_homeserver_address
+    user = {
+      username = var.legacy_homeserver_username
+      password = var.legacy_homeserver_password
+    }
+  }
 }
