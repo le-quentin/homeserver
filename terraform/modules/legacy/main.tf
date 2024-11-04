@@ -36,13 +36,14 @@ variable "bridge_lan_network_ip" {
   description = "The ip address of the network for the the global bridge LAN"
 }
 
-variable "vlan_legacy" {
-  type = object({
-    id   = number
-    name = string
-    address = string
-  })
-  description = "The VLAN for legacy infra (=all containers on one host)"
+variable "bridge_management_lan_interface" {
+  type        = string
+  description = "The name of the network interface for the management bridge LAN"
+}
+
+variable "bridge_management_lan_network_ip" {
+  type        = string
+  description = "The ip address of the network interface for the management bridge LAN"
 }
 
 resource "proxmox_virtual_environment_pool" "pool" {
@@ -57,6 +58,7 @@ resource "proxmox_virtual_environment_network_linux_bridge" "bridge_lan_interfac
 
   node_name = var.node_name
   name      = var.bridge_lan_interface
+  address = "${var.bridge_lan_network_ip}/24"
   comment   = "The global LAN for the ${var.environment} env"
 
   vlan_aware = true
@@ -68,18 +70,23 @@ resource "proxmox_virtual_environment_network_linux_bridge" "bridge_lan_interfac
   ]
 }
 
-resource "proxmox_virtual_environment_network_linux_vlan" "vlan_legacy" {
-  depends_on = [proxmox_virtual_environment_network_linux_bridge.bridge_lan_interface]
-  node_name = var.node_name
-  comment   = "The LAN for legacy (=all dockers on hone host) homeserver"
-  # name      = "vlan-legacy"
-  #
-  address = "${var.vlan_legacy.address}/24"
+resource "proxmox_virtual_environment_network_linux_bridge" "bridge_management_lan_interface" {
+  # depends_on = [
+  #   proxmox_virtual_environment_network_linux_vlan.vlan99
+  # ]
 
-  ## or alternatively, use custom name:
-  name      = var.vlan_legacy.name
-  interface = var.bridge_lan_interface
-  vlan      = var.vlan_legacy.id
+  node_name = var.node_name
+  name      = var.bridge_management_lan_interface
+  address = "${var.bridge_management_lan_network_ip}/24"
+  comment   = "The management LAN for the ${var.environment} env"
+
+  vlan_aware = true
+
+  ports = [
+    # Network (or VLAN) interfaces to attach to the bridge, specified by their interface name
+    # (e.g. "ens18.99" for VLAN 99 on interface ens18).
+    # For VLAN interfaces with custom names, use the interface name without the VLAN tag, e.g. "vlan_lab"
+  ]
 }
 
 ###################################### VMs
@@ -101,7 +108,7 @@ variable "legacy_homeserver_vm" {
       password = string
     })
   })
-  description = "The user account to use to ssh into that vm"
+  description = "Legacy VM (containing all containers in a single host, as it was on the Pi)"
 }
 
 resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
@@ -110,7 +117,7 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
   description = "All the containers on one host, as it was before getting proxmox"
 
   pool_id = var.pool
-  vm_id = 1001
+  vm_id = 1801
 
   initialization {
     # do not use this in production, configure your own ssh key instead!
@@ -121,7 +128,7 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
     ip_config {
       ipv4 {
         address = var.legacy_homeserver_vm.address
-        gateway = var.vlan_legacy.address
+        gateway = var.bridge_lan_network_ip
       }
     }
   }
@@ -143,7 +150,6 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
 
   network_device {
     bridge  = var.bridge_lan_interface
-    vlan_id = var.vlan_legacy.id
   }
 
   operating_system {
@@ -172,5 +178,57 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
   #   up_delay   = "60"
   #   down_delay = "60"
   # }
+
+}
+
+variable "opnsense_vm" {
+  type = object({
+    template_id = number
+    address = string
+  })
+  description = "Opensense VM"
+}
+
+resource "proxmox_virtual_environment_vm" "opnsense_vm" {
+  name        = "opnsense"
+  node_name   = var.node_name
+  description = "Opnsense firewall, managing the whole internal LAN: VLANs, routing and interaction with the outside world"
+
+  pool_id = var.pool
+  vm_id = 1001
+
+  clone {
+    vm_id = var.opnsense_vm.template_id
+    full = false
+  }
+
+  network_device {
+    bridge  = "vmbr0"
+  }
+
+  network_device {
+    bridge  = var.bridge_management_lan_interface
+  }
+
+  network_device {
+    bridge  = var.bridge_lan_interface
+  }
+
+  cpu {
+    cores = 1
+    type  = "x86-64-v2-AES" # recommended for modern CPUs
+  }
+
+  memory {
+    dedicated = 1024
+    floating  = 1024 # set equal to dedicated to enable ballooning
+  }
+
+  agent {
+    # read 'Qemu guest agent' section, change to true only when ready
+    enabled = false
+  }
+  # if agent is not enabled, the VM may not be able to shutdown properly, and may need to be forced off
+  stop_on_destroy = true
 
 }

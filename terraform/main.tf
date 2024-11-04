@@ -31,6 +31,30 @@ variable "legacy_homeserver_password" {
   sensitive   = true
 }
 
+variable "opnsense_template_id" {
+  type        = number
+  description = "Id of the template Opnsense VM will be cloned from"
+  sensitive   = true
+}
+
+variable "opnsense_address" {
+  type        = string
+  description = "Address of opnsense"
+  sensitive   = true
+}
+
+variable "opnsense_username" {
+  type        = string
+  description = "Username of opnsense"
+  sensitive   = true
+}
+
+variable "opnsense_password" {
+  type        = string
+  description = "Password of opnsense"
+  sensitive   = true
+}
+
 module "downloads" {
   source = "./modules/downloads"
 
@@ -48,14 +72,11 @@ module "legacy" {
   pool        = var.pool
   node_name   = var.node_name
 
-  images                = module.downloads.images
-  bridge_lan_interface  = "vmbr1001"
-  bridge_lan_network_ip = "10.142.142.1"
-  vlan_legacy = {
-    id   = 1001
-    name = "vlan_legacy"
-    address = "10.142.142.1"
-  }
+  images                           = module.downloads.images
+  bridge_lan_interface             = "vmbr1001"
+  bridge_lan_network_ip            = "10.142.142.1"
+  bridge_management_lan_interface  = "vmbr1100"
+  bridge_management_lan_network_ip = "10.143.143.100"
 
   disk_storage = "local-lvm"
 
@@ -65,5 +86,10 @@ module "legacy" {
       username = var.legacy_homeserver_username
       password = var.legacy_homeserver_password
     }
+  }
+
+  opnsense_vm = {
+    template_id = var.opnsense_template_id
+    address     = var.opnsense_address
   }
 }
