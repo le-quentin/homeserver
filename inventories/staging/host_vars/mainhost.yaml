@@ -1,5 +1,5 @@
-ansible_host: homeserver-staging # set in /etc/hosts file
-ansible_user: staging
+ansible_host: 10.142.210.10
+ansible_user: legacy_user
 ansible_password: 1234
 ansible_become_password: 1234
 home_dir: /home/staging
