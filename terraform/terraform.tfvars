@@ -2,4 +2,4 @@ environment = "staging"
 pool        = "staging-pool"
 node_name   = "beelink"
 
-opnsense_template_id = 1999
+opnsense_template_id = 1998

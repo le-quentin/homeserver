@@ -1,4 +1,4 @@
-[firewalls]
+[opnsenseservs]
 opnsensehost
 
 [backupservs]

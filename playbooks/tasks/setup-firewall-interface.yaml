@@ -1,0 +1,16 @@
+
+# - name: Print interface attributes
+#   ansible.builtin.debug:
+#     msg: "{{ interface.key }}: {{ attribute.key }} - {{ attribute.value }}"
+#   loop: "{{ interface.value | dict2items }}"
+#   loop_control:
+#     loop_var: attribute
+- name: Set interface attributes
+  community.general.xml:
+    path: "{{ config_file_local_path }}"
+    xpath: "/opnsense/interfaces/{{ interface.key }}/{{ attribute.key }}"
+    value: "{{ attribute.value }}"
+    pretty_print: true
+  loop: "{{ interface.value | dict2items }}"
+  loop_control:
+    loop_var: attribute

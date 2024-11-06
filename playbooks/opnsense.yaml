@@ -1,0 +1,146 @@
+- name: Setup Opnsense firewall
+  hosts: opnsenseservs
+  connection: local # Run from the control node (=this machine)
+  gather_facts: no # No point in gathering facts on the local machine
+  vars:
+    lan_interface_device: "vtnet2"
+    lan_interface_id: "opt1"
+    sshmgt_interface_id: "opt2"
+    legacyvlan_interface_id: "opt3"
+    config_file_local_path: /tmp/{{ inventory_hostname }}.config.xml
+  module_defaults:
+    group/ansibleguy.opnsense.all:
+      ssl_verify: false
+      firewall: "{{ ansible_host }}"
+      api_key: "{{ opnsense_api_key }}"
+      api_secret: "{{ opnsense_api_secret }}"
+  tasks:
+    # Interfaces assignment
+    - name: Import interfaces config file from host
+      connection: ssh
+      ansible.builtin.fetch:
+        src: /conf/config.xml
+        dest: "{{ config_file_local_path }}"
+        flat: yes
+    # WAN, mgtLAN and LAN assignment
+    # TODO turn into a role with proper defaults etc
+    - include_tasks: tasks/setup-firewall-interface.yaml
+      loop: "{{ standard_interfaces | dict2items }}"
+      loop_control:
+        loop_var: interface
+    # TODO make backup conf file
+    - name: Update interfaces config file
+      connection: ssh
+      become: yes
+      copy:
+        src: "{{ config_file_local_path }}"
+        dest: /conf/config.xml
+      vars:
+        ansible_python_interpreter: /usr/local/bin/python3
+      register: ifconfig
+
+    # VLANs configuration
+    - name: Create ssh management VLAN
+      ansibleguy.opnsense.interface_vlan:
+        description: "Network for all SSH enabled hosts"
+        interface: "{{ lan_interface_device }}"
+        vlan: 254
+    - name: Create legacy VLAN
+      ansibleguy.opnsense.interface_vlan:
+        description: "Legacy network, with all containers deployed on the same host"
+        interface: "{{ lan_interface_device }}"
+        vlan: 200
+    # VLAN interfaces assignment
+    # Postponed because VLANs need to be created first; otherwise the assignment is buggy (no ip for interface)
+    - name: Import interfaces config file from host
+      connection: ssh
+      ansible.builtin.fetch:
+        src: /conf/config.xml
+        dest: "{{ config_file_local_path }}"
+        flat: yes
+      vars:
+        ansible_python_interpreter: /usr/local/bin/python3
+    # TODO turn into a role with proper defaults etc
+    - include_tasks: tasks/setup-firewall-interface.yaml
+      loop: "{{ vlan_interfaces | dict2items }}"
+      loop_control:
+        loop_var: interface
+    # TODO make backup conf file
+    - name: Update interfaces config file
+      connection: ssh
+      become: yes
+      copy:
+        src: "{{ config_file_local_path }}"
+        dest: /conf/config.xml
+      vars:
+        ansible_python_interpreter: /usr/local/bin/python3
+      register: ifconfig
+      # Test if really needed
+    - name: Reboot to parse new config
+      ansibleguy.opnsense.system:
+        action: reboot
+      when: ifconfig.changed
+    # Aliases
+    - name: privateips alias 
+      ansibleguy.opnsense.alias:
+        name: "privateips"
+        type: "network"
+        content: ["192.168.0.0/16", "172.16.0.0/12", "10.0.0.0/8"]
+    - name: dnsservs alias 
+      ansibleguy.opnsense.alias:
+        name: "dnsservs"
+        type: "host"
+        content: ["192.168.50.1"]
+    - name: localnetworks alias
+      ansibleguy.opnsense.alias:
+        name: "localnetworks"
+        type: "network"
+        content: ["10.142.0.0/16"]
+    - name: List aliases
+      ansibleguy.opnsense.list:
+        target: alias
+    # Rules
+    # TODO rules from vars, and purge mechanism for rules not defined here
+    - name: Legacy VLAN internet access
+      ansibleguy.opnsense.rule:
+        interface: "{{ legacyvlan_interface_id }}"
+        source_net: "any"  # host, network, alias or "any"
+        destination_net: "privateips"
+        destination_invert: true
+        description: "Legacy VLAN internet access"
+        match_fields: ["description"]
+    - name: Legacy VLAN DNS access
+      ansibleguy.opnsense.rule:
+        interface: "{{ legacyvlan_interface_id }}"
+        source_net: "any"  # host, network, alias or "any"
+        destination_net: "dnsservs"
+        description: "Legacy VLAN DNS access"
+        match_fields: ["description"]
+    - name: SSH management VLAN access
+      ansibleguy.opnsense.rule:
+        interface: "{{ lan_interface_id }}"
+        protocol: "TCP"
+        destination_net: "{{ sshmgt_interface_id }}"
+        destination_port: "ssh"
+        description: "SSH management VLAN access"
+        match_fields: ["description"]
+    - name: LAN/VLAN pings in
+      ansibleguy.opnsense.rule:
+        interface: ["lan", "opt1", "opt2", "opt3"]
+        # source_net: "localnetworks"  # host, network, alias or "any"
+        protocol: "ICMP"
+        # destination_net: "localnetworks"
+        description: "Allow ping  to all local hosts"
+        match_fields: ["description"]
+    - name: LAN/VLAN pings out
+      ansibleguy.opnsense.rule:
+        direction: "out"
+        interface: ["lan", "opt1", "opt2", "opt3"]
+        # source_net: "localnetworks"  # host, network, alias or "any"
+        protocol: "ICMP"
+        # destination_net: "localnetworks"
+        description: "Allow ping from all local hosts"
+        match_fields: ["description"]
+    - name: List rules
+      ansibleguy.opnsense.list:
+        target: rule
