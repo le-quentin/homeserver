@@ -19,6 +19,18 @@ variable "legacy_homeserver_address" {
   sensitive   = true
 }
 
+variable "legacy_homeserver_sshmgt_address" {
+  type        = string
+  description = "Address of legacy homeserver (SSH)"
+  sensitive   = true
+}
+
+variable "legacy_homeserver_ssh_key" {
+  type        = string
+  description = "Public key for SSH connection to legacy VM"
+  sensitive   = true
+}
+
 variable "legacy_homeserver_username" {
   type        = string
   description = "Username of legacy homeserver"
@@ -74,15 +86,19 @@ module "legacy" {
 
   images                           = module.downloads.images
   bridge_lan_interface             = "vmbr1001"
-  bridge_lan_network_ip            = "10.142.142.1"
+  bridge_lan_network_ip            = "10.142.1.100"
   bridge_management_lan_interface  = "vmbr1100"
-  bridge_management_lan_network_ip = "10.143.143.100"
+  bridge_management_lan_network_ip = "10.143.1.100"
+  legacy_vlan_network_ip           = "10.142.200.1"
+  sshmgt_vlan_network_ip           = "10.142.254.1"
 
   disk_storage = "local-lvm"
 
   legacy_homeserver_vm = {
     address = var.legacy_homeserver_address
+    sshmgt_address = var.legacy_homeserver_sshmgt_address
     user = {
+      ssh_key  = var.legacy_homeserver_ssh_key
       username = var.legacy_homeserver_username
       password = var.legacy_homeserver_password
     }

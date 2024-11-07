@@ -46,6 +46,16 @@ variable "bridge_management_lan_network_ip" {
   description = "The ip address of the network interface for the management bridge LAN"
 }
 
+variable "legacy_vlan_network_ip" {
+  type        = string
+  description = "The ip address of the legacy VLAN"
+}
+
+variable "sshmgt_vlan_network_ip" {
+  type        = string
+  description = "The ip address of the SSH management VLAN"
+}
+
 resource "proxmox_virtual_environment_pool" "pool" {
   comment = "Staging environment pool"
   pool_id = var.pool
@@ -58,8 +68,8 @@ resource "proxmox_virtual_environment_network_linux_bridge" "bridge_lan_interfac
 
   node_name = var.node_name
   name      = var.bridge_lan_interface
-  address = "${var.bridge_lan_network_ip}/24"
-  comment   = "The global LAN for the ${var.environment} env"
+  address = "${var.bridge_lan_network_ip}/16"
+  comment   = "${var.environment} global LAN"
 
   vlan_aware = true
 
@@ -77,8 +87,8 @@ resource "proxmox_virtual_environment_network_linux_bridge" "bridge_management_l
 
   node_name = var.node_name
   name      = var.bridge_management_lan_interface
-  address = "${var.bridge_management_lan_network_ip}/24"
-  comment   = "The management LAN for the ${var.environment} env"
+  address = "${var.bridge_management_lan_network_ip}/16"
+  comment   = "${var.environment} web management (firewall web GUIs)"
 
   vlan_aware = true
 
@@ -103,7 +113,9 @@ variable "disk_storage" {
 variable "legacy_homeserver_vm" {
   type = object({
     address = string
+    sshmgt_address = string
     user = object({
+      ssh_key = string
       username = string
       password = string
     })
@@ -122,13 +134,20 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
   initialization {
     # do not use this in production, configure your own ssh key instead!
     user_account {
+      keys = [var.legacy_homeserver_vm.user.ssh_key]
       username = var.legacy_homeserver_vm.user.username
       password = var.legacy_homeserver_vm.user.password
     }
     ip_config {
       ipv4 {
         address = var.legacy_homeserver_vm.address
-        gateway = var.bridge_lan_network_ip
+        gateway = var.legacy_vlan_network_ip
+      }
+    }
+    ip_config {
+      ipv4 {
+        address = var.legacy_homeserver_vm.sshmgt_address
+        gateway = var.sshmgt_vlan_network_ip
       }
     }
   }
@@ -148,8 +167,16 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
   #   iothread     = true
   # }
 
+  # Legacy VLAN
   network_device {
     bridge  = var.bridge_lan_interface
+    vlan_id = 200
+  }
+
+  # SSH management VLAN
+  network_device {
+    bridge  = var.bridge_lan_interface
+    vlan_id = 254
   }
 
   operating_system {
@@ -157,7 +184,7 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
   }
 
   cpu {
-    cores = 2
+    cores = 1
     type  = "x86-64-v2-AES" # recommended for modern CPUs
   }
 
