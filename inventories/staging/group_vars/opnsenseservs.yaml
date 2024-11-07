@@ -1,4 +1,4 @@
-standard_interfaces:
+interfaces:
   wan:
     if: vtnet0
     descr: WAN
@@ -20,7 +20,6 @@ standard_interfaces:
     spoofmac: ""
     ipaddr: "10.142.1.1"
     subnet: 16
-vlan_interfaces:
   opt2:
     if: vlan0.254
     descr: sshMgtVLAN

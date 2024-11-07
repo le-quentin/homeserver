@@ -15,30 +15,6 @@
       api_key: "{{ opnsense_api_key }}"
       api_secret: "{{ opnsense_api_secret }}"
   tasks:
-    # Interfaces assignment
-    - name: Import interfaces config file from host
-      connection: ssh
-      ansible.builtin.fetch:
-        src: /conf/config.xml
-        dest: "{{ config_file_local_path }}"
-        flat: yes
-    # WAN, mgtLAN and LAN assignment
-    # TODO turn into a role with proper defaults etc
-    - include_tasks: tasks/setup-firewall-interface.yaml
-      loop: "{{ standard_interfaces | dict2items }}"
-      loop_control:
-        loop_var: interface
-    # TODO make backup conf file
-    - name: Update interfaces config file
-      connection: ssh
-      become: yes
-      copy:
-        src: "{{ config_file_local_path }}"
-        dest: /conf/config.xml
-      vars:
-        ansible_python_interpreter: /usr/local/bin/python3
-      register: ifconfig
-
     # VLANs configuration
     - name: Create ssh management VLAN
       ansibleguy.opnsense.interface_vlan:
@@ -50,8 +26,7 @@
         description: "Legacy network, with all containers deployed on the same host"
         interface: "{{ lan_interface_device }}"
         vlan: 200
-    # VLAN interfaces assignment
-    # Postponed because VLANs need to be created first; otherwise the assignment is buggy (no ip for interface)
+    # interfaces assignment
     - name: Import interfaces config file from host
       connection: ssh
       ansible.builtin.fetch:
@@ -62,7 +37,7 @@
         ansible_python_interpreter: /usr/local/bin/python3
     # TODO turn into a role with proper defaults etc
     - include_tasks: tasks/setup-firewall-interface.yaml
-      loop: "{{ vlan_interfaces | dict2items }}"
+      loop: "{{ interfaces | dict2items }}"
       loop_control:
         loop_var: interface
     # TODO make backup conf file
