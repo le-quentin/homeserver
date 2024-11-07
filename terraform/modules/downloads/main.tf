@@ -7,21 +7,6 @@ terraform {
   }
 }
 
-variable "node_name" {
-  type = string
-  description = "The Proxmox node where the images will be stored"
-}
-
-variable "img_storage" {
-  type        = string
-  description = "The Proxmox storage when the images will be stored"
-}
-
-variable "debian_12_raw_img_url" {
-  type        = string
-  description = "The url address where to pull debian 12 image"
-}
-
 resource "proxmox_virtual_environment_download_file" "debian_12_raw_img" {
   content_type = "iso"
   datastore_id = var.img_storage

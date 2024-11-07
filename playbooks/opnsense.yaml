@@ -1,3 +1,7 @@
+# TODO add ansible playbook configure the default staging route on proxmox
+# ip route replace 10.142.0.0/16 dev vmbr1001 via 10.142.1.1
+# Then call the ansible playbooks from Terraform
+
 - name: Setup Opnsense firewall
   hosts: opnsenseservs
   connection: local # Run from the control node (=this machine)
