@@ -7,19 +7,46 @@ terraform {
   }
 }
 
-###################################### VMs
-
 variable "legacy_homeserver_vm" {
   type = object({
-    address        = string
-    sshmgt_address = string
+    address = string
     user = object({
       ssh_key  = string
       username = string
-      password = string
     })
   })
   description = "Legacy VM (containing all containers in a single host, as it was on the Pi)"
+}
+
+resource "proxmox_virtual_environment_file" "cloudinit_user" {
+  content_type = "snippets"
+  # TODO automate the creation of the snippets data folder on proxmox (via ansible=>conf file?)
+  datastore_id = "snippets"
+  node_name    = var.node_name
+
+  source_raw {
+    data = <<-EOF
+    #cloud-config
+    users:
+      - name: ${var.legacy_homeserver_vm.user.username}
+        groups:
+          - sudo
+        shell: /bin/bash
+        ssh_authorized_keys:
+          - ${var.legacy_homeserver_vm.user.ssh_key}
+        sudo: ALL=(ALL) NOPASSWD:ALL
+    EOF
+    # This could add the qemu guest agent
+    # runcmd:
+    #     - apt update
+    #     - apt install -y qemu-guest-agent net-tools
+    #     - timedatectl set-timezone America/Toronto
+    #     - systemctl enable qemu-guest-agent
+    #     - systemctl start qemu-guest-agent
+    #     - echo "done" > /tmp/cloud-config.done
+
+    file_name = "cloudinit_user.yaml"
+  }
 }
 
 resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
@@ -31,22 +58,12 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
   vm_id   = var.vm_ids_offset + 801
 
   initialization {
-    user_account {
-      keys = [var.legacy_homeserver_vm.user.ssh_key]
-      # do not use this in production, configure your own ssh key instead!
-      username = var.legacy_homeserver_vm.user.username
-      password = var.legacy_homeserver_vm.user.password
-    }
+    user_data_file_id = proxmox_virtual_environment_file.cloudinit_user.id
+
     ip_config {
       ipv4 {
         address = var.legacy_homeserver_vm.address
         gateway = var.legacy_vlan_network_ip
-      }
-    }
-    ip_config {
-      ipv4 {
-        address = var.legacy_homeserver_vm.sshmgt_address
-        gateway = var.sshmgt_vlan_network_ip
       }
     }
   }
@@ -54,28 +71,14 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
   disk {
     datastore_id = var.disk_storage
     file_id      = var.images.debian
-    # file_format = "raw"
-    # file_id      = "disk_debian-12-generic-amd64.qcow2.img"
-    interface = "scsi0"
-    # iothread  = true
+    interface    = "scsi0"
+    size         = 20
   }
-
-  # disk {
-  #   datastore_id = var.disk_storage
-  #   interface    = "scsi0"
-  #   iothread     = true
-  # }
 
   # Legacy VLAN
   network_device {
     bridge  = var.bridge_lan_interface
     vlan_id = 200
-  }
-
-  # SSH management VLAN
-  network_device {
-    bridge  = var.bridge_lan_interface
-    vlan_id = 254
   }
 
   operating_system {

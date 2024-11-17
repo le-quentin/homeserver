@@ -39,6 +39,11 @@
       template:
         src: "./resources/backups/local-backups-compose.yaml.j2"
         dest: "{{ docker_volume_backup_root }}/compose.yaml"
+    - name: Install crontab
+      become: yes
+      package:
+        name: 
+          - cron
     - name: Setup the local backups cron
       ansible.builtin.cron:
         name: "local backups"

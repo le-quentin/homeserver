@@ -1,6 +1,6 @@
-ansible_host: 10.142.210.10
+ansible_host: 10.142.200.10
 ansible_user: legacy_user
-ansible_password: 1234
-ansible_become_password: 1234
-home_dir: /home/staging
-ansible_files_root: /home/staging/ansible-files
+home_dir: /home/{{ hostvars.mainhost.ansible_user }}
+ansible_files_root: /home/{{ hostvars.mainhost.ansible_user }}/ansible-files
+ansible_python_interpreter: /usr/bin/python3
+ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"

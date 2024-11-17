@@ -9,8 +9,7 @@
   vars:
     lan_interface_device: "vtnet2"
     lan_interface_id: "opt1"
-    sshmgt_interface_id: "opt2"
-    legacyvlan_interface_id: "opt3"
+    legacyvlan_interface_id: "opt2"
     config_file_local_path: /tmp/{{ inventory_hostname }}.config.xml
   module_defaults:
     group/ansibleguy.opnsense.all:
@@ -19,12 +18,6 @@
       api_key: "{{ opnsense_api_key }}"
       api_secret: "{{ opnsense_api_secret }}"
   tasks:
-    # VLANs configuration
-    - name: Create ssh management VLAN
-      ansibleguy.opnsense.interface_vlan:
-        description: "Network for all SSH enabled hosts"
-        interface: "{{ lan_interface_device }}"
-        vlan: 254
     - name: Create legacy VLAN
       ansibleguy.opnsense.interface_vlan:
         description: "Legacy network, with all containers deployed on the same host"
@@ -75,6 +68,16 @@
         name: "localnetworks"
         type: "network"
         content: ["10.142.0.0/16"]
+    - name: httpnetworks alias
+      ansibleguy.opnsense.alias:
+        name: "httpnetworks"
+        type: "network"
+        content: ["10.142.200.0/24"]
+    - name: ansiblehosts alias
+      ansibleguy.opnsense.alias:
+        name: "ansiblehosts"
+        type: "host"
+        content: ["10.142.200.10"]
     - name: List aliases
       ansibleguy.opnsense.list:
         target: alias
@@ -88,6 +91,14 @@
         destination_invert: true
         description: "Legacy VLAN internet access"
         match_fields: ["description"]
+    - name: Legacy VLAN HTTP access
+      ansibleguy.opnsense.rule:
+        interface: "{{ lan_interface_id }}"
+        protocol: "TCP"
+        destination_net: "httpnetworks"
+        destination_port: "http"
+        description: "Legacy VLAN HTTP access"
+        match_fields: ["description"]
     - name: Legacy VLAN DNS access
       ansibleguy.opnsense.rule:
         interface: "{{ legacyvlan_interface_id }}"
@@ -95,17 +106,17 @@
         destination_net: "dnsservs"
         description: "Legacy VLAN DNS access"
         match_fields: ["description"]
-    - name: SSH management VLAN access
+    - name: ansiblehosts SSH access 
       ansibleguy.opnsense.rule:
         interface: "{{ lan_interface_id }}"
         protocol: "TCP"
-        destination_net: "{{ sshmgt_interface_id }}"
+        destination_net: "ansiblehosts"
         destination_port: "ssh"
-        description: "SSH management VLAN access"
+        description: "ansiblehosts SSH access"
         match_fields: ["description"]
     - name: LAN/VLAN pings in
       ansibleguy.opnsense.rule:
-        interface: ["lan", "opt1", "opt2", "opt3"]
+        interface: ["lan", "opt1", "opt2"]
         # source_net: "localnetworks"  # host, network, alias or "any"
         protocol: "ICMP"
         # destination_net: "localnetworks"
@@ -114,7 +125,7 @@
     - name: LAN/VLAN pings out
       ansibleguy.opnsense.rule:
         direction: "out"
-        interface: ["lan", "opt1", "opt2", "opt3"]
+        interface: ["lan", "opt1", "opt2"]
         # source_net: "localnetworks"  # host, network, alias or "any"
         protocol: "ICMP"
         # destination_net: "localnetworks"

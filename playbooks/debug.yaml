@@ -1,4 +1,4 @@
-- hosts: all
+- hosts: all, !opnsensehost
   become: false
   tasks:
     - name: user

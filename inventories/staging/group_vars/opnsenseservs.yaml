@@ -21,13 +21,6 @@ interfaces:
     ipaddr: "10.142.1.1"
     subnet: 16
   opt2:
-    if: vlan0.254
-    descr: sshMgtVLAN
-    enable: 1
-    spoofmac: ""
-    ipaddr: "10.142.254.1"
-    subnet: 24
-  opt3:
     if: vlan0.200
     descr: legacyVLAN
     enable: 1

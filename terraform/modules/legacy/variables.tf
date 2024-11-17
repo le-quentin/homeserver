@@ -47,11 +47,6 @@ variable "legacy_vlan_network_ip" {
   description = "The ip address of the legacy VLAN"
 }
 
-variable "sshmgt_vlan_network_ip" {
-  type        = string
-  description = "The ip address of the SSH management VLAN"
-}
-
 ##### Variables with defaults
 
 variable "node_name" {
