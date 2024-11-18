@@ -1,4 +1,4 @@
-ansible_host: piserv
+ansible_host: 192.168.50.2
 ansible_user: pi
 home_dir: /home/pi
 ansible_files_root: /home/pi/ansible-files
