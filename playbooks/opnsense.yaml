@@ -11,6 +11,8 @@
     lan_interface_id: "opt1"
     legacyvlan_interface_id: "opt2"
     config_file_local_path: /tmp/{{ inventory_hostname }}.config.xml
+    piserv_ip: "192.168.50.2"
+    legacy_vm_ip: "10.142.200.10"
   module_defaults:
     group/ansibleguy.opnsense.all:
       ssl_verify: false
@@ -58,14 +60,19 @@
         name: "privateips"
         type: "network"
         content: ["192.168.0.0/16", "172.16.0.0/12", "10.0.0.0/8"]
+    - name: physicallan alias
+      ansibleguy.opnsense.alias:
+        name: "physicallan"
+        type: "network"
+        content: ["192.168.50.0/24"]
     - name: dnsservs alias 
       ansibleguy.opnsense.alias:
         name: "dnsservs"
         type: "host"
-        content: ["192.168.50.1"]
-    - name: localnetworks alias
+        content: ["192.168.50.1", "10.142.1.1"]
+    - name: virtuallan alias
       ansibleguy.opnsense.alias:
-        name: "localnetworks"
+        name: "virtuallan"
         type: "network"
         content: ["10.142.0.0/16"]
     - name: httpnetworks alias
@@ -106,6 +113,18 @@
         destination_net: "dnsservs"
         description: "Legacy VLAN DNS access"
         match_fields: ["description"]
+    - name: Physical LAN DNS access
+      ansibleguy.opnsense.rule:
+        interface: "{{ lan_interface_id }}"
+        source_net: "physicallan"  # host, network, alias or "any"
+        protocol: "{{ item }}"
+        destination_port: "53"
+        destination_net: "dnsservs"
+        description: "Physical LAN -> DNS servers ({{ item }})"
+        match_fields: ["description"]
+      loop:
+        - "TCP"
+        - "UDP"
     - name: ansiblehosts SSH access 
       ansibleguy.opnsense.rule:
         interface: "{{ lan_interface_id }}"
@@ -117,20 +136,46 @@
     - name: LAN/VLAN pings in
       ansibleguy.opnsense.rule:
         interface: ["lan", "opt1", "opt2"]
-        # source_net: "localnetworks"  # host, network, alias or "any"
+        # source_net: "virtuallan"  # host, network, alias or "any"
         protocol: "ICMP"
-        # destination_net: "localnetworks"
+        # destination_net: "virtuallan"
         description: "Allow ping  to all local hosts"
         match_fields: ["description"]
     - name: LAN/VLAN pings out
       ansibleguy.opnsense.rule:
         direction: "out"
         interface: ["lan", "opt1", "opt2"]
-        # source_net: "localnetworks"  # host, network, alias or "any"
+        # source_net: "virtuallan"  # host, network, alias or "any"
         protocol: "ICMP"
-        # destination_net: "localnetworks"
+        # destination_net: "virtuallan"
         description: "Allow ping from all local hosts"
         match_fields: ["description"]
     - name: List rules
       ansibleguy.opnsense.list:
         target: rule
+    # Unbound DNS
+    - name: DNS - whole domain redirected to legacy homserver VM
+      ansibleguy.opnsense.unbound_host:
+        hostname: "*"
+        domain: "staging.home"
+        value: "{{ legacy_vm_ip }}"
+        match_fields: ["description"]
+        description: "whole domain redirected to legacy homserver VM"
+        # record_type: 'A'
+        # prio: 10
+        # state: 'present'
+        # reload: true
+        # enabled: true
+        # debug: false
+    - name: DNS - prod redirected to pi temporarily (until prod DNS implemented)
+      ansibleguy.opnsense.unbound_host:
+        hostname: "*"
+        domain: "home"
+        value: "{{ piserv_ip }}"
+        match_fields: ["description"]
+        description: "prod redirected to pi temporarily (until prod DNS implemented)"
+    - name: Listing
+      ansibleguy.opnsense.list:
+        target: 'unbound_host'
+      register: existing_entries
+
