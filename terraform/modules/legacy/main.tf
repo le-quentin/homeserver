@@ -35,15 +35,15 @@ resource "proxmox_virtual_environment_file" "cloudinit_user" {
         ssh_authorized_keys:
           - ${var.legacy_homeserver_vm.user.ssh_key}
         sudo: ALL=(ALL) NOPASSWD:ALL
-    EOF
     # This could add the qemu guest agent
-    # runcmd:
-    #     - apt update
-    #     - apt install -y qemu-guest-agent net-tools
-    #     - timedatectl set-timezone America/Toronto
-    #     - systemctl enable qemu-guest-agent
-    #     - systemctl start qemu-guest-agent
-    #     - echo "done" > /tmp/cloud-config.done
+    runcmd:
+        - apt update
+        - apt install -y qemu-guest-agent net-tools
+        - timedatectl set-timezone America/Toronto
+        - systemctl enable qemu-guest-agent
+        - systemctl start qemu-guest-agent
+        - echo "done" > /tmp/cloud-config.done
+    EOF
 
     file_name = "cloudinit_user.yaml"
   }
@@ -101,9 +101,9 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
 
   agent {
     # read 'Qemu guest agent' section, change to true only when ready
-    enabled = false
+    enabled = true
   }
   # if agent is not enabled, the VM may not be able to shutdown properly, and may need to be forced off
-  stop_on_destroy = true
+  # stop_on_destroy = true
 
 }
