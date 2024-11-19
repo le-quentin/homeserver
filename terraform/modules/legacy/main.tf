@@ -75,6 +75,10 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
     size         = 20
   }
 
+  usb {
+    host = var.zigbee_dongle_id
+  }
+
   # Legacy VLAN
   network_device {
     bridge  = var.bridge_lan_interface

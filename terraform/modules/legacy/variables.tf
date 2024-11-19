@@ -16,6 +16,10 @@ variable "vm_ids_offset" {
   type = number
 }
 
+variable "zigbee_dongle_id" {
+  type = string
+}
+
 variable "vm_cpu_cores" {
   type    = number
   default = 2

@@ -6,6 +6,7 @@ module "legacy" {
     debian = "local:iso/debian-12-generic-amd64.img"
   }
 
+  zigbee_dongle_id = "10c4:ea60"
   vm_ids_offset = 1000
 
   environment = "staging"
