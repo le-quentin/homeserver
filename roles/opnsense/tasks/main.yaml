@@ -1,0 +1,37 @@
+---
+# tasks file for opnsense
+- name: "Configure aliases"
+  ansibleguy.opnsense.alias:
+    name: "{{ item.name }}"
+    type: "{{ item.type }}"
+    content: "{{ item.content }}"
+  loop: "{{ aliases }}"
+- name: List aliases
+  ansibleguy.opnsense.list:
+    target: alias
+- name: "Configure rules"
+  ansibleguy.opnsense.rule:
+    interface: "{{ item.interface | default(omit) }}"
+    direction: "{{ item.direction | default(omit) }}"
+    protocol: "{{ item.protocol | default(omit) }}"
+    source_net: "{{ item.source_net | default(omit) }}"
+    destination_net: "{{ item.destination_net | default(omit) }}"
+    destination_port: "{{ item.destination_port | default(omit) }}"
+    destination_invert: "{{ item.destination_invert | default(omit) }}"
+    description: "{{ item.description }}"
+    match_fields: "{{ item.match_fields | default([\"description\"]) }}"
+  loop: "{{ rules }}"
+- name: List rules
+  ansibleguy.opnsense.list:
+    target: rule
+- name: "Configure DNS entries"
+  ansibleguy.opnsense.unbound_host:
+    hostname: "{{ item.hostname | default(\"*\") }}"
+    domain: "{{ item.domain }}"
+    value: "{{ item.value }}"
+    description: "{{ item.description }}"
+    match_fields: "{{ item.match_fields | default([\"description\"]) }}"
+  loop: "{{ dns_entries }}"
+- name: List DNS entries
+  ansibleguy.opnsense.list:
+    target: unbound_host

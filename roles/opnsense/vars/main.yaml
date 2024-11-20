@@ -1,0 +1,79 @@
+---
+# TODO erase items not in those lists to get true repeatability
+
+# Aliases
+aliases:
+  - name: "privateips"
+    type: "network"
+    content: ["192.168.0.0/16", "172.16.0.0/12", "10.0.0.0/8"]
+  - name: "physicallan"
+    type: "network"
+    content: ["192.168.50.0/24"]
+  - name: "dnsservs"
+    type: "host"
+    content: ["192.168.50.1", "{{ opnsense_ip }}"]
+  - name: "virtuallan"
+    type: "network"
+    content: ["{{ virtuallan_cidr_ip }}"]
+  - name: "httpnetworks"
+    type: "network"
+    content: "{{ httpnetworks_cidr_ips }}"
+  - name: "ansiblehosts"
+    type: "host"
+    content: "{{ ansiblehosts_ips }}"
+
+rules:
+
+  - description: "Legacy VLAN internet access"
+    interface: "{{ legacyvlan_interface_id }}"
+    destination_net: "privateips"
+    destination_invert: true
+
+  - description: "Legacy VLAN HTTP access"
+    interface: "{{ lan_interface_id }}"
+    protocol: "TCP"
+    destination_net: "httpnetworks"
+    destination_port: "http"
+
+  - description: "Legacy VLAN DNS access"
+    interface: "{{ legacyvlan_interface_id }}"
+    destination_net: "dnsservs"
+
+  - description: "Physical LAN -> DNS servers (TCP)"
+    interface: "{{ lan_interface_id }}"
+    source_net: "physicallan"  # host, network, alias or "any"
+    protocol: "TCP"
+    destination_port: "53"
+    destination_net: "dnsservs"
+
+  - description: "Physical LAN -> DNS servers (UDP)"
+    interface: "{{ lan_interface_id }}"
+    source_net: "physicallan"  # host, network, alias or "any"
+    protocol: "UDP"
+    destination_port: "53"
+    destination_net: "dnsservs"
+
+  - description: "ansiblehosts SSH access"
+    interface: "{{ lan_interface_id }}"
+    protocol: "TCP"
+    destination_net: "ansiblehosts"
+    destination_port: "ssh"
+
+  - description: "Allow ping to all local hosts"
+    interface: ["lan", "opt1", "opt2"]
+    protocol: "ICMP"
+
+  - description: "Allow ping from all local hosts"
+    direction: "out"
+    interface: ["lan", "opt1", "opt2"]
+    protocol: "ICMP"
+
+dns_entries:
+
+  - domain: "staging.home"
+    value: "{{ legacy_vm_ip }}"
+    description: "whole domain redirected to legacy homserver VM"
+
+  - domain: "home"
+    value: "{{ piserv_ip }}"
+    description: "prod redirected to pi temporarily (until prod DNS implemented)"

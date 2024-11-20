@@ -1,3 +1,12 @@
+opnsense_ip: "10.142.1.1"
+legacy_vm_ip: "10.142.200.10"
+piserv_ip: "192.168.50.2"
+virtuallan_cidr_ip: "10.142.0.0/16"
+httpnetworks_cidr_ips: 
+  - "10.142.200.0/24"
+ansiblehosts_ips:
+  - "10.142.200.10"
+
 interfaces:
   wan:
     if: vtnet0

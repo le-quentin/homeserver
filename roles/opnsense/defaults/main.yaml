@@ -1,0 +1,6 @@
+---
+# defaults file for opnsense
+lan_interface_device: "vtnet2"
+lan_interface_id: "opt1"
+legacyvlan_interface_id: "opt2"
+config_file_local_path: /tmp/{{ inventory_hostname }}.config.xml
