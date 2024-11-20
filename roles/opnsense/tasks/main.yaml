@@ -1,4 +1,8 @@
 ---
+- name: Include all roles vars 
+  include_vars: "{{ item }}"
+  with_fileglob:
+    - "./vars/*"
 # tasks file for opnsense
 - name: Configure aliases
   ansibleguy.opnsense.alias_multi:

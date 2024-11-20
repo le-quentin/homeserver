@@ -1,0 +1,10 @@
+---
+dns_entries:
+
+  - domain: "staging.home"
+    value: "{{ legacy_vm_ip }}"
+    description: "whole domain redirected to legacy homserver VM"
+
+  - domain: "home"
+    value: "{{ piserv_ip }}"
+    description: "prod redirected to pi temporarily (until prod DNS implemented)"

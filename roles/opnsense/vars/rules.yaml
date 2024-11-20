@@ -1,25 +1,4 @@
 ---
-# Aliases
-aliases:
-  privateips:
-    type: "network"
-    content: ["192.168.0.0/16", "172.16.0.0/12", "10.0.0.0/8"]
-  physicallan:
-    type: "network"
-    content: ["192.168.50.0/24"]
-  dnsservs:
-    type: "host"
-    content: ["192.168.50.1", "{{ opnsense_ip }}"]
-  virtuallan:
-    type: "network"
-    content: ["{{ virtuallan_cidr_ip }}"]
-  httpnetworks:
-    type: "network"
-    content: "{{ httpnetworks_cidr_ips }}"
-  ansiblehosts:
-    type: "host"
-    content: "{{ ansiblehosts_ips }}"
-
 rules:
 
   1:
@@ -73,13 +52,3 @@ rules:
     direction: "out"
     interface: ["lan", "opt1", "opt2"]
     protocol: "ICMP"
-
-dns_entries:
-
-  - domain: "staging.home"
-    value: "{{ legacy_vm_ip }}"
-    description: "whole domain redirected to legacy homserver VM"
-
-  - domain: "home"
-    value: "{{ piserv_ip }}"
-    description: "prod redirected to pi temporarily (until prod DNS implemented)"
