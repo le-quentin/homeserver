@@ -7,32 +7,7 @@ httpnetworks_cidr_ips:
 ansiblehosts_ips:
   - "10.142.200.10"
 
-interfaces:
-  wan:
-    if: vtnet0
-    descr: WAN
-    enable: 1
-    spoofmac: ""
-    ipaddr: "192.168.50.142"
-    subnet: 24
-  lan:
-    if: vtnet1
-    descr: mgtLAN
-    enable: 1
-    spoofmac: ""
-    ipaddr: "10.143.1.1"
-    subnet: 16
-  opt1:
-    if: vtnet2
-    descr: LAN
-    enable: 1
-    spoofmac: ""
-    ipaddr: "10.142.1.1"
-    subnet: 16
-  opt2:
-    if: vlan0.200
-    descr: legacyVLAN
-    enable: 1
-    spoofmac: ""
-    ipaddr: "10.142.200.1"
-    subnet: 24
+wan_interface_ip: "192.168.50.142"
+mgtlan_interface_ip: "10.143.1.1"
+lan_interface_ip: "10.142.1.1"
+legacy_vlan_interface_ip: "10.142.200.1"

@@ -25,36 +25,6 @@
         description: "Legacy network, with all containers deployed on the same host"
         interface: "{{ lan_interface_device }}"
         vlan: 200
-    # interfaces assignment
-    - name: Import interfaces config file from host
-      connection: ssh
-      ansible.builtin.fetch:
-        src: /conf/config.xml
-        dest: "{{ config_file_local_path }}"
-        flat: yes
-      vars:
-        ansible_python_interpreter: /usr/local/bin/python3
-    # TODO turn into a role with proper defaults etc
-    - include_tasks: tasks/setup-firewall-interface.yaml
-      loop: "{{ interfaces | dict2items }}"
-      loop_control:
-        loop_var: interface
-    # TODO make backup conf file
-    - name: Update interfaces config file
-      connection: ssh
-      become: yes
-      copy:
-        src: "{{ config_file_local_path }}"
-        dest: /conf/config.xml
-      vars:
-        ansible_python_interpreter: /usr/local/bin/python3
-      register: ifconfig
-      # Test if really needed
-    - name: Reboot to parse new config
-      ansibleguy.opnsense.system:
-        action: reboot
-      when: ifconfig.changed
-    
     - name: opnsense role
       include_role:
         name: "../roles/opnsense"
