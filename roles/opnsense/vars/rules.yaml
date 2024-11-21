@@ -3,25 +3,25 @@ rules:
 
   1:
     description: "Legacy VLAN internet access"
-    interface: "{{ legacyvlan_interface_id }}"
+    interface: "{{ interfaces.legacyVLAN.name }}"
     destination_net: "privateips"
     destination_invert: true
 
   2:
     description: "Legacy VLAN HTTP access"
-    interface: "{{ lan_interface_id }}"
+    interface: "{{ interfaces.servicesLAN.name }}"
     protocol: "TCP"
     destination_net: "httpnetworks"
     destination_port: "http"
 
   3:
     description: "Legacy VLAN DNS access"
-    interface: "{{ legacyvlan_interface_id }}"
+    interface: "{{ interfaces.legacyVLAN.name }}"
     destination_net: "dnsservs"
 
   4:
     description: "Physical LAN -> DNS servers (TCP)"
-    interface: "{{ lan_interface_id }}"
+    interface: "{{ interfaces.servicesLAN.name }}"
     source_net: "physicallan"  # host, network, alias or "any"
     protocol: "TCP"
     destination_port: "53"
@@ -29,7 +29,7 @@ rules:
 
   5:
     description: "Physical LAN -> DNS servers (UDP)"
-    interface: "{{ lan_interface_id }}"
+    interface: "{{ interfaces.servicesLAN.name }}"
     source_net: "physicallan"  # host, network, alias or "any"
     protocol: "UDP"
     destination_port: "53"
@@ -37,7 +37,7 @@ rules:
 
   6:
     description: "ansiblehosts SSH access"
-    interface: "{{ lan_interface_id }}"
+    interface: "{{ interfaces.servicesLAN.name }}"
     protocol: "TCP"
     destination_net: "ansiblehosts"
     destination_port: "ssh"

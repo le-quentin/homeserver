@@ -6,13 +6,6 @@
   hosts: opnsenseservs
   connection: local # Run from the control node (=this machine)
   gather_facts: no # No point in gathering facts on the local machine
-  vars:
-    lan_interface_device: "vtnet2"
-    lan_interface_id: "opt1"
-    legacyvlan_interface_id: "opt2"
-    config_file_local_path: /tmp/{{ inventory_hostname }}.config.xml
-    piserv_ip: "192.168.50.2"
-    legacy_vm_ip: "10.142.200.10"
   module_defaults:
     group/ansibleguy.opnsense.all:
       ssl_verify: false

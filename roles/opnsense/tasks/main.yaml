@@ -7,7 +7,7 @@
 - name: Create legacy VLAN
   ansibleguy.opnsense.interface_vlan:
     description: "Legacy network, with all containers deployed on the same host"
-    interface: "{{ lan_interface_device }}"
+    interface: "{{ interfaces.servicesLAN.xml_config.if }}"
     vlan: 200
 
 - name: Import interfaces config file from host
