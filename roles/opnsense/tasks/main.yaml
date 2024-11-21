@@ -52,12 +52,12 @@
   ansibleguy.opnsense.rule_multi:
     key_field: "sequence"
     match_fields: ["description"]
-    rules: "{{ rules }}"
+    rules: "{{ rules | combine(additional_rules | default({})) }}"
 - name: Purge all non-configured rules
   ansibleguy.opnsense.rule_purge:
     key_field: "sequence"
     match_fields: ["description"]
-    rules: "{{ rules }}"
+    rules: "{{ rules | combine(additional_rules | default({})) }}"
 - name: List rules
   ansibleguy.opnsense.list:
     target: rule

@@ -11,3 +11,15 @@ wan_interface_ip: "192.168.50.142"
 mgtlan_interface_ip: "10.143.1.1"
 lan_interface_ip: "10.142.1.1"
 legacy_vlan_interface_ip: "10.142.200.1"
+
+additional_rules:
+  101:
+    description: "Allow ping to all local hosts"
+    interface: ["lan", "opt1", "opt2"]
+    protocol: "ICMP"
+
+  102:
+    description: "Allow ping from all local hosts"
+    direction: "out"
+    interface: ["lan", "opt1", "opt2"]
+    protocol: "ICMP"

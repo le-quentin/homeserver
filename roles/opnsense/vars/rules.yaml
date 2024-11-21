@@ -41,14 +41,3 @@ rules:
     protocol: "TCP"
     destination_net: "ansiblehosts"
     destination_port: "ssh"
-
-  7:
-    description: "Allow ping to all local hosts"
-    interface: ["lan", "opt1", "opt2"]
-    protocol: "ICMP"
-
-  8:
-    description: "Allow ping from all local hosts"
-    direction: "out"
-    interface: ["lan", "opt1", "opt2"]
-    protocol: "ICMP"
