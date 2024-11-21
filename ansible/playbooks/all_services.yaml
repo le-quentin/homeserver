@@ -1,4 +1,3 @@
-- import_playbook: "./opnsense.yaml"
 - import_playbook: "./backups.yaml"
 - import_playbook: "./zigbee2mqtt.yaml"
 - import_playbook: "./home-assistant.yaml"
