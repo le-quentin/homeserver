@@ -1,3 +1,0 @@
----
-# defaults file for opnsense
-config_file_local_path: /tmp/{{ inventory_hostname }}.config.xml

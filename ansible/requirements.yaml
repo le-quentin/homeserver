@@ -1,3 +1,2 @@
 collections:
   - name: prometheus.prometheus
-  - name: ansibleguy.opnsense

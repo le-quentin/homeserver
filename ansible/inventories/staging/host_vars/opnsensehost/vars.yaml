@@ -1,2 +1,0 @@
-ansible_host: 10.143.1.1 # Virtual management LAN, route setup in phyisical router
-ansible_user: ansible
