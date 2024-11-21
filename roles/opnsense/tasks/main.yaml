@@ -4,6 +4,12 @@
   with_fileglob:
     - "./vars/*"
 
+- name: Create legacy VLAN
+  ansibleguy.opnsense.interface_vlan:
+    description: "Legacy network, with all containers deployed on the same host"
+    interface: "{{ lan_interface_device }}"
+    vlan: 200
+
 - name: Import interfaces config file from host
   connection: ssh
   ansible.builtin.fetch:

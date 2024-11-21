@@ -20,11 +20,6 @@
       api_key: "{{ opnsense_api_key }}"
       api_secret: "{{ opnsense_api_secret }}"
   tasks:
-    - name: Create legacy VLAN
-      ansibleguy.opnsense.interface_vlan:
-        description: "Legacy network, with all containers deployed on the same host"
-        interface: "{{ lan_interface_device }}"
-        vlan: 200
     - name: opnsense role
       include_role:
         name: "../roles/opnsense"
