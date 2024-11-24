@@ -63,9 +63,10 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
     ip_config {
       ipv4 {
         address = var.legacy_homeserver_vm.address
-        gateway = var.legacy_vlan_network_ip
+        gateway = var.bridge_lan_network_ip
       }
     }
+
   }
 
   disk {
@@ -79,10 +80,9 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
     host = var.zigbee_dongle_id
   }
 
-  # Legacy VLAN
   network_device {
     bridge  = var.bridge_lan_interface
-    vlan_id = 200
+    firewall = true
   }
 
   operating_system {
@@ -105,5 +105,46 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
   }
   # if agent is not enabled, the VM may not be able to shutdown properly, and may need to be forced off
   # stop_on_destroy = true
+
+}
+
+resource "proxmox_virtual_environment_firewall_options" "legacy_homeserver_vm_firewall_options" {
+  depends_on = [proxmox_virtual_environment_vm.legacy_homeserver_vm]
+
+  node_name = proxmox_virtual_environment_vm.legacy_homeserver_vm.node_name
+  vm_id     = proxmox_virtual_environment_vm.legacy_homeserver_vm.vm_id
+
+  enabled       = true
+  input_policy  = "DROP"
+  output_policy = "ACCEPT"
+}
+
+resource "proxmox_virtual_environment_firewall_rules" "legacy_vm_firewall_rules" {
+  depends_on = [
+    proxmox_virtual_environment_vm.legacy_homeserver_vm
+  ]
+
+  node_name = proxmox_virtual_environment_vm.legacy_homeserver_vm.node_name
+  vm_id     = proxmox_virtual_environment_vm.legacy_homeserver_vm.vm_id
+
+  rule {
+    security_group = "${var.environment}-ssh"
+    iface          = "net0"
+  }
+
+  rule {
+    security_group = "${var.environment}-http"
+    iface          = "net0"
+  }
+
+  rule {
+    security_group = "${var.environment}-https"
+    iface          = "net0"
+  }
+
+  rule {
+    security_group = "${var.environment}-icmp"
+    iface          = "net0"
+  }
 
 }

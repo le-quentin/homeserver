@@ -18,16 +18,6 @@ variable "bridge_lan_cidr_ip" {
   description = "The ip address of the network for the the global bridge LAN"
 }
 
-variable "bridge_mgtlan_name" {
-  type        = string
-  description = "The name of the network interface for the management bridge LAN"
-}
-
-variable "bridge_mgtlan_cidr_ip" {
-  type        = string
-  description = "The ip address of the network interface for the management bridge LAN"
-}
-
 ##### Variables with defaults
 
 variable "node_name" {

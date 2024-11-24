@@ -46,11 +46,6 @@ variable "bridge_lan_network_ip" {
   description = "The ip address of the network for the the global bridge LAN"
 }
 
-variable "legacy_vlan_network_ip" {
-  type        = string
-  description = "The ip address of the legacy VLAN"
-}
-
 ##### Variables with defaults
 
 variable "node_name" {

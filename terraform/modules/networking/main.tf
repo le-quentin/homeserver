@@ -18,16 +18,5 @@ resource "proxmox_virtual_environment_network_linux_bridge" "bridge_lan" {
   name      = var.bridge_lan_name
   address   = var.bridge_lan_cidr_ip
   comment   = "${var.environment} global LAN"
-
-  vlan_aware = true
-}
-
-resource "proxmox_virtual_environment_network_linux_bridge" "bridge_mgtlan" {
-  node_name = var.node_name
-  name      = var.bridge_mgtlan_name
-  address   = var.bridge_mgtlan_cidr_ip
-  comment   = "${var.environment} web management (firewall web GUIs)"
-
-  vlan_aware = true
 }
 
