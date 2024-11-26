@@ -10,6 +10,7 @@ terraform {
 variable "dns_vm" {
   type = object({
     address = string
+    cidr_address = string
     user = object({
       ssh_key  = string
       username = string
@@ -61,7 +62,7 @@ resource "proxmox_virtual_environment_vm" "dns_vm" {
 
     ip_config {
       ipv4 {
-        address = var.dns_vm.address
+        address = var.dns_vm.cidr_address
         gateway = var.bridge_lan_network_ip
       }
     }
@@ -144,4 +145,17 @@ resource "proxmox_virtual_environment_firewall_rules" "dns_vm_firewall_rules" {
     iface          = "net0"
   }
 
+}
+
+resource "proxmox_virtual_environment_dns" "first_node_dns_configuration" {
+  count = var.main_dns == true ? 1 : 0
+  depends_on = [proxmox_virtual_environment_vm.dns_vm]
+
+  domain    = "bonnet-lan"
+  node_name = var.node_name
+
+  servers = [
+    var.dns_vm.address,
+    "8.8.4.4",
+  ]
 }

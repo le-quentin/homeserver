@@ -56,3 +56,8 @@ variable "disk_storage" {
   default     = "local-lvm"
 }
 
+variable "main_dns" {
+  type = bool
+  description = "Should this be used as the primary Proxmox DNS"
+  default = false
+}

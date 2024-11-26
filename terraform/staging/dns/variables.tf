@@ -4,6 +4,12 @@ variable "dns_vm_address" {
   sensitive   = true
 }
 
+variable "dns_vm_cidr_suffix" {
+  type        = string
+  description = "Suffix of the CIDR notation for the DNS VM IP (= number of bits dedicated to the subnet)"
+  sensitive   = true
+}
+
 variable "dns_vm_ssh_key" {
   type        = string
   description = "Public key for SSH connection to DNS VM"

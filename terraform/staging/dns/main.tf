@@ -19,7 +19,8 @@ module "dns" {
   bridge_lan_network_ip = "10.142.1.1"
 
   dns_vm = {
-    address = var.dns_vm_address
+    address      = var.dns_vm_address
+    cidr_address = "${var.dns_vm_address}/${var.dns_vm_cidr_suffix}"
     user = {
       ssh_key  = var.dns_vm_ssh_key
       username = var.dns_vm_username
