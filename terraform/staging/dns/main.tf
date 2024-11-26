@@ -21,6 +21,7 @@ module "dns" {
   dns_vm = {
     address      = var.dns_vm_address
     cidr_address = "${var.dns_vm_address}/${var.dns_vm_cidr_suffix}"
+    disk_size    = 10
     user = {
       ssh_key  = var.dns_vm_ssh_key
       username = var.dns_vm_username

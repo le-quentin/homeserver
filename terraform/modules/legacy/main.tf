@@ -9,9 +9,9 @@ terraform {
 
 variable "legacy_homeserver_vm" {
   type = object({
-    address = string
-    dns = string
-    disk_size = string
+    address   = string
+    dns       = string
+    disk_size = number
     user = object({
       ssh_key  = string
       username = string

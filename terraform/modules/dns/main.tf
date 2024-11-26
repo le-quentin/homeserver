@@ -9,8 +9,9 @@ terraform {
 
 variable "dns_vm" {
   type = object({
-    address = string
+    address      = string
     cidr_address = string
+    disk_size    = number
     user = object({
       ssh_key  = string
       username = string
@@ -74,7 +75,7 @@ resource "proxmox_virtual_environment_vm" "dns_vm" {
     datastore_id = var.disk_storage
     file_id      = var.images.debian
     interface    = "scsi0"
-    size         = 10
+    size         = var.dns_vm.disk_size
   }
 
   network_device {
@@ -149,7 +150,7 @@ resource "proxmox_virtual_environment_firewall_rules" "dns_vm_firewall_rules" {
 }
 
 resource "proxmox_virtual_environment_dns" "first_node_dns_configuration" {
-  count = var.main_dns == true ? 1 : 0
+  count      = var.main_dns == true ? 1 : 0
   depends_on = [proxmox_virtual_environment_vm.dns_vm]
 
   domain    = "bonnet-lan"

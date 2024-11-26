@@ -57,7 +57,7 @@ variable "disk_storage" {
 }
 
 variable "main_dns" {
-  type = bool
+  type        = bool
   description = "Should this be used as the primary Proxmox DNS"
-  default = false
+  default     = false
 }
