@@ -1,1 +1,3 @@
 homeserver_domain: staging.home
+dns_ip: 10.142.1.2
+legacy_server_ip: 10.142.1.200
