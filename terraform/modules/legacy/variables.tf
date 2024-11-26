@@ -25,12 +25,12 @@ variable "vm_cpu_cores" {
   default = 2
 }
 
-variable "vm_cpu_dedicated_memory" {
+variable "vm_dedicated_memory" {
   type    = number
   default = 2048
 }
 
-variable "vm_cpu_floating_memory" {
+variable "vm_floating_memory" {
   type        = number
   description = "Set equal to dedicated to enable ballooning"
   default     = 2048

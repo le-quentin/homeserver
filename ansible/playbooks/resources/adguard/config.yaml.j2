@@ -154,8 +154,6 @@ filtering:
       answer: {{ dns_ip }}
     - domain: '*.{{ homeserver_domain }}'
       answer: {{ legacy_server_ip }}
-    - domain: '*.home'
-      answer: 192.168.50.2
   safe_fs_patterns:
     - /opt/adguardhome/work/userfilters/*
   safebrowsing_cache_size: 1048576

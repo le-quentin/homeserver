@@ -9,7 +9,7 @@ terraform {
 
 # Done here for now because networking is probably the very first thing to setup, so this will be run first
 resource "proxmox_virtual_environment_pool" "pool" {
-  comment = "Staging environment pool"
+  comment = "${var.environment} environment pool"
   pool_id = var.pool
 }
 

@@ -105,8 +105,8 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
   }
 
   memory {
-    dedicated = var.vm_cpu_dedicated_memory
-    floating  = var.vm_cpu_floating_memory # set equal to dedicated to enable ballooning
+    dedicated = var.vm_dedicated_memory
+    floating  = var.vm_floating_memory # set equal to dedicated to enable ballooning
   }
 
   agent {
