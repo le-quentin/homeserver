@@ -5,18 +5,18 @@ module "dns" {
   images = {
     debian = "local:iso/debian-12-generic-amd64.img"
   }
-  
+
   vm_dedicated_memory = 1024
-  vm_floating_memory = 1024
-  
+  vm_floating_memory  = 1024
+
   vm_ids_offset = 1000
 
   environment = "staging"
   pool        = "staging"
 
   //TODO use local datasource to communicate module outputs (https://developer.hashicorp.com/terraform/language/backend/local)
-  bridge_lan_interface   = "vmbr1001"
-  bridge_lan_network_ip  = "10.142.1.1"
+  bridge_lan_interface  = "vmbr1001"
+  bridge_lan_network_ip = "10.142.1.1"
 
   dns_vm = {
     address = var.dns_vm_address

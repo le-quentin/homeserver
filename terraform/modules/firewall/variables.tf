@@ -13,6 +13,6 @@ variable "pool" {
 variable "icmp_enabled" {
   type        = string
   description = "Does the icmp security group actually open icmp"
-  default = false
+  default     = false
 }
 

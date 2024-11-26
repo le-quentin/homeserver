@@ -7,14 +7,14 @@ module "legacy" {
   }
 
   zigbee_dongle_id = "10c4:ea60"
-  vm_ids_offset = 1000
+  vm_ids_offset    = 1000
 
   environment = "staging"
   pool        = "staging"
 
   //TODO use local datasource to communicate module outputs (https://developer.hashicorp.com/terraform/language/backend/local)
-  bridge_lan_interface   = "vmbr1001"
-  bridge_lan_network_ip  = "10.142.1.1"
+  bridge_lan_interface  = "vmbr1001"
+  bridge_lan_network_ip = "10.142.1.1"
 
   legacy_homeserver_vm = {
     address = var.legacy_homeserver_address

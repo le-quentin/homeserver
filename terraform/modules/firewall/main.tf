@@ -73,3 +73,16 @@ resource "proxmox_virtual_environment_cluster_firewall_security_group" "https" {
   }
 }
 
+resource "proxmox_virtual_environment_cluster_firewall_security_group" "dns" {
+  name    = "${var.environment}-dns"
+  comment = "DNS servs"
+
+  rule {
+    type    = "in"
+    action  = "ACCEPT"
+    comment = "DNS servs"
+    macro   = "DNS"
+    log     = "info"
+  }
+}
+

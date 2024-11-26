@@ -76,7 +76,7 @@ resource "proxmox_virtual_environment_vm" "dns_vm" {
   }
 
   network_device {
-    bridge  = var.bridge_lan_interface
+    bridge   = var.bridge_lan_interface
     firewall = true
   }
 
@@ -136,6 +136,11 @@ resource "proxmox_virtual_environment_firewall_rules" "dns_vm_firewall_rules" {
 
   rule {
     security_group = "${var.environment}-icmp"
+    iface          = "net0"
+  }
+
+  rule {
+    security_group = "${var.environment}-dns"
     iface          = "net0"
   }
 

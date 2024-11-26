@@ -81,7 +81,7 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
   }
 
   network_device {
-    bridge  = var.bridge_lan_interface
+    bridge   = var.bridge_lan_interface
     firewall = true
   }
 
