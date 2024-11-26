@@ -16,6 +16,7 @@
         state: restarted
       when: systemd_resolved_conf.changed
     - name: Ensure work and conf folders exist
+      become: yes
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory

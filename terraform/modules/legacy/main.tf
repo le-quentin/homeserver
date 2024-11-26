@@ -67,6 +67,14 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
       }
     }
 
+    dns {
+      domain = "bonnet-lan"
+      servers = [
+        "10.142.1.2",
+        "1.1.1.1"
+      ]
+    }
+
   }
 
   disk {
