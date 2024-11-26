@@ -5,77 +5,70 @@
 This is a long living DIY homeserver project that I build over the years in my spare time. My end goal is to replace most of my third-party cloud dependencies (Spotify, Netflix, Newsfeeds...) by self-hosted, open source alternatives. I'd also like to try some smart home solutions.
 
 This is the IaC repository for said homeserver, currently using:
-- Terraform for insfrastructure provisionning (VMs in Proxmox host)
-- Ansible for infrastructure configuration and services setup
+- Terraform for infrastructure provisioning (actually, its 100% open source fork OpenTofu)
+- Ansible for infrastructure deployment and setup
 - [git-crypt](https://github.com/AGWA/git-crypt) for secrets encryption
 - [gitleaks](https://github.com/gitleaks/gitleaks) to detect secrets possibly slipping through the net
 
-Currently, the Terraform states are stored in local files that are pushed after being git-crypted. It's definitely not best practice, but it's enough for my current needs and to start experimenting with Terraform.
-
-## Requirements
-
-Requirements on the host:
-- Proxmox installed
-- SSH user/password connection enabled (would be better to not rely on that in the long run)
-
-Then, from the control node (typically linux laptop):
+Requirements:
+- Install OpenTofu (1.8.2+)
 - Install Ansible (2.16.2+) 
-- Install OpenTofu (1.8.2+), a truly open source Terraform fork
 - Install git-crypt
 - Make sure you have the GPG key in your keyring (passwords are encrypted via git-crypt)
 
-Then, unlock the repository's secrets with:
+Unlock the repository's secrets with:
 
 ```sh
 git-crypt unlock
 ```
+## Initial setup
 
-Install the Ansible dependencies (in the relevant python venv)
+Install ProxmoxVE on the host.
+
+SSH into it and disable ipv6 (reduce attack surface):
+```sh
+vi /etc/default/grub
+```
+Add `ipv6.disable=1` to the end of `GRUB_CMDLINE_LINUX_DEFAULT` and `GRUB_CMDLINE_LINUX` line. Don't change the other values at those lines.
 
 ```sh
-cd ./ansible
-pip install -r requirements.txt
-ansible-galaxy install -r requirements.yml
+update-grub
 ```
 
-## How to install
+Then reboot. Check ipv6 addresses are not shown anymore with `ip a`.
 
-i.e. in staging env.
+## Provisioning
 
-Deploy the infrastructure:
+i.e. in staging
 
 ```sh
-cd ./terraform/staging/downloads
+cd terraform/staging/downloads
+tofu init
 tofu apply
 cd ../networking
+tofu init
 tofu apply
-cd ../opnsense
+cd ../dns
+tofu init
 tofu apply
-```
-
-In a dedicated ansible terminal (where you enabled the relevant python venv)
-(If there are errors, debug will be easier with the -v(erbose) option)
-
-```sh
-cd ./ansible
-ansible-playbook -i inventories/staging playbooks/opnsense.yaml
-```
-
-From the Terraform terminal, deploy the services infrastructure:
-
-```sh
 cd ../legacy
+tofu init
 tofu apply
 ```
 
-One last thing that is not automated (and I'm not sure to automate it because I'm not 100% sure after the network desing yest). Ssh into the proxmox host and configure the route to staging infra:
+## Deployment
+
+Then, install the dependencies and run the overall playbook, i.e. in staging:
 ```sh
-ip route replace 10.142.0.0/16 dev vmbr1001 via 10.142.1.1 
+cd ansible
+ansible-galaxy install -r requirements.yaml
+ansible-playbook -i inventories/staging playbooks/all.yaml
 ```
 
-Finally, from the Ansible Terminal, configure all services:
-```sh
-ansible-playbook -i inventories/staging playbooks/all_services.yaml
-```
+If there are errors, debug will be easier with the -v(erbose) option.
 
-Then, if you wanna reach the staging env from your local machine, add the 10.142.1.1 router to your local /etc/resolv.conf
+## TODO
+
+- [ ] Logstash for log aggregation and Kibana for reading logs in web UI
+- And many more things I'll list soon
+
