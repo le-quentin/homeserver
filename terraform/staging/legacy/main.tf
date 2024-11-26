@@ -17,7 +17,9 @@ module "legacy" {
   bridge_lan_network_ip = "10.142.1.1"
 
   legacy_homeserver_vm = {
-    address = var.legacy_homeserver_address
+    address   = var.legacy_homeserver_address
+    disk_size = 20
+    dns       = "10.142.1.2"
     user = {
       ssh_key  = var.legacy_homeserver_ssh_key
       username = var.legacy_homeserver_username

@@ -10,6 +10,8 @@ terraform {
 variable "legacy_homeserver_vm" {
   type = object({
     address = string
+    dns = string
+    disk_size = string
     user = object({
       ssh_key  = string
       username = string
@@ -70,7 +72,7 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
     dns {
       domain = "bonnet-lan"
       servers = [
-        "10.142.1.2",
+        var.legacy_homeserver_vm.dns,
         "1.1.1.1"
       ]
     }
@@ -81,7 +83,7 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
     datastore_id = var.disk_storage
     file_id      = var.images.debian
     interface    = "scsi0"
-    size         = 20
+    size         = var.legacy_homeserver_vm.disk_size
   }
 
   usb {

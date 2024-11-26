@@ -49,6 +49,7 @@ resource "proxmox_virtual_environment_file" "dns_vm_cloudinit_user" {
     file_name = "dns_vm_cloudinit_user.yaml"
   }
 }
+
 resource "proxmox_virtual_environment_vm" "dns_vm" {
   name        = "adguard-dns"
   node_name   = var.node_name
