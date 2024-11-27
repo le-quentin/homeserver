@@ -41,7 +41,7 @@ resource "proxmox_virtual_environment_file" "cloudinit_user" {
     runcmd:
         - apt update
         - apt install -y qemu-guest-agent net-tools
-        - timedatectl set-timezone America/Toronto
+        - timedatectl set-timezone Europe/Paris
         - systemctl enable qemu-guest-agent
         - systemctl start qemu-guest-agent
         - echo "done" > /tmp/cloud-config.done
@@ -49,6 +49,11 @@ resource "proxmox_virtual_environment_file" "cloudinit_user" {
 
     file_name = "cloudinit_user.yaml"
   }
+}
+
+resource "proxmox_virtual_environment_time" "node_time" {
+  node_name = var.node_name
+  time_zone = "CET"
 }
 
 resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {

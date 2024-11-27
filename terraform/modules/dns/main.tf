@@ -41,7 +41,7 @@ resource "proxmox_virtual_environment_file" "dns_vm_cloudinit_user" {
     runcmd:
         - apt update
         - apt install -y qemu-guest-agent net-tools
-        - timedatectl set-timezone America/Toronto
+        - timedatectl set-timezone Europe/Paris
         - systemctl enable qemu-guest-agent
         - systemctl start qemu-guest-agent
         - echo "done" > /tmp/cloud-config.done

@@ -69,6 +69,7 @@ If there are errors, debug will be easier with the -v(erbose) option.
 
 ## TODO
 
+- [ ] Use Packer to produce base linux image with Docker and initial setup
 - [ ] Logstash for log aggregation and Kibana for reading logs in web UI
 - And many more things I'll list soon
 
