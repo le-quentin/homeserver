@@ -18,9 +18,16 @@ serial:
 frontend:
     url: {{ zigbee2mqtt_frontend_url }}
     port: 8080
-# Let Zigbee2MQTT generate a new network key on first start
 advanced:
+    # Let Zigbee2MQTT generate a new network key on first start
     network_key: GENERATE
+    # Don't spam DB with attributes
+    homeassistant_legacy_entity_attributes: false
+	
+# Don't spam DB with attributes
+homeassistant:
+  legacy_entity_attributes: false
+
 
 # Parts of the config in other files
 devices: devices.yaml

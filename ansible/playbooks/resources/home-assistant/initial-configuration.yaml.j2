@@ -16,6 +16,26 @@ homeassistant:
 logger:
   default: info
 
+recorder:
+  purge_keep_days: 7
+  auto_purge: true
+  auto_repack: true
+  # Maybe someday do something like this if DB gets too huge
+  # include:
+  #   domains:
+  #     - sensor
+  #   entity_globs:
+  #     - sensor.*linkquality
+  #     - sensor.*battery
+  #
+  #     - sensor.*temperature
+  #     - sensor.*humidity
+  #
+  #     - sensor.*current
+  #     - sensor.*energy
+  #     - sensor.*power
+  #     - sensor.*voltage
+
 http:
   use_x_forwarded_for: true     # To ensure HA understands that client requests come via reverse proxy
   trusted_proxies:
