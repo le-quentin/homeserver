@@ -69,8 +69,7 @@ If there are errors, debug will be easier with the -v(erbose) option.
 
 ## TODO
 
-- [ ] Setup the Home-Assistant recorder, to control what's stored for how long
-- [ ] Migrate Home-Assistant DB to MySQL
+- [x] Setup the Home-Assistant recorder, to control what's stored for how long
 - [ ] Use Packer to produce base linux image with Docker and initial setup
 - [ ] Logstash for log aggregation and Kibana for reading logs in web UI
 - And many more things I'll list soon
