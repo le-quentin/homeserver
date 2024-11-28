@@ -13,6 +13,9 @@ scene: !include scenes.yaml
 homeassistant:
   internal_url: http://assistant.{{ homeserver_domain }}
 
+logger:
+  default: info
+
 http:
   use_x_forwarded_for: true     # To ensure HA understands that client requests come via reverse proxy
   trusted_proxies:
