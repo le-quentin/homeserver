@@ -3,7 +3,7 @@ services:
     container_name: adguard-home
     labels:
       - homeserver.container-category=service
-      - docker-volume-backup.stop-during-backup=true
+      - docker-volume-backup.stop-during-backup=adguard
     image: "adguard/adguardhome:v0.107.54"
     restart: unless-stopped
     volumes:

@@ -4,7 +4,7 @@ services:
     container_name: mqtt
     labels:
       - homeserver.container-category=service
-      - docker-volume-backup.stop-during-backup=true
+      - docker-volume-backup.stop-during-backup=mosquitto
     image: eclipse-mosquitto:2.0
     restart: unless-stopped
     volumes:
@@ -20,7 +20,7 @@ services:
     container_name: zigbee2mqtt
     labels:
       - homeserver.container-category=service
-      - docker-volume-backup.stop-during-backup=true
+      - docker-volume-backup.stop-during-backup=zigbee2mqtt
     restart: unless-stopped
     image: koenkk/zigbee2mqtt:1.40.2
     volumes:

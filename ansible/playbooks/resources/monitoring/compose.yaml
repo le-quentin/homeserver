@@ -22,7 +22,7 @@ services:
     container_name: prometheus
     labels:
       - homeserver.container-category=monitoring
-      - docker-volume-backup.stop-during-backup=true
+      - docker-volume-backup.stop-during-backup=prometheus
     image: prom/prometheus:v2.45.3
     restart: unless-stopped
     ports:

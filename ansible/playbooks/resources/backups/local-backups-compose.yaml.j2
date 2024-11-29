@@ -13,6 +13,8 @@ services:
     entrypoint: backup
     environment:
       BACKUP_FILENAME: "backup-prometheus-%Y-%m-%dT%H-%M-%S.tar.gz"
+      BACKUP_STOP_DURING_BACKUP_LABEL: prometheus
+      GZIP_PARALLELISM: 3
     volumes:
       # Mounting the Docker socket allows the script to stop and restart
       # the container during backup and to access the container labels to
@@ -35,6 +37,9 @@ services:
     entrypoint: backup
     environment:
       BACKUP_FILENAME: "backup-home-assistant-%Y-%m-%dT%H-%M-%S.tar.gz"
+      BACKUP_STOP_DURING_BACKUP_LABEL: home-assistant
+      BACKUP_FROM_SNAPSHOT: true
+      GZIP_PARALLELISM: 3
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - home-assistant-data:/backup/home-assistant:ro
@@ -47,6 +52,8 @@ services:
     entrypoint: backup
     environment:
       BACKUP_FILENAME: "backup-zigbee2mqtt-%Y-%m-%dT%H-%M-%S.tar.gz"
+      BACKUP_STOP_DURING_BACKUP_LABEL: zigbee2mqtt
+      GZIP_PARALLELISM: 3
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - zigbee2mqtt-data:/backup/zigbee2mqtt:ro
@@ -59,6 +66,8 @@ services:
     entrypoint: backup
     environment:
       BACKUP_FILENAME: "backup-mosquitto-%Y-%m-%dT%H-%M-%S.tar.gz"
+      BACKUP_STOP_DURING_BACKUP_LABEL: mosquitto
+      GZIP_PARALLELISM: 3
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - mosquitto-data:/backup/mosquitto:ro

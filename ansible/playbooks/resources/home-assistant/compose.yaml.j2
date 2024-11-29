@@ -3,7 +3,8 @@ services:
     container_name: home-assistant
     labels:
       - homeserver.container-category=service
-      - docker-volume-backup.stop-during-backup=true
+      #No point in stopping it, we need to do it from snapshot because sqlite DB keeps writing after container stopped
+      #- docker-volume-backup.stop-during-backup=home-assistant
     image: "ghcr.io/home-assistant/home-assistant:2024.10"
     restart: unless-stopped
     networks:
