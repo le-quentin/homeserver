@@ -1,0 +1,76 @@
+---
+- name: Include all roles vars 
+  include_vars: "{{ item }}"
+  with_fileglob:
+    - "./vars/*"
+
+- name: Create legacy VLAN
+  ansibleguy.opnsense.interface_vlan:
+    description: "Legacy network, with all containers deployed on the same host"
+    interface: "{{ interfaces.servicesLAN.xml_config.if }}"
+    vlan: 200
+
+- name: Import interfaces config file from host
+  connection: ssh
+  ansible.builtin.fetch:
+    src: /conf/config.xml
+    dest: "{{ config_file_local_path }}"
+    flat: yes
+  vars:
+    ansible_python_interpreter: /usr/local/bin/python3
+- include_tasks: tasks/setup-firewall-interface.yaml
+  loop: "{{ interfaces | dict2items }}"
+  loop_control:
+    loop_var: interface
+# TODO make backup conf file
+- name: Update interfaces config file
+  connection: ssh
+  become: yes
+  copy:
+    src: "{{ config_file_local_path }}"
+    dest: /conf/config.xml
+  vars:
+    ansible_python_interpreter: /usr/local/bin/python3
+  register: ifconfig
+  # Test if really needed
+- name: Reboot to parse new config
+  ansibleguy.opnsense.system:
+    action: reboot
+  when: ifconfig.changed
+
+- name: Configure aliases
+  ansibleguy.opnsense.alias_multi:
+    aliases: "{{ aliases }}"
+- name: Purge all non-configured aliases
+  ansibleguy.opnsense.alias_multi:
+    aliases: "{{ aliases }}"
+- name: List aliases
+  ansibleguy.opnsense.list:
+    target: alias
+
+- name: Configure rules
+  ansibleguy.opnsense.rule_multi:
+    key_field: "sequence"
+    match_fields: ["description"]
+    rules: "{{ rules | combine(additional_rules | default({})) }}"
+- name: Purge all non-configured rules
+  ansibleguy.opnsense.rule_purge:
+    key_field: "sequence"
+    match_fields: ["description"]
+    rules: "{{ rules | combine(additional_rules | default({})) }}"
+- name: List rules
+  ansibleguy.opnsense.list:
+    target: rule
+
+- name: Configure DNS entries
+  ansibleguy.opnsense.unbound_host:
+    hostname: "{{ item.hostname | default(\"*\") }}"
+    domain: "{{ item.domain }}"
+    value: "{{ item.value }}"
+    description: "{{ item.description }}"
+    match_fields: "{{ item.match_fields | default([\"description\"]) }}"
+  loop: "{{ dns_entries }}"
+- name: List DNS entries
+  ansibleguy.opnsense.list:
+    target: unbound_host
+# TODO remove other dns entries (needs to be done manually with a loop, no purge module there)
