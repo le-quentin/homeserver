@@ -12,11 +12,22 @@ resource "proxmox_virtual_environment_pool" "pool" {
   comment = "${var.environment} environment pool"
   pool_id = var.pool
 }
-
-resource "proxmox_virtual_environment_network_linux_bridge" "bridge_lan" {
+resource "proxmox_virtual_environment_time" "node_time" {
   node_name = var.node_name
-  name      = var.bridge_lan_name
-  address   = var.bridge_lan_cidr_ip
-  comment   = "${var.environment} global LAN"
+  time_zone = "CET"
+}
+
+resource "proxmox_virtual_environment_network_linux_bridge" "networking_lan" {
+  node_name = var.node_name
+  name      = var.networking_lan_name
+  address   = var.networking_lan_cidr_ip
+  comment   = "${var.environment} network apps (DNS, router, DHCP...)  LAN"
+}
+
+resource "proxmox_virtual_environment_network_linux_bridge" "k3s_lan" {
+  node_name = var.node_name
+  name      = var.k3s_lan_name
+  address   = var.k3s_lan_cidr_ip
+  comment   = "${var.environment} k3s cluster LAN"
 }
 

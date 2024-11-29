@@ -7,7 +7,11 @@ terraform {
   }
 }
 
-variable "legacy_homeserver_vm" {
+locals {
+  vm_id = var.vm_ids_offset + 10
+}
+
+variable "vm_params" {
   type = object({
     address   = string
     dns       = string
@@ -17,7 +21,6 @@ variable "legacy_homeserver_vm" {
       username = string
     })
   })
-  description = "Legacy VM (containing all containers in a single host, as it was on the Pi)"
 }
 
 resource "proxmox_virtual_environment_file" "cloudinit_user" {
@@ -30,14 +33,14 @@ resource "proxmox_virtual_environment_file" "cloudinit_user" {
     data = <<-EOF
     #cloud-config
     users:
-      - name: ${var.legacy_homeserver_vm.user.username}
+      - name: ${var.vm_params.user.username}
         groups:
           - sudo
         shell: /bin/bash
         ssh_authorized_keys:
-          - ${var.legacy_homeserver_vm.user.ssh_key}
+          - ${var.vm_params.user.ssh_key}
         sudo: ALL=(ALL) NOPASSWD:ALL
-    # This could add the qemu guest agent
+    # add the qemu guest agent
     runcmd:
         - apt update
         - apt install -y qemu-guest-agent net-tools
@@ -47,24 +50,24 @@ resource "proxmox_virtual_environment_file" "cloudinit_user" {
         - echo "done" > /tmp/cloud-config.done
     EOF
 
-    file_name = "cloudinit_user.yaml"
+    file_name = "cloudinit_user_${local.vm_id}.yaml"
   }
 }
 
-resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
-  name        = "legacy-homeserver"
+resource "proxmox_virtual_environment_vm" "vm" {
   node_name   = var.node_name
-  description = "All the containers on one host, as it was before getting proxmox"
+  name        = var.vm_name
+  description = var.vm_description
 
   pool_id = var.pool
-  vm_id   = var.vm_ids_offset + 801
+  vm_id   = local.vm_id
 
   initialization {
     user_data_file_id = proxmox_virtual_environment_file.cloudinit_user.id
 
     ip_config {
       ipv4 {
-        address = var.legacy_homeserver_vm.address
+        address = var.vm_params.address
         gateway = var.bridge_lan_network_ip
       }
     }
@@ -72,7 +75,7 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
     dns {
       domain = "bonnet-lan"
       servers = [
-        var.legacy_homeserver_vm.dns,
+        var.vm_params.dns,
         "1.1.1.1"
       ]
     }
@@ -83,11 +86,14 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
     datastore_id = var.disk_storage
     file_id      = var.images.debian
     interface    = "scsi0"
-    size         = var.legacy_homeserver_vm.disk_size
+    size         = var.vm_params.disk_size
   }
 
-  usb {
-    host = var.zigbee_dongle_id
+  dynamic "usb" {
+    for_each = var.usb_mappings
+    content {
+      host  = usb.value.device_id
+    }
   }
 
   network_device {
@@ -118,24 +124,24 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
 
 }
 
-resource "proxmox_virtual_environment_firewall_options" "legacy_homeserver_vm_firewall_options" {
-  depends_on = [proxmox_virtual_environment_vm.legacy_homeserver_vm]
+resource "proxmox_virtual_environment_firewall_options" "vm_params_firewall_options" {
+  depends_on = [proxmox_virtual_environment_vm.vm]
 
-  node_name = proxmox_virtual_environment_vm.legacy_homeserver_vm.node_name
-  vm_id     = proxmox_virtual_environment_vm.legacy_homeserver_vm.vm_id
+  node_name = proxmox_virtual_environment_vm.vm.node_name
+  vm_id     = proxmox_virtual_environment_vm.vm.vm_id
 
-  enabled       = true
+  enabled       = false # Disabled for now, to not make k3s setup more complex than it already is
   input_policy  = "DROP"
   output_policy = "ACCEPT"
 }
 
-resource "proxmox_virtual_environment_firewall_rules" "legacy_vm_firewall_rules" {
+resource "proxmox_virtual_environment_firewall_rules" "vm_firewall_rules" {
   depends_on = [
-    proxmox_virtual_environment_vm.legacy_homeserver_vm
+    proxmox_virtual_environment_vm.vm
   ]
 
-  node_name = proxmox_virtual_environment_vm.legacy_homeserver_vm.node_name
-  vm_id     = proxmox_virtual_environment_vm.legacy_homeserver_vm.vm_id
+  node_name = proxmox_virtual_environment_vm.vm.node_name
+  vm_id     = proxmox_virtual_environment_vm.vm.vm_id
 
   rule {
     security_group = "${var.environment}-ssh"

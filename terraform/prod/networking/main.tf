@@ -4,6 +4,9 @@ module "networking" {
   environment = "prod"
   pool        = "prod"
 
-  bridge_lan_name    = "vmbr1"
-  bridge_lan_cidr_ip = "10.42.1.1/24"
+  networking_lan_name    = "vmbr1"
+  networking_lan_cidr_ip = "10.42.1.1/24"
+
+  k3s_lan_name    = "vmbr10"
+  k3s_lan_cidr_ip = "10.42.10.1/24"
 }
