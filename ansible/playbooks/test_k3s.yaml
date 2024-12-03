@@ -1,0 +1,34 @@
+- name: Setup k3s services
+  hosts: k3scontroller
+  vars:
+    k3s_release_version: v1.31.2+k3s1
+    k3s_become: true
+  tasks:
+    - name: Check if k3s is installed
+      command: k3s --version
+      register: k3s_installed
+      ignore_errors: yes
+      failed_when: false
+      changed_when: false
+    - name: Install k3s
+      include_role: 
+        name: xanmanning.k3s
+      when: k3s_installed.rc != 0
+    - name: Ensure kube folder exists
+      ansible.builtin.file:
+        path: "{{ home_dir }}/.kube"
+        state: directory
+        mode: "0744"
+    - name: Copy k3s config for user
+      become: yes
+      copy: 
+        src: /etc/rancher/k3s/k3s.yaml 
+        remote_src: true
+        dest: "{{ home_dir }}/.kube/config"
+        owner: "{{ ansible_user }}"
+        mode: "0644"
+        force: false
+    
+    - name: Deploy the test k3s service
+      include_role:
+        name: "../roles/k3s_service"

@@ -48,6 +48,33 @@ resource "proxmox_virtual_environment_file" "cloudinit_user" {
         - systemctl enable qemu-guest-agent
         - systemctl start qemu-guest-agent
         - echo "done" > /tmp/cloud-config.done
+        # Python dependencies for Ansible k8s module (TODO: use packer for an ansible ready machine image)
+        - apt install -y python3-venv
+        - sudo -u ${var.vm_params.user.username} mkdir /home/${var.vm_params.user.username}/k3s
+        - cd /home/${var.vm_params.user.username}/k3s
+        - sudo -u ${var.vm_params.user.username} python3 -m venv ./venv
+        # TODO get these dependencies and versions from a variable
+        - ./venv/bin/pip install cachetools==5.5.0
+        - ./venv/bin/pip install certifi==2024.8.30
+        - ./venv/bin/pip install charset-normalizer==3.4.0
+        - ./venv/bin/pip install durationpy==0.9
+        - ./venv/bin/pip install google-auth==2.36.0
+        - ./venv/bin/pip install idna==3.10
+        - ./venv/bin/pip install jsonpatch==1.33
+        - ./venv/bin/pip install jsonpointer==3.0.0
+        - ./venv/bin/pip install kubernetes==31.0.0
+        - ./venv/bin/pip install oauthlib==3.2.2
+        - ./venv/bin/pip install pyasn1==0.6.1
+        - ./venv/bin/pip install pyasn1_modules==0.4.1
+        - ./venv/bin/pip install python-dateutil==2.9.0.post0
+        - ./venv/bin/pip install PyYAML==6.0.2
+        - ./venv/bin/pip install requests==2.32.3
+        - ./venv/bin/pip install requests-oauthlib==2.0.0
+        - ./venv/bin/pip install rsa==4.9
+        - ./venv/bin/pip install six==1.16.0
+        - ./venv/bin/pip install urllib3==2.2.3
+        - ./venv/bin/pip install websocket-client==1.8.0
+
     EOF
 
     file_name = "cloudinit_user_${local.vm_id}.yaml"
