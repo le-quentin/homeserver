@@ -119,7 +119,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
   dynamic "usb" {
     for_each = var.usb_mappings
     content {
-      host  = usb.value.device_id
+      host = usb.value.device_id
     }
   }
 

@@ -69,7 +69,7 @@ variable "disk_storage" {
 }
 
 variable "usb_mappings" {
-  type        = list
+  type        = list(any)
   description = "Id of and usb device (int the \"<bus>-<device>\" format) to passthrough to the VM"
   default     = []
 }
