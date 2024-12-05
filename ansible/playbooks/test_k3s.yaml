@@ -33,3 +33,5 @@
     - name: Deploy the test k3s service
       ansible.builtin.include_role:
         name: "k3s_service"
+      vars:
+        k3s_service_name: test

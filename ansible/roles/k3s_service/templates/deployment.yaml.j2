@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: helloworld
+  name: "{{ k3s_service_name }}"
   namespace: "{{ k3s_service_namespace }}"
 spec:
   selector:
     matchLabels:
-      name: helloworld
+      name: "{{ k3s_service_name }}"
   replicas: 1 # tells deployment to run 1 pods matching the template
   template: # create pods using pod definition in this template
     metadata:
       labels:
-        name: helloworld
+        name: "{{ k3s_service_name }}"
     spec:
       containers:
-      - name: helloworld
+      - name: "{{ k3s_service_name }}"
         image: nginx:latest
         ports:
         - containerPort: 80
       volumes:
-      - name: helloworld-volume
+      - name: "{{ k3s_service_name }}-volume"
         persistentVolumeClaim:
-          claimName: helloworld-pvc
+          claimName: "{{ k3s_service_name }}-pvc"

@@ -1,0 +1,10 @@
+---
+# Here we assert all variables that don't have a default value,
+# therefore that are required when calling the role
+- name: Check k3s_service_name
+  ansible.builtin.assert:
+    that:
+      - k3s_service_name is defined
+      - k3s_service_name is match("^(?![0-9]+$)(?!-)[a-zA-Z0-9-]{,63}(?<!-)$")
+    success_msg: "OK"
+    fail_msg: "k3s_service_name must be a valid DNS name (because it will also be used for ingress access)"

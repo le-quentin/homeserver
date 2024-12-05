@@ -1,4 +1,6 @@
 ---
+- name: Validate required variables
+  ansible.builtin.include_tasks: assert-vars.yml
 - name: Namespace
   kubernetes.core.k8s:
     name: "{{ k3s_service_namespace }}"
