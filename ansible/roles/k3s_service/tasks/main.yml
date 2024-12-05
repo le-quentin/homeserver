@@ -1,31 +1,32 @@
 ---
 - name: Namespace
   kubernetes.core.k8s:
-    name: "{{ namespace }}"
+    name: "{{ k3s_service_namespace }}"
     api_version: v1
     kind: Namespace
-- block:
-  - name: '"persistent" StorageClass (basic localpath for persistent volumes)'
-    kubernetes.core.k8s:
-      state: present
-      template: 'persistent-storage-class.yaml'
-  - name: "Storage"
-    kubernetes.core.k8s:
-      state: "{{ state }}"
-      template: "storage.yaml"
-  - name: "Deployment"
-    kubernetes.core.k8s:
-      state: "{{ state }}"
-      template: "deployment.yaml"
-  - name: "Service"
-    kubernetes.core.k8s:
-      state: "{{ state }}"
-      template: "service.yaml"
-  - name: "Ingress"
-    kubernetes.core.k8s:
-      state: "{{ state }}"
-      template: "ingress.yaml"
+- name: Set module defaults
   module_defaults:
     kubernetes.core.k8s:
-      namespace: "{{ namespace }}"
+      namespace: "{{ k3s_service_namespace }}"
       apply: true
+  block:
+    - name: '"persistent" StorageClass (basic localpath for persistent volumes)'
+      kubernetes.core.k8s:
+        state: present
+        template: "persistent-storage-class.yaml.j2"
+    - name: "Storage"
+      kubernetes.core.k8s:
+        state: "{{ k3s_service_state }}"
+        template: "storage.yaml.j2"
+    - name: "Deployment"
+      kubernetes.core.k8s:
+        state: "{{ k3s_service_state }}"
+        template: "deployment.yaml.j2"
+    - name: "Service"
+      kubernetes.core.k8s:
+        state: "{{ k3s_service_state }}"
+        template: "service.yaml.j2"
+    - name: "Ingress"
+      kubernetes.core.k8s:
+        state: "{{ k3s_service_state }}"
+        template: "ingress.yaml.j2"

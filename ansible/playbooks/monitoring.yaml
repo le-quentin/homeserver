@@ -1,26 +1,29 @@
+---
 - name: Install monitoring services
   hosts: monitoringservs
   tasks:
-    - include_tasks: "tasks/install-docker.yaml"
+    - name: Ensure docker is installed
+      ansible.builtin.include_tasks: "tasks/install-docker.yaml"
     - name: Make sure the docker network exists
-      become: yes
+      become: true
       community.docker.docker_network:
         name: "monitoring-net"
     - name: Make sure the prometheus volume exists
-      become: yes
+      become: true
       community.docker.docker_volume:
         name: prometheus-data
     - name: Copy monitoring services files
-      copy:
+      ansible.builtin.copy:
         src: "./resources/monitoring"
         dest: "{{ ansible_files_root }}"
+        mode: "0644"
       notify: Run monitoring services
     - name: Run the node-exporter role (expose hardware metrics in prometheus)
-      include_role:
+      ansible.builtin.include_role:
         name: prometheus.prometheus.node_exporter
   handlers:
     - name: Run monitoring services
-      become: yes
+      become: true
       community.docker.docker_compose_v2:
         project_src: "{{ ansible_files_root }}/monitoring"
         recreate: always # so that changes in config are applied

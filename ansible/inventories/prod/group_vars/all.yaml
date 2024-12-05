@@ -1,3 +1,4 @@
+---
 homeserver_domain: home
 dns_ip: 10.42.1.2
 legacy_server_ip: 10.42.1.200

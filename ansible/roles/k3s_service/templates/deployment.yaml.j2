@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: helloworld
-  namespace: "{{ namespace }}"
+  namespace: "{{ k3s_service_namespace }}"
 spec:
   selector:
     matchLabels:

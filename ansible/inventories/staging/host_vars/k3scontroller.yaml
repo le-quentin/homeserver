@@ -1,3 +1,4 @@
+---
 ansible_host: 10.142.10.10
 ansible_user: k3s_user
 home_dir: /home/{{ hostvars.k3scontroller.ansible_user }}

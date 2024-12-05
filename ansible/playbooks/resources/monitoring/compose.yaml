@@ -1,3 +1,4 @@
+---
 services:
   grafana:
     container_name: grafana
@@ -5,7 +6,7 @@ services:
       - homeserver.container-category=monitoring
     image: grafana/grafana:10.3.1
     restart: unless-stopped
-    ports: 
+    ports:
       - "9000:3000"
     environment:
       GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s:%(http_port)s/"
@@ -43,12 +44,12 @@ services:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
     restart: unless-stopped
     ports:
-    - 9091:8080
+      - 9091:8080
     volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:rw
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
     networks:
       - monitoring-net
 volumes:

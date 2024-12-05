@@ -3,7 +3,7 @@ kind: PersistentVolumeClaim
 # TODO either define pv explicitly so it gets deleted... or rather attach to existing pv if it is there (= redeploying doesn't lose database)
 metadata:
   name: helloworld-pvc
-  namespace: "{{ namespace }}"
+  namespace: "{{ k3s_service_namespace }}"
 spec:
   accessModes:
     - ReadWriteOnce

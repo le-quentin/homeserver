@@ -1,13 +1,13 @@
 ---
 - name: Update and upgrade all packages to the latest version
-  become: yes
+  become: true
   ansible.builtin.apt:
     update_cache: true
     upgrade: dist
     cache_valid_time: 3600
 
 - name: Install required packages
-  become: yes
+  become: true
   ansible.builtin.apt:
     pkg:
       - apt-transport-https
@@ -17,14 +17,14 @@
       - software-properties-common
 
 - name: Create directory for Docker's GPG key
-  become: yes
+  become: true
   ansible.builtin.file:
     path: /etc/apt/keyrings
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Add Docker's official GPG key
-  become: yes
+  become: true
   ansible.builtin.apt_key:
     url: https://download.docker.com/linux/debian/gpg
     keyring: /etc/apt/keyrings/docker.gpg
@@ -35,7 +35,7 @@
     msg: "Architecture: {{ ansible_architecture_alt }}, Codename: {{ ansible_lsb.codename }}"
 
 - name: Add Docker repository
-  become: yes
+  become: true
   ansible.builtin.apt_repository:
     repo: >-
       deb [arch={{ ansible_architecture_alt }}
@@ -45,7 +45,7 @@
     state: present
 
 - name: Install Docker and related packages
-  become: yes
+  become: true
   ansible.builtin.apt:
     name: "{{ item }}"
     state: present
@@ -70,7 +70,7 @@
 #     append: true
 
 - name: Enable and start Docker services
-  become: yes
+  become: true
   ansible.builtin.systemd:
     name: "{{ item }}"
     enabled: true
