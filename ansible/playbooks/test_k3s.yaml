@@ -35,6 +35,7 @@
         name: "k3s_service"
       vars:
         k3s_service_name: test
+        k3s_service_data_volume_mount_path: /config
         k3s_service_config_files:
           - template: "./resources/home-assistant/initial-configuration.yaml.j2"
             dest: "/config/configuration.yaml"

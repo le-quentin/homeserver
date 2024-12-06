@@ -17,7 +17,7 @@
         var: config_map_files
     - name: "ConfigMaps"
       kubernetes.core.k8s:
-        state: "{{ k3s_service_state }}"
+        state: "{{ 'present' if k3s_service_state == 'present' and config_map_enabled else 'absent' }}"
         template: "configmap.yml.j2"
     - name: '"persistent" StorageClass (basic localpath for persistent volumes)'
       kubernetes.core.k8s:

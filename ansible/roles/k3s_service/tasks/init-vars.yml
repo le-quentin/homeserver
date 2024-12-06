@@ -9,6 +9,11 @@
     success_msg: "OK"
     fail_msg: "k3s_service_name must be a valid DNS name (because it will also be used for ingress access)"
 
+- name: Set default facts
+  ansible.builtin.set_fact:
+    config_map_files: []
+    config_map_enabled: false
+
 - name: Set config_map_files
   ansible.builtin.set_fact:
     config_map_files: >-
@@ -19,3 +24,7 @@
         'init_only': item.init_only | default(false)
       }] }}
   with_items: "{{ k3s_service_config_files }}"
+
+- name: Set config_map_enabled
+  ansible.builtin.set_fact:
+    config_map_enabled: "{{ config_map_files | length > 0 }}"

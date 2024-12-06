@@ -30,9 +30,11 @@ spec:
       - name: "{{ k3s_service_name }}-volume"
         persistentVolumeClaim:
           claimName: "{{ k3s_service_name }}-pvc"
+{% if config_map_enabled %}
       - name: "{{ k3s_service_name }}-configuration-volume"
         configMap:
           name: "{{ k3s_service_name }}-config-files"
+{% endif %}
 {% if config_map_files | selectattr('init_only', 'equalto', true) | length>0 %}
       initContainers:
       - name: "{{ k3s_service_name }}-init"
