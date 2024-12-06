@@ -18,8 +18,8 @@ spec:
         image: busybox
         command:
 {% set commands = [] %}
-{% for file in k3s_service_config_files | selectattr('init_only', 'equalto', true) %}
-  {{ commands.append("cp -n '/tmp"~(file.dest)~"' '"~file.dest~"'") }}
+{% for file in config_map_files | selectattr('init_only', 'equalto', true) %}
+  {{ commands.append("cp -n '/tmp"~(file.mountPath)~"' '"~file.mountPath~"'") }}
 {% endfor %}
         - "sh"
         - "-c"
@@ -27,10 +27,10 @@ spec:
         volumeMounts:
         - name:  "{{ k3s_service_name }}-volume"
           mountPath: /config
-{% for file in k3s_service_config_files | selectattr('init_only', 'equalto', true) %}
+{% for file in config_map_files | selectattr('init_only', 'equalto', true) %}
         - name:  "{{ k3s_service_name }}-configuration-volume"
-          mountPath: "/tmp{{ file.dest }}"
-          subPath: "{{ file.dest | basename }}"
+          mountPath: "/tmp{{ file.mountPath }}"
+          subPath: "{{ file.name }}"
 {% endfor %}
       containers:
       - name: "{{ k3s_service_name }}"
@@ -40,10 +40,10 @@ spec:
         volumeMounts:
         - name:  "{{ k3s_service_name }}-volume"
           mountPath: /config
-{% for file in k3s_service_config_files | selectattr('init_only', 'equalto', false) %}
+{% for file in config_map_files | selectattr('init_only', 'equalto', false) %}
         - name:  "{{ k3s_service_name }}-configuration-volume"
-          mountPath: "{{ file.dest }}"
-          subPath: "{{ file.dest | basename }}"
+          mountPath: "{{ file.mountPath }}"
+          subPath: "{{ file.name }}"
 {% endfor %}
       volumes:
       - name: "{{ k3s_service_name }}-volume"
@@ -52,6 +52,3 @@ spec:
       - name: "{{ k3s_service_name }}-configuration-volume"
         configMap:
           name: "{{ k3s_service_name }}-config-files"
-{#          items:
-          - key: "{{ file.dest | basename }}"
-            path: "{{ file.dest | basename }}"#}

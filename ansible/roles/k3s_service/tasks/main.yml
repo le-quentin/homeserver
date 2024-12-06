@@ -1,6 +1,6 @@
 ---
-- name: Validate required variables
-  ansible.builtin.include_tasks: assert-vars.yml
+- name: Initialise role variables (check required inputs, and set computed values)
+  ansible.builtin.include_tasks: init-vars.yml
 - name: Namespace
   kubernetes.core.k8s:
     name: "{{ k3s_service_namespace }}"
@@ -14,9 +14,7 @@
   block:
     - name: "Debug"
       ansible.builtin.debug:
-        var: init_only_files
-      vars:
-        init_only_files: "{{ k3s_service_config_files | selectattr('init_only', 'equalto', false) }}"
+        var: config_map_files
     - name: "ConfigMaps"
       kubernetes.core.k8s:
         state: "{{ k3s_service_state }}"

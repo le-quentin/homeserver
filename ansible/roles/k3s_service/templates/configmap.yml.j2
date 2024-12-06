@@ -9,7 +9,7 @@ data:
       <raw content of the file>
 
  We manually insert four white space after each line break, to create the right indentation in the configmap yaml file #}
-{% for file in k3s_service_config_files %}
-  {{ file.dest | basename }}: |
-    {{ lookup('template', file.template) | regex_replace('\\n', '\n    ') }}
+{% for file in config_map_files %}
+  {{ file.name }}: |
+    {{ file.value }}
 {% endfor %}

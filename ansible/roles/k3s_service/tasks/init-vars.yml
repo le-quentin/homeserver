@@ -8,3 +8,14 @@
       - k3s_service_name is match("^(?![0-9]+$)(?!-)[a-zA-Z0-9-]{,63}(?<!-)$")
     success_msg: "OK"
     fail_msg: "k3s_service_name must be a valid DNS name (because it will also be used for ingress access)"
+
+- name: Set default vars
+  ansible.builtin.set_fact:
+    config_map_files: >-
+      {{ (config_map_files | default([])) + [{
+        'name': item.dest | basename,
+        'value': lookup('template', item.template) | regex_replace('\n', '\n    '),
+        'mountPath': item.dest,
+        'init_only': item.init_only | default(false)
+      }] }}
+  with_items: "{{ k3s_service_config_files }}"
