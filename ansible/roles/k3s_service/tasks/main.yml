@@ -12,6 +12,16 @@
       namespace: "{{ k3s_service_namespace }}"
       apply: true
   block:
+    - name: "Debug"
+      ansible.builtin.debug:
+        var: rendered_template
+      vars:
+        rendered_template: "{{ lookup('template', item.template) | regex_replace('\\n', '\n    ') }}"
+      loop: "{{ k3s_service_config_files }}"
+    - name: "ConfigMaps"
+      kubernetes.core.k8s:
+        state: present
+        template: "configmap.yml.j2"
     - name: '"persistent" StorageClass (basic localpath for persistent volumes)'
       kubernetes.core.k8s:
         state: present

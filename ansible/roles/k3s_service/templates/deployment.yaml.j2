@@ -13,12 +13,33 @@ spec:
       labels:
         name: "{{ k3s_service_name }}"
     spec:
+#       initContainers:
+#       - name: "{{ k3s_service_name }}-init"
+#         image: busybox
+#         command:
+{# {% for file in k3s_service_config_files %}
+#           - "echo {{ lookup('template', file.template) }} >> {{ file.dest }}"
+# {% endfor %}#}
       containers:
       - name: "{{ k3s_service_name }}"
         image: nginx:latest
         ports:
         - containerPort: 80
+        volumeMounts:
+        - name:  "{{ k3s_service_name }}-volume"
+          mountPath: /config
+{% for file in k3s_service_config_files %}
+        - name:  "{{ k3s_service_name }}-configuration-volume"
+          mountPath: "{{ file.dest }}"
+          subPath: "{{ file.dest | basename }}"
+{% endfor %}
       volumes:
       - name: "{{ k3s_service_name }}-volume"
         persistentVolumeClaim:
           claimName: "{{ k3s_service_name }}-pvc"
+      - name: "{{ k3s_service_name }}-configuration-volume"
+        configMap:
+          name: "{{ k3s_service_name }}-config-files"
+{#          items:
+          - key: "{{ file.dest | basename }}"
+            path: "{{ file.dest | basename }}"#}
