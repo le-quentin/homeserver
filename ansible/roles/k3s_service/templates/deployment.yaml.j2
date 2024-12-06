@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: "{{ k3s_service_name }}"
-        image: nginx:latest
+        image: "{{ k3s_service_image }}"
         ports:
         - containerPort: {{ k3s_service_container_port }}
         volumeMounts:

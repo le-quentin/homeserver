@@ -14,6 +14,11 @@
     - name: Install k3s
       ansible.builtin.include_role:
         name: xanmanning.k3s
+      vars:
+        k3s_server:
+          cluster-cidr: 172.42.0.0/16
+          service-cidr: 172.43.0.0/16
+          cluster-dns: 172.43.0.10
       when: k3s_installed.rc != 0
     - name: Ensure kube folder exists
       ansible.builtin.file:
@@ -34,8 +39,9 @@
       ansible.builtin.include_role:
         name: "k3s_service"
       vars:
-        k3s_service_name: test
-        k3s_service_container_port: 80
+        k3s_service_name: assistant
+        k3s_service_image: "ghcr.io/home-assistant/home-assistant:2024.10"
+        k3s_service_container_port: 8123
         k3s_service_data_volume_mount_path: /config
         k3s_service_config_files:
           - template: "./resources/home-assistant/initial-configuration.yaml.j2"
