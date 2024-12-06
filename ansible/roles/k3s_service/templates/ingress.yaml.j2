@@ -5,7 +5,7 @@ metadata:
   namespace: "{{ k3s_service_namespace }}"
 spec:
   rules:
-  - host: "{{ k3s_service_name }}.staging.home"
+  - host: "{{ k3s_service_name }}.{{ homeserver_domain }}"
     http:
       paths:
       - path: /
@@ -14,4 +14,4 @@ spec:
           service:
             name: "{{ k3s_service_name }}-service"
             port:
-              number: 80
+              number: {{ service_port }}

@@ -13,6 +13,7 @@
   ansible.builtin.set_fact:
     config_map_files: []
     config_map_enabled: false
+    service_port: 80
 
 - name: Set config_map_files
   ansible.builtin.set_fact:

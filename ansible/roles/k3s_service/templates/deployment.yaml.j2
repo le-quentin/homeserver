@@ -17,7 +17,7 @@ spec:
       - name: "{{ k3s_service_name }}"
         image: nginx:latest
         ports:
-        - containerPort: 80
+        - containerPort: {{ k3s_service_container_port }}
         volumeMounts:
         - name:  "{{ k3s_service_name }}-volume"
           mountPath: /config
