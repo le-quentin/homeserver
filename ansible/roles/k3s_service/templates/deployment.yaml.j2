@@ -13,13 +13,25 @@ spec:
       labels:
         name: "{{ k3s_service_name }}"
     spec:
-#       initContainers:
-#       - name: "{{ k3s_service_name }}-init"
-#         image: busybox
-#         command:
-{# {% for file in k3s_service_config_files %}
-#           - "echo {{ lookup('template', file.template) }} >> {{ file.dest }}"
-# {% endfor %}#}
+      initContainers:
+      - name: "{{ k3s_service_name }}-init"
+        image: busybox
+        command:
+{% set commands = [] %}
+{% for file in k3s_service_config_files | selectattr('init_only', 'equalto', true) %}
+  {{ commands.append("cp -n '/tmp"~(file.dest)~"' '"~file.dest~"'") }}
+{% endfor %}
+        - "sh"
+        - "-c"
+        - "{{ commands | join(';') }}"
+        volumeMounts:
+        - name:  "{{ k3s_service_name }}-volume"
+          mountPath: /config
+{% for file in k3s_service_config_files | selectattr('init_only', 'equalto', true) %}
+        - name:  "{{ k3s_service_name }}-configuration-volume"
+          mountPath: "/tmp{{ file.dest }}"
+          subPath: "{{ file.dest | basename }}"
+{% endfor %}
       containers:
       - name: "{{ k3s_service_name }}"
         image: nginx:latest
@@ -28,7 +40,7 @@ spec:
         volumeMounts:
         - name:  "{{ k3s_service_name }}-volume"
           mountPath: /config
-{% for file in k3s_service_config_files %}
+{% for file in k3s_service_config_files | selectattr('init_only', 'equalto', false) %}
         - name:  "{{ k3s_service_name }}-configuration-volume"
           mountPath: "{{ file.dest }}"
           subPath: "{{ file.dest | basename }}"

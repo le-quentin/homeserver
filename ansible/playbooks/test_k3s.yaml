@@ -38,9 +38,13 @@
         k3s_service_config_files:
           - template: "./resources/home-assistant/initial-configuration.yaml.j2"
             dest: "/config/configuration.yaml"
+            init_only: false
           - template: "./resources/home-assistant/empty-template.yaml.j2"
             dest: "/config/automations.yaml"
+            init_only: true
           - template: "./resources/home-assistant/empty-template.yaml.j2"
             dest: "/config/scripts.yaml"
+            init_only: true
           - template: "./resources/home-assistant/empty-template.yaml.j2"
             dest: "/config/scenes.yaml"
+            init_only: true
