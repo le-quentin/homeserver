@@ -1,0 +1,44 @@
+---
+- name: Setup k3s cluster (install k3s and helm on nodes)
+  hosts: k3scontroller
+  vars:
+    k3s_release_version: v1.31.2+k3s1
+  tasks:
+    - name: Check if k3s is installed
+      ansible.builtin.command: k3s --version
+      register: k3s_installed
+      ignore_errors: true
+      failed_when: false
+      changed_when: false
+    - name: Install k3s
+      ansible.builtin.include_role:
+        name: xanmanning.k3s
+      vars:
+        k3s_release_version: v1.31.2+k3s1
+        k3s_server:
+          cluster-cidr: 172.42.0.0/16
+          service-cidr: 172.43.0.0/16
+          cluster-dns: 172.43.0.10
+      when: k3s_installed.rc != 0
+    - name: Ensure kube folder exists
+      ansible.builtin.file:
+        path: "{{ home_dir }}/.kube"
+        state: directory
+        mode: "0744"
+    - name: Copy k3s config for user
+      become: true
+      ansible.builtin.copy:
+        src: /etc/rancher/k3s/k3s.yaml
+        remote_src: true
+        dest: "{{ home_dir }}/.kube/config"
+        owner: "{{ ansible_user }}"
+        mode: "0600"
+        force: false
+
+    - name: Install helm
+      ansible.builtin.include_role:
+        name: geerlingguy.helm
+      vars:
+        helm_version: v3.16.3
+        helm_platform: linux
+        helm_arch: "{{ ansible_architecture_alt }}"
