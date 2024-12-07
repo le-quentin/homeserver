@@ -15,6 +15,7 @@
       ansible.builtin.include_role:
         name: xanmanning.k3s
       vars:
+        k3s_release_version: v1.31.2+k3s1
         k3s_server:
           cluster-cidr: 172.42.0.0/16
           service-cidr: 172.43.0.0/16
@@ -34,6 +35,14 @@
         owner: "{{ ansible_user }}"
         mode: "0644"
         force: false
+
+    - name: Install helm
+      ansible.builtin.include_role:
+        name: geerlingguy.helm
+      vars:
+        helm_version: v3.16.3
+        helm_platform: linux
+        helm_arch: "{{ ansible_architecture_alt }}"
 
     - name: Deploy the test k3s service
       ansible.builtin.include_role:
