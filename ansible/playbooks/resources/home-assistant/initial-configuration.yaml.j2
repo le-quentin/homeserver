@@ -39,7 +39,7 @@ recorder:
 http:
   use_x_forwarded_for: true     # To ensure HA understands that client requests come via reverse proxy
   trusted_proxies:
-    - 172.42.0.0/16   # Access via kubernetes cluster: this is the pods ip range (and as far as the container is conconcerned, the pod is making the request)
+    - {{ k3s_cluster_cidr }}   # Access via kubernetes cluster: this is the pods ip range (and as far as the container is conconcerned, the pod is making the request)
     - 127.0.0.1                 # Add the localhost IPv4 address
     - ::1                       # Add the localhost IPv6 address
 
