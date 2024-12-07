@@ -33,7 +33,7 @@
         remote_src: true
         dest: "{{ home_dir }}/.kube/config"
         owner: "{{ ansible_user }}"
-        mode: "0644"
+        mode: "0600"
         force: false
 
     - name: Install helm
