@@ -153,7 +153,7 @@ filtering:
     - domain: adguard.{{ homeserver_domain }}
       answer: {{ dns_ip }}
     - domain: '*.{{ homeserver_domain }}'
-      answer: {{ legacy_server_ip }}
+      answer: {{ k3s_controller_ip }}
   safe_fs_patterns:
     - /opt/adguardhome/work/userfilters/*
   safebrowsing_cache_size: 1048576

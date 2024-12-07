@@ -1,2 +1,6 @@
+---
 collections:
   - name: prometheus.prometheus
+roles:
+  - name: xanmanning.k3s
+  - name: geerlingguy.helm

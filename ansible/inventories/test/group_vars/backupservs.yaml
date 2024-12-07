@@ -1,2 +1,3 @@
-remote_backups_enabled: false 
+---
+remote_backups_enabled: false
 remote_backups_path: backups/homeserver-staging
