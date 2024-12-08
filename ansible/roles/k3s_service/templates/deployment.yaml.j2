@@ -19,17 +19,21 @@ spec:
         ports:
         - containerPort: {{ k3s_service_container_port }}
         volumeMounts:
-        - name:  "{{ k3s_service_name }}-volume"
-          mountPath: /config
+{% for volume in data_volumes %}
+        - name:  "{{ k3s_service_name }}-volume-{{ volume.name }}"
+          mountPath: "{{ volume.mount_path }}"
+{% endfor %}
 {% for file in config_map_files | selectattr('init_only', 'equalto', false) %}
         - name:  "{{ k3s_service_name }}-configuration-volume"
-          mountPath: "{{ file.mountPath }}"
+          mountPath: "{{ file.mount_path }}"
           subPath: "{{ file.name }}"
 {% endfor %}
       volumes:
-      - name: "{{ k3s_service_name }}-volume"
+{% for volume in data_volumes %}
+      - name: "{{ k3s_service_name }}-volume-{{ volume.name }}"
         persistentVolumeClaim:
-          claimName: "{{ k3s_service_name }}-pvc"
+          claimName: "{{ k3s_service_name }}-pvc-{{ volume.name }}"
+{% endfor %}
 {% if config_map_enabled %}
       - name: "{{ k3s_service_name }}-configuration-volume"
         configMap:
@@ -42,17 +46,19 @@ spec:
         command:
 {% set commands = [] %}
 {% for file in config_map_files | selectattr('init_only', 'equalto', true) %}
-  {{ commands.append("cp -n '/tmp"~(file.mountPath)~"' '"~file.mountPath~"'") }}
+  {{ commands.append("cp -n '/tmp"~(file.mount_path)~"' '"~file.mount_path~"'") }}
 {% endfor %}
         - "sh"
         - "-c"
         - "{{ commands | join(';') }}"
         volumeMounts:
-        - name:  "{{ k3s_service_name }}-volume"
-          mountPath: /config
+{% for volume in data_volumes %}
+        - name:  "{{ k3s_service_name }}-volume-{{ volume.name }}"
+          mountPath: "{{ volume.mount_path }}"
+{% endfor %}
 {% for file in config_map_files | selectattr('init_only', 'equalto', true) %}
         - name:  "{{ k3s_service_name }}-configuration-volume"
-          mountPath: "/tmp{{ file.mountPath }}"
+          mountPath: "/tmp{{ file.mount_path }}"
           subPath: "{{ file.name }}"
 {% endfor %}
 {% endif %}

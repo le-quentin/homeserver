@@ -10,6 +10,11 @@
         k3s_service_image: "ghcr.io/home-assistant/home-assistant:2024.10"
         k3s_service_container_port: 8123
         k3s_service_data_volume_mount_path: /config
+        k3s_service_data_volumes:
+          - type: local_path
+            name: all-data
+            mount_path: /config
+            size: 1Gi
         k3s_service_config_files:
           - template: "./resources/home-assistant/initial-configuration.yaml.j2"
             dest: "/config/configuration.yaml"

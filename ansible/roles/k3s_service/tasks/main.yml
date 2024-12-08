@@ -19,14 +19,15 @@
       kubernetes.core.k8s:
         state: "{{ 'present' if k3s_service_state == 'present' and config_map_enabled else 'absent' }}"
         template: "configmap.yml.j2"
-    - name: '"persistent" StorageClass (basic localpath for persistent volumes)'
-      kubernetes.core.k8s:
-        state: present
-        template: "persistent-storage-class.yaml.j2"
-    - name: "Storage"
-      kubernetes.core.k8s:
-        state: "{{ k3s_service_state }}"
-        template: "storage.yaml.j2"
+    # - name: 'StorageClass'
+    #   kubernetes.core.k8s:
+    #     state: present
+    #     template: "persistent-storage-class.yaml.j2"
+    - name: Storage
+      with_items: "{{ data_volumes }}"
+      loop_control:
+        loop_var: "volume"
+      ansible.builtin.include_tasks: setup-storage.yml
     - name: "Deployment"
       kubernetes.core.k8s:
         state: "{{ k3s_service_state }}"
