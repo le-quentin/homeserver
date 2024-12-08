@@ -1,5 +1,5 @@
 ---
 # defaults file for k3s-service.yaml
-k3s_service_namespace: homeserver
+k3s_service_namespace: "{{ k3s_service_name }}"
 k3s_service_state: "{{ 'absent' if (action | default('create')) == 'delete' else 'present' }}"
 k3s_service_config_files: []

@@ -35,9 +35,9 @@
               node-label:
                 - "high-io-storage=true"
 
-              cluster-cidr: 172.42.0.0/16
-              service-cidr: 172.43.0.0/16
-              cluster-dns: 172.43.0.10
+              cluster-cidr: "{{ k3s_cluster_cidr }}"
+              service-cidr: "{{ k3s_services_cidr }}"
+              cluster-dns: "{{ k3s_cluster_dns }}"
     - name: Ensure kube folder exists
       ansible.builtin.file:
         path: "{{ home_dir }}/.kube"
@@ -60,3 +60,32 @@
         helm_version: v3.16.3
         helm_platform: linux
         helm_arch: "{{ ansible_architecture_alt }}"
+
+    - name: Setup NFS access
+      block:
+        - name: "Install nfs-common package"
+          become: true
+          ansible.builtin.package:
+            name: nfs-common
+        - name: "Create the nfs-subdir-external-provisioner namespace"
+          kubernetes.core.k8s:
+            kind: Namespace
+            api_version: v1
+            name: nfs-subdir-external-provisioner
+        - name: "Add the nfs-subdir-external-provisioner helm repo"
+          kubernetes.core.helm_repository:
+            name: nfs-subdir-external-provisioner
+            repo_url: "https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/"
+        - name: "Install nfs-subdir-external-provisioner via helm"
+          kubernetes.core.helm:
+            name: nfs-subdir-external-provisioner
+            chart_ref: nfs-subdir-external-provisioner/nfs-subdir-external-provisioner
+            chart_version: 4.0.18
+            release_namespace: nfs-subdir-external-provisioner
+            values:
+              nfs:
+                server: "{{ nfs_server }}"
+                path: "{{ nfs_root_path }}"
+              storageClass:
+                archiveOnDelete: false # We want to reuse our data when redeploying the infra
+                pathPattern: "${.PVC.namespace}/${.PVC.annotations.nfs.io/storage-path}"
