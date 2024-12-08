@@ -12,17 +12,10 @@
       namespace: "{{ k3s_service_namespace }}"
       apply: true
   block:
-    - name: "Debug"
-      ansible.builtin.debug:
-        var: config_map_files
     - name: "ConfigMaps"
       kubernetes.core.k8s:
         state: "{{ 'present' if k3s_service_state == 'present' and config_map_enabled else 'absent' }}"
         template: "configmap.yml.j2"
-    # - name: 'StorageClass'
-    #   kubernetes.core.k8s:
-    #     state: present
-    #     template: "persistent-storage-class.yaml.j2"
     - name: Storage
       with_items: "{{ data_volumes }}"
       loop_control:
