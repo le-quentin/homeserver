@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ k3s_service_name }}"
+  namespace: "{{ k3s_service_namespace }}"
+spec:
+  selector:
+    matchLabels:
+      name: "{{ k3s_service_name }}"
+  replicas: 1 # tells deployment to run 1 pods matching the template
+  template: # create pods using pod definition in this template
+    metadata:
+      labels:
+        name: "{{ k3s_service_name }}"
+    spec:
+      containers:
+      - name: "{{ k3s_service_name }}"
+        image: "{{ k3s_service_image }}"
+        ports:
+        - containerPort: {{ k3s_service_container_port }}
+        volumeMounts:
+{% for volume in data_volumes %}
+        - name:  "{{ k3s_service_name }}-volume-{{ volume.name }}"
+          mountPath: "{{ volume.mount_path }}"
+{% endfor %}
+{% for file in config_map_files | selectattr('init_only', 'equalto', false) %}
+        - name:  "{{ k3s_service_name }}-configuration-volume"
+          mountPath: "{{ file.mount_path }}"
+          subPath: "{{ file.name }}"
+{% endfor %}
+      volumes:
+{% for volume in data_volumes %}
+      - name: "{{ k3s_service_name }}-volume-{{ volume.name }}"
+        persistentVolumeClaim:
+          claimName: "{{ k3s_service_name }}-pvc-{{ volume.name }}"
+{% endfor %}
+{% if config_map_enabled %}
+      - name: "{{ k3s_service_name }}-configuration-volume"
+        configMap:
+          name: "{{ k3s_service_name }}-config-files"
+{% endif %}
+{% if config_map_files | selectattr('init_only', 'equalto', true) | length>0 %}
+      initContainers:
+      - name: "{{ k3s_service_name }}-init"
+        image: busybox
+        command:
+{% set commands = [] %}
+{% for file in config_map_files | selectattr('init_only', 'equalto', true) %}
+  {{ commands.append("cp -n '/tmp"~(file.mount_path)~"' '"~file.mount_path~"'") }}
+{% endfor %}
+        - "sh"
+        - "-c"
+        - "{{ commands | join(';') }}"
+        volumeMounts:
+{% for volume in data_volumes %}
+        - name:  "{{ k3s_service_name }}-volume-{{ volume.name }}"
+          mountPath: "{{ volume.mount_path }}"
+{% endfor %}
+{% for file in config_map_files | selectattr('init_only', 'equalto', true) %}
+        - name:  "{{ k3s_service_name }}-configuration-volume"
+          mountPath: "/tmp{{ file.mount_path }}"
+          subPath: "{{ file.name }}"
+{% endfor %}
+{% endif %}

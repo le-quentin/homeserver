@@ -1,48 +1,52 @@
+---
 - name: Setup backups
   hosts: backupservs
   vars:
     docker_volume_backup_root: "{{ ansible_files_root }}/docker-volume-backup"
     backups_dir: "{{ home_dir }}/backups"
   tasks:
-    - include_tasks: "tasks/install-docker.yaml"
+    - name: Ensure docker is installed
+      ansible.builtin.include_tasks: "tasks/install-docker.yaml"
     - name: Install unzip
-      become: yes
-      package:
-        name: 
+      become: true
+      ansible.builtin.package:
+        name:
           - unzip
     - name: Install rclone (used for syncing backups in the cloud)
-      become: yes
-      script: "./resources/backups/install-rclone.sh {{ ansible_architecture_alt }}"
+      become: true
+      ansible.builtin.script: "./resources/backups/install-rclone.sh {{ ansible_architecture_alt }}"
       args:
         creates: "/usr/local/bin/rclone"
     - name: Ensure rclone config folder exists
       ansible.builtin.file:
-        path:  "{{ home_dir }}/.config/rclone"
+        path: "{{ home_dir }}/.config/rclone"
         state: directory
-        mode: '0755'
-        recurse: yes
+        mode: "0755"
+        recurse: true
     - name: Copy rclone config
-      copy:
-         src: "./resources/backups/rclone.conf"
-         dest: "{{ home_dir }}/.config/rclone/rclone.conf"
+      ansible.builtin.copy:
+        src: "./resources/backups/rclone.conf"
+        dest: "{{ home_dir }}/.config/rclone/rclone.conf"
+        mode: "0644"
     - name: Ensure backup folder exists
       ansible.builtin.file:
         path: "{{ backups_dir }}"
         state: directory
-        mode: '0755'
+        mode: "0755"
     - name: Ensure docker-volume-backup folder exists
       ansible.builtin.file:
         path: "{{ docker_volume_backup_root }}"
         state: directory
-        mode: '0755'
+        mode: "0755"
     - name: Interpret docker-volume-backup compose template
-      template:
+      ansible.builtin.template:
         src: "./resources/backups/local-backups-compose.yaml.j2"
         dest: "{{ docker_volume_backup_root }}/compose.yaml"
+        mode: "0644"
     - name: Install crontab
-      become: yes
-      package:
-        name: 
+      become: true
+      ansible.builtin.package:
+        name:
           - cron
     - name: Setup the local backups cron
       ansible.builtin.cron:
@@ -60,7 +64,7 @@
         job: "/usr/local/bin/rclone copy {{ backups_dir }}/ proton:{{ remote_backups_path }}"
         state: "{{ remote_backups_enabled | ternary('present', 'absent') }}"
     # Delete backup files older than 7 days
-    # Not a good solution because it doesn't ensure the files were uploaded, which could get bad in case of 
+    # Not a good solution because it doesn't ensure the files were uploaded, which could get bad in case of
     # TODO - Proper solution that keeps N files for each service, and delete the older ones
     - name: Setup the cron to cleanup old backups locally
       ansible.builtin.cron:
@@ -73,15 +77,16 @@
       ansible.builtin.file:
         path: "{{ home_dir }}/scripts"
         state: directory
-        mode: '0755'
+        mode: "0755"
     - name: Interpret scripts templates to restore backups
-      template:
+      ansible.builtin.template:
         src: "./resources/backups/scripts/{{ item | basename }}"
         dest: "{{ home_dir }}/scripts/{{ item | basename | splitext | first }}"
+        mode: "0644"
       with_fileglob:
         - "./resources/backups/scripts/*"
     - name: Make all scripts executable
-      file:
+      ansible.builtin.file:
         path: "{{ home_dir }}/scripts/{{ item | basename | splitext | first }}"
         mode: "0775"
       with_fileglob:

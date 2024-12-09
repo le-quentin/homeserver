@@ -1,9 +1,10 @@
+---
 global:
   # How frequently to scrape targets by default.
   scrape_interval: 15s
 
   # How long until a scrape request times out.
-  scrape_timeout:  10s
+  scrape_timeout: 10s
 
   # The protocols to negotiate during a scrape with the client.
   # Supported values (case sensitive): PrometheusProto, OpenMetricsText0.0.1,
@@ -24,19 +25,19 @@ global:
   # Reloading the configuration will reopen the file.
   query_log_file: /prometheus/query.log
 
-    # A scrape configuration containing exactly one endpoint to scrape:
+# A scrape configuration containing exactly one endpoint to scrape:
 # Here it's Prometheus itself.
 scrape_configs:
   # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
-  - job_name: 'docker'
+  - job_name: "docker"
 
     static_configs:
-      - targets: ['cadvisor:8080']
+      - targets: ["cadvisor:8080"]
 
-  - job_name: 'host'
+  - job_name: "host"
 
     static_configs:
-      - targets: ['host.docker.internal:9100']
+      - targets: ["host.docker.internal:9100"]
   # An uncompressed response body larger than this many bytes will cause the
   # scrape to fail. 0 means no limit. Example: 100MB.
   # This is an experimental feature, this behaviour could

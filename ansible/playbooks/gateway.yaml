@@ -1,32 +1,36 @@
+---
 - name: Install gateway
   hosts: gatewayservs
   tasks:
-    - include_tasks: "tasks/install-docker.yaml"
+    - name: Ensure docker is installed
+      ansible.builtin.include_tasks: "tasks/install-docker.yaml"
     - name: Setup docker networks
-      become: yes
+      become: true
       community.docker.docker_network:
         name: "{{ item }}"
       loop:
         - public-net
         - services-net
         - monitoring-net
-    - block:
-      - name: Copy gateway files
-        copy:
-          src: "./resources/gateway"
-          dest: "{{ ansible_files_root }}"
-      - name: Interpret gateway conf template
-        become: yes
-        template:
-          src: ./resources/gateway/nginx.conf.j2
-          dest: "{{ ansible_files_root }}/gateway/nginx.conf"
+    - name: Copy files
       notify:
         - Run gateway
+      block:
+        - name: Copy gateway files
+          ansible.builtin.copy:
+            src: "./resources/gateway"
+            dest: "{{ ansible_files_root }}"
+            mode: "0644"
+        - name: Interpret gateway conf template
+          become: true
+          ansible.builtin.template:
+            src: ./resources/gateway/nginx.conf.j2
+            dest: "{{ ansible_files_root }}/gateway/nginx.conf"
+            mode: "0644"
   handlers:
     - name: Run gateway
-      become: yes
+      become: true
       community.docker.docker_compose_v2:
         project_src: "{{ ansible_files_root }}/gateway"
         recreate: always # so that changes in config are applied
         build: always # rebuild gateway if changes are detected
-      

@@ -1,0 +1,35 @@
+---
+- name: Initialise role variables (check required inputs, and set computed values)
+  ansible.builtin.include_tasks: init-vars.yml
+- name: Namespace
+  kubernetes.core.k8s:
+    name: "{{ k3s_service_namespace }}"
+    api_version: v1
+    kind: Namespace
+- name: Set module defaults
+  module_defaults:
+    kubernetes.core.k8s:
+      namespace: "{{ k3s_service_namespace }}"
+      apply: true
+  block:
+    - name: "ConfigMaps"
+      kubernetes.core.k8s:
+        state: "{{ 'present' if k3s_service_state == 'present' and config_map_enabled else 'absent' }}"
+        template: "configmap.yml.j2"
+    - name: Storage
+      with_items: "{{ data_volumes }}"
+      loop_control:
+        loop_var: "volume"
+      ansible.builtin.include_tasks: setup-storage.yml
+    - name: "Deployment"
+      kubernetes.core.k8s:
+        state: "{{ k3s_service_state }}"
+        template: "deployment.yaml.j2"
+    - name: "Service"
+      kubernetes.core.k8s:
+        state: "{{ k3s_service_state }}"
+        template: "service.yaml.j2"
+    - name: "Ingress"
+      kubernetes.core.k8s:
+        state: "{{ k3s_service_state }}"
+        template: "ingress.yaml.j2"

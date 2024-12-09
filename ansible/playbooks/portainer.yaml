@@ -1,24 +1,26 @@
+---
 - name: Install Portainer
   hosts: portainerservs
   tasks:
-    - include_tasks: "tasks/install-docker.yaml"
+    - name: Ensure docker is installed
+      ansible.builtin.include_tasks: "tasks/install-docker.yaml"
     - name: Make sure the portainer volume exists
-      become: yes
+      become: true
       community.docker.docker_volume:
         name: portainer-data
     - name: Make sure the docker network exists
-      become: yes
+      become: true
       community.docker.docker_network:
         name: "monitoring-net"
     - name: Create portainer container
-      become: yes
-      docker_container:
+      become: true
+      community.docker.docker_container:
         name: portainer
         labels:
           homeserver.container-category: monitoring
         image: portainer/portainer-ce:2.19.4-alpine
         state: started
-        recreate: yes
+        recreate: true
         restart_policy: unless-stopped
         network_mode: monitoring-net
         env:
@@ -29,18 +31,17 @@
         volumes:
           - /var/run/docker.sock:/var/run/docker.sock
           - portainer-data:/data
-        # mounts:
-        #   - type: volume
-        #     source: portainer-data
-        #     target: /data
+    # mounts:
+    #   - type: volume
+    #     source: portainer-data
+    #     target: /data
     - name: Setup portainer admin password
-      uri:
+      ansible.builtin.uri:
         url: "https://localhost:9443/api/users/admin/init"
         method: POST
         status_code: [200, 409] # Allow 409 for idempotence of the playbook
-        validate_certs: no
+        validate_certs: false
         body_format: json
         body:
           username: "{{ portainer_username }}"
           password: "{{ portainer_password }}"
-

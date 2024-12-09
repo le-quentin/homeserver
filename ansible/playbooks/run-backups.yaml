@@ -1,3 +1,4 @@
+---
 - name: Manually run local backups
   hosts: backupservs
   vars:
@@ -7,7 +8,7 @@
     - name: Run prometheus backup
       tags:
         - prometheus
-      become: yes
+      become: true
       community.docker.docker_compose_v2:
         project_src: "{{ docker_volume_backup_root }}"
         services:
@@ -16,7 +17,7 @@
     - name: Run home-assistant backup
       tags:
         - home-assistant
-      become: yes
+      become: true
       community.docker.docker_compose_v2:
         project_src: "{{ docker_volume_backup_root }}"
         services:
@@ -25,7 +26,7 @@
     - name: Run zigbee2mqtt backup
       tags:
         - zigbee2mqtt
-      become: yes
+      become: true
       community.docker.docker_compose_v2:
         project_src: "{{ docker_volume_backup_root }}"
         services:
@@ -34,7 +35,7 @@
     - name: Run mosquitto backup
       tags:
         - mosquitto
-      become: yes
+      become: true
       community.docker.docker_compose_v2:
         project_src: "{{ docker_volume_backup_root }}"
         services:
