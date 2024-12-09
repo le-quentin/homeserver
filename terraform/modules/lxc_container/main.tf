@@ -56,6 +56,11 @@ resource "proxmox_virtual_environment_container" "lxc" {
 
   }
 
+  unprivileged = false
+  features {
+    nesting = true
+  }
+
   network_interface {
     name     = "eth0"
     bridge   = var.bridge_lan_interface

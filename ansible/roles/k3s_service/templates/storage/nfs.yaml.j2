@@ -4,7 +4,6 @@ kind: PersistentVolumeClaim
 metadata:
   name: "{{ k3s_service_name }}-pvc-{{ volume.name }}"
   namespace: "{{ k3s_service_namespace }}"
-  nfs-directory: "{{ volume.name }}"
   annotations:
     nfs.io/storage-path: "{{ volume.name }}"
 spec:

@@ -27,3 +27,4 @@ module "nfs_server" {
     }
   }
 }
+# TODO add firewall for security

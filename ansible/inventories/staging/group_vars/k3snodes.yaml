@@ -1,6 +1,7 @@
+---
 k3s_cluster_cidr: 172.42.0.0/16
 k3s_services_cidr: 172.43.0.0/16
 k3s_cluster_dns: 172.43.0.10
 
-nfs_server: 10.142.10.9
+nfs_server: 10.142.10.20
 nfs_root_path: /srv/nfs/k3s/volumes
