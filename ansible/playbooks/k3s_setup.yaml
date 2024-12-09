@@ -5,6 +5,17 @@
     k3s_release_version: v1.31.2+k3s1
     k3s_become: true
   tasks:
+    - name: Python dependencies for kubernetes modules
+      block:
+        - name: Copy requirements.txt
+          ansible.builtin.copy:
+            src: "resources/k3s_setup/requirements.txt"
+            dest: "/tmp/requirements.txt"
+            mode: "0600"
+        - name: Install requirements
+          ansible.builtin.pip:
+            requirements: /tmp/requirements.txt
+
     - name: Check if k3s is installed
       ansible.builtin.command: k3s --version
       register: k3s_installed

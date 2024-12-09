@@ -12,6 +12,16 @@ variable "images" {
   description = "Object containing the various images availables for VM creation"
 }
 
+variable "vm_name" {
+  type        = string
+  description = "Name of the VM as it will appear in Proxmox"
+}
+
+variable "vm_description" {
+  type        = string
+  description = "Description of the VM as it will appear in Proxmox"
+}
+
 variable "vm_ids_offset" {
   type = number
 }
@@ -29,7 +39,7 @@ variable "vm_dedicated_memory" {
 variable "vm_floating_memory" {
   type        = number
   description = "Set equal to dedicated to enable ballooning"
-  default     = 0
+  default     = 2048
 }
 
 variable "bridge_lan_interface" {
@@ -48,18 +58,6 @@ variable "node_name" {
   type        = string
   description = "Name of the node where all the resources will be"
   default     = "beelink"
-}
-
-variable "vm_name" {
-  type        = string
-  description = "Name of the VM as it will appear in Proxmox"
-  default     = "k3s-node"
-}
-
-variable "vm_description" {
-  type        = string
-  description = "Description of the VM as it will appear in Proxmox"
-  default     = "A k3s node (agent or server) machine"
 }
 
 variable "disk_storage" {

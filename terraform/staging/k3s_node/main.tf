@@ -1,5 +1,5 @@
 module "k3s_node" {
-  source = "../../modules/k3s_node"
+  source = "../../modules/vm"
 
   //TODO use local datasource to communicate module outputs (https://developer.hashicorp.com/terraform/language/backend/local)
   images = {
@@ -21,6 +21,10 @@ module "k3s_node" {
   #   { device_id = "toto" }
   # ]
 
+  vm_cpu_cores = 2 
+  vm_dedicated_memory = 2048
+  vm_floating_memory = 0 # Disable ballooning because k3s doesn't like swapping
+
   vm_params = {
     address   = var.vm_address
     disk_size = 30
@@ -29,5 +33,9 @@ module "k3s_node" {
       ssh_key  = var.vm_ssh_key
       username = var.vm_username
     }
+  }
+
+  custom_python = {
+    enabled = true
   }
 }
