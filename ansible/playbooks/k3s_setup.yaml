@@ -78,25 +78,21 @@
           become: true
           ansible.builtin.package:
             name: nfs-common
-        - name: "Create the nfs-subdir-external-provisioner namespace"
+        - name: "Create the csi-driver-nfs namespace"
           kubernetes.core.k8s:
             kind: Namespace
             api_version: v1
-            name: nfs-subdir-external-provisioner
-        - name: "Add the nfs-subdir-external-provisioner helm repo"
+            name: csi-driver-nfs
+        - name: "Add the csi-driver-nfs helm repo"
           kubernetes.core.helm_repository:
-            name: nfs-subdir-external-provisioner
-            repo_url: "https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner/"
-        - name: "Install nfs-subdir-external-provisioner via helm"
+            name: csi-driver-nfs
+            repo_url: "https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts"
+        - name: "Install csi-driver-nfs via helm"
           kubernetes.core.helm:
-            name: nfs-subdir-external-provisioner
-            chart_ref: nfs-subdir-external-provisioner/nfs-subdir-external-provisioner
-            chart_version: 4.0.18
-            release_namespace: nfs-subdir-external-provisioner
+            name: csi-driver-nfs
+            chart_ref: csi-driver-nfs/csi-driver-nfs
+            chart_version: 4.9.0
+            release_namespace: csi-driver-nfs
             values:
-              nfs:
-                server: "{{ nfs_server }}"
-                path: "{{ nfs_root_path }}"
-              storageClass:
-                archiveOnDelete: false # We want to reuse our data when redeploying the infra
-                pathPattern: "${.PVC.namespace}/${.PVC.annotations.nfs.io/storage-path}"
+              controller:
+                defaultOnDeletePolicy: retain

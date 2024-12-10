@@ -32,7 +32,7 @@ spec:
 {% for volume in data_volumes %}
       - name: "{{ k3s_service_name }}-volume-{{ volume.name }}"
         persistentVolumeClaim:
-          claimName: "{{ k3s_service_name }}-pvc-{{ volume.name }}"
+          claimName: "{{ volume.name }}"
 {% endfor %}
 {% if config_map_enabled %}
       - name: "{{ k3s_service_name }}-configuration-volume"

@@ -12,24 +12,28 @@
       namespace: "{{ k3s_service_namespace }}"
       apply: true
   block:
-    - name: "ConfigMaps"
+    - name: ConfigMaps
       kubernetes.core.k8s:
         state: "{{ 'present' if k3s_service_state == 'present' and config_map_enabled else 'absent' }}"
         template: "configmap.yml.j2"
+    - name: StorageClass
+      kubernetes.core.k8s:
+        state: present
+        template: "storage-classes.yaml.j2"
     - name: Storage
       with_items: "{{ data_volumes }}"
       loop_control:
         loop_var: "volume"
       ansible.builtin.include_tasks: setup-storage.yml
-    - name: "Deployment"
+    - name: Deployment
       kubernetes.core.k8s:
         state: "{{ k3s_service_state }}"
         template: "deployment.yaml.j2"
-    - name: "Service"
+    - name: Service
       kubernetes.core.k8s:
         state: "{{ k3s_service_state }}"
         template: "service.yaml.j2"
-    - name: "Ingress"
+    - name: Ingress
       kubernetes.core.k8s:
         state: "{{ k3s_service_state }}"
         template: "ingress.yaml.j2"

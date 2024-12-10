@@ -2,14 +2,12 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: "{{ k3s_service_name }}-pvc-{{ volume.name }}"
+  name: "{{ volume.name }}"
   namespace: "{{ k3s_service_namespace }}"
-  annotations:
-    nfs.io/storage-path: "{{ volume.name }}"
 spec:
   accessModes:
     - ReadWriteOnce
-  storageClassName: nfs-client
+  storageClassName: nfs-dynamic
   resources:
     requests:
       storage:  "{{ volume.size }}"
