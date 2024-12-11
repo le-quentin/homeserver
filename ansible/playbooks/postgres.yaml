@@ -30,6 +30,7 @@
               'priv': 'CONNECT/CREATE'
             }]
           }}
+        # TODO turn into a role to get more flexible settings for access to each database with default etc 
         postgresql_hba_entries: >-
           {{
             (postgresql_hba_entries | default([
@@ -38,8 +39,8 @@
               { 'type': 'host', 'database': 'all', 'user': 'all', 'address': '127.0.0.1/32', 'auth_method': 'md5' },
               { 'type': 'host', 'database': 'all', 'user': 'all', 'address': '::1/128', 'auth_method': 'md5' }
           ])) + [
-            { 'type': 'host', 'database': item.name, 'user': item.user, 'address': '10.142.0.0/16', 'auth_method': 'md5' },
-            { 'type': 'host', 'database': item.name, 'user': item.user, 'address': '192.168.50.0/24', 'auth_method': 'md5' }
+            { 'type': 'host', 'database': item.name, 'user': item.user, 'address': lan_cidr, 'auth_method': 'md5' },
+            { 'type': 'host', 'database': item.name, 'user': item.user, 'address': k3s_cluster_cidr, 'auth_method': 'md5' }
           ]
           }}
       with_items: "{{ databases }}"
