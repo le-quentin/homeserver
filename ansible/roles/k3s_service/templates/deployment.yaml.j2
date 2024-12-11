@@ -7,38 +7,50 @@ spec:
   selector:
     matchLabels:
       name: "{{ k3s_service_name }}"
-  replicas: 1 # tells deployment to run 1 pods matching the template
-  template: # create pods using pod definition in this template
+  replicas: 1 
+  template: 
     metadata:
       labels:
         name: "{{ k3s_service_name }}"
     spec:
+
+{#################### containers ####################}
       containers:
-      - name: "{{ k3s_service_name }}"
-        image: "{{ k3s_service_image }}"
-        ports:
-        - containerPort: {{ k3s_service_container_port }}
-        volumeMounts:
+
+        - name: "{{ k3s_service_name }}"
+          image: "{{ k3s_service_image }}"
+          ports:
+            - containerPort: {{ k3s_service_container_port }}
+          volumeMounts:
 {% for volume in data_volumes %}
-        - name:  "{{ k3s_service_name }}-volume-{{ volume.name }}"
-          mountPath: "{{ volume.mount_path }}"
+            - name:  "volume-{{ volume.name }}"
+              mountPath: "{{ volume.mount_path }}"
 {% endfor %}
 {% for file in config_map_files | selectattr('init_only', 'equalto', false) %}
-        - name:  "{{ k3s_service_name }}-configuration-volume"
-          mountPath: "{{ file.mount_path }}"
-          subPath: "{{ file.name }}"
+            - name:  "volume-configuration"
+              mountPath: "{{ file.mount_path }}"
+              subPath: "{{ file.name }}"
 {% endfor %}
+
+{#################### Volumes ####################}
       volumes:
 {% for volume in data_volumes %}
-      - name: "{{ k3s_service_name }}-volume-{{ volume.name }}"
+      - name: "volume-{{ volume.name }}"
         persistentVolumeClaim:
           claimName: "{{ volume.name }}"
+{% if volume.type == 'sqlite' %}
+      - name: "volume-nfs-sync-{{ volume.name }}"
+        persistentVolumeClaim:
+          claimName: "synced-{{ volume.name }}"
+{% endif %}
 {% endfor %}
 {% if config_map_enabled %}
-      - name: "{{ k3s_service_name }}-configuration-volume"
+      - name: "volume-configuration"
         configMap:
           name: "{{ k3s_service_name }}-config-files"
 {% endif %}
+
+{#################### Init containers ####################}
 {% if config_map_files | selectattr('init_only', 'equalto', true) | length>0 %}
       initContainers:
       - name: "{{ k3s_service_name }}-init"
@@ -53,11 +65,11 @@ spec:
         - "{{ commands | join(';') }}"
         volumeMounts:
 {% for volume in data_volumes %}
-        - name:  "{{ k3s_service_name }}-volume-{{ volume.name }}"
+        - name:  "volume-{{ volume.name }}"
           mountPath: "{{ volume.mount_path }}"
 {% endfor %}
 {% for file in config_map_files | selectattr('init_only', 'equalto', true) %}
-        - name:  "{{ k3s_service_name }}-configuration-volume"
+        - name:  "volume-configuration"
           mountPath: "/tmp{{ file.mount_path }}"
           subPath: "{{ file.name }}"
 {% endfor %}
