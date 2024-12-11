@@ -6,7 +6,7 @@ module "k3s_node" {
     debian = "local:iso/debian-12-generic-amd64.img"
   }
 
-  vm_id          = 2010
+  vm_id       = 2010
   name        = "k3s-server"
   description = "The k3s server node, running both the control plane and a kubelet for pods hosting"
 
