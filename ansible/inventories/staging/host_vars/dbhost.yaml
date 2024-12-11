@@ -1,0 +1,7 @@
+---
+ansible_host: 10.142.10.21
+ansible_user: db_user
+home_dir: /home/{{ hostvars.dbhost.ansible_user }}
+ansible_files_root: /home/{{ hostvars.dbhost.ansible_user }}/ansible-files
+ansible_python_interpreter: /usr/bin/python3
+ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"

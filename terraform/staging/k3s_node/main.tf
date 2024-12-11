@@ -6,9 +6,9 @@ module "k3s_node" {
     debian = "local:iso/debian-12-generic-amd64.img"
   }
 
-  vm_ids_offset  = 2000
-  vm_name        = "k3s-server"
-  vm_description = "The k3s server node, running both the control plane and a kubelet for pods hosting"
+  vm_id          = 2010
+  name        = "k3s-server"
+  description = "The k3s server node, running both the control plane and a kubelet for pods hosting"
 
   environment = "staging"
   pool        = "staging"
@@ -21,9 +21,9 @@ module "k3s_node" {
   #   { device_id = "toto" }
   # ]
 
-  vm_cpu_cores = 2 
+  vm_cpu_cores        = 2
   vm_dedicated_memory = 2048
-  vm_floating_memory = 0 # Disable ballooning because k3s doesn't like swapping
+  vm_floating_memory  = 0 # Disable ballooning because k3s doesn't like swapping
 
   vm_params = {
     address   = var.vm_address

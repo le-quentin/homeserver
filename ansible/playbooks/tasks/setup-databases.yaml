@@ -1,0 +1,37 @@
+- name: "Create database ({{ item.name }})"
+  ansible.community.postgresql_db:
+    state: present
+    name: "{{ item.name }}"
+  become: true
+  become_user: postgres
+
+- name: "Create user ({{ item.user }})"
+  ansible.community.postgresql_user:
+    state: present
+    name: "{{ item.name.user }}"
+    password: "{{ item.password }}"
+  become: true
+  become_user: postgres
+  no_log: true
+
+- name: "Grant user access to db ({{ item.name }})"
+  ansible.community.postgresql_privs:
+    type: database
+    database: "{{ item.name }}"
+    roles: "{{ item.user }}"
+    grant_option: false
+    privs: all
+  become: true
+  become_user: postgres
+
+- name: "Allow md5 connection for the db user ({{ item.name }})"
+  ansible.community.postgresql_pg_hba:
+    dest: "~/data/pg_hba.conf"
+    contype: host
+    databases: all
+    method: md5
+    users: "{{ item.user }}"
+    create: true
+  become: true
+  become_user: postgres
+  notify: Restart postgres

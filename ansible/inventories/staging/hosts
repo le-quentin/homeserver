@@ -4,6 +4,9 @@ k3scontroller
 [nfsservs]
 nfshost
 
+[postgresservs]
+dbhost
+
 [adguardservs]
 dnshost
 

@@ -8,7 +8,7 @@ terraform {
 }
 
 locals {
-  lxc_id = var.ids_offset + 20
+  lxc_id = var.vm_id
 }
 
 variable "lxc_params" {
@@ -56,9 +56,9 @@ resource "proxmox_virtual_environment_container" "lxc" {
 
   }
 
-  unprivileged = false
+  unprivileged = !var.privileged
   features {
-    nesting = true
+    nesting = var.nesting
   }
 
   network_interface {

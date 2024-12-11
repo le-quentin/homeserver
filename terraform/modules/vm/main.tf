@@ -30,7 +30,7 @@ variable "custom_python" {
 }
 
 locals {
-  vm_id    = var.vm_ids_offset + 10
+  vm_id    = var.vm_id
   home_dir = "/home/${var.vm_params.user.username}"
   python_venv_cmds = var.custom_python.enabled ? [
     "apt install -y python3-venv",
@@ -78,8 +78,8 @@ resource "proxmox_virtual_environment_file" "cloudinit_user" {
 
 resource "proxmox_virtual_environment_vm" "vm" {
   node_name   = var.node_name
-  name        = var.vm_name
-  description = var.vm_description
+  name        = var.name
+  description = var.description
 
   pool_id = var.pool
   vm_id   = local.vm_id

@@ -12,17 +12,17 @@ variable "images" {
   description = "Object containing the various images availables for VM creation"
 }
 
-variable "vm_name" {
+variable "name" {
   type        = string
   description = "Name of the VM as it will appear in Proxmox"
 }
 
-variable "vm_description" {
+variable "description" {
   type        = string
   description = "Description of the VM as it will appear in Proxmox"
 }
 
-variable "vm_ids_offset" {
+variable "vm_id" {
   type = number
 }
 

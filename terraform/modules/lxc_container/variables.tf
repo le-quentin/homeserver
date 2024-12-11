@@ -12,7 +12,7 @@ variable "images" {
   description = "Object containing the various images availables for VM creation"
 }
 
-variable "ids_offset" {
+variable "vm_id" {
   type = number
 }
 
@@ -68,3 +68,14 @@ variable "disk_storage" {
   default     = "local-lvm"
 }
 
+variable "privileged" {
+  type        = bool
+  description = "Is the container running in privileged mode ? (dangerous)"
+  default     = false
+}
+
+variable "nesting" {
+  type        = bool
+  description = "Is nesting feature enabled ? (dangerous++)"
+  default     = false
+}
