@@ -2,9 +2,14 @@
 - name: Install and setup PostgreSQL
   hosts: postgresservs
   become: true
+  become_user: postgres
+  vars:
+    client_ip: "{{ k3s_controller_ip }}/32"
+    ansible_ssh_pipelining: true
   roles:
     - role: geerlingguy.postgresql
       become: true
+      become_user: postgres
       vars:
         postgres_users_no_log: false
   pre_tasks:
@@ -39,11 +44,18 @@
               { 'type': 'host', 'database': 'all', 'user': 'all', 'address': '::1/128', 'auth_method': 'md5' }
           ])) + [
             { 'type': 'host', 'database': item.name, 'user': item.user, 'address': lan_cidr, 'auth_method': 'md5' },
-            { 'type': 'host', 'database': item.name, 'user': item.user, 'address': k3s_cluster_cidr, 'auth_method': 'md5' }
+            { 'type': 'host', 'database': item.name, 'user': item.user, 'address': client_ip, 'auth_method': 'md5' }
           ]
           }}
       with_items: "{{ databases }}"
-  # post_tasks:
+  post_tasks:
+    - name: Every created user becomes owner of the public schema of its database
+      community.postgresql.postgresql_owner:
+        db: "{{ item.name }}"
+        new_owner: "{{ item.user }}"
+        obj_name: public
+        obj_type: schema
+      with_items: "{{ databases }}"
   #   - name: Grant privileges to users
   #     with_items: "{{ databases }}"
   #     community.postgresql.postgresql_privs:

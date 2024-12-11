@@ -1,6 +1,6 @@
 ---
 - name: Install a k3s service
-  hosts: k3scontroller
+  hosts: homeassistantservs
   tasks:
     - name: Deploy the test k3s service
       ansible.builtin.include_role:

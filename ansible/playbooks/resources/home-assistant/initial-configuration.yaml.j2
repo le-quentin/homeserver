@@ -17,9 +17,10 @@ logger:
   default: info
 
 recorder:
-  purge_keep_days: 7
+  db_url: "postgresql://{{ db.user }}:{{ db.password }}@{{ database_ip }}/{{ db.name }}"
+  purge_keep_days: 56
   auto_purge: true
-  auto_repack: true
+  auto_repack: false
   # Maybe someday do something like this if DB gets too huge
   # include:
   #   domains:

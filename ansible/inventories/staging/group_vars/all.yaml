@@ -3,3 +3,4 @@ homeserver_domain: staging.home
 dns_ip: 10.142.1.2
 legacy_server_ip: 10.142.1.200
 k3s_controller_ip: 10.142.10.10
+database_ip: 10.142.10.21

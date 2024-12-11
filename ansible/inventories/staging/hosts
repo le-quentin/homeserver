@@ -17,7 +17,7 @@ mainhost
 mainhost
 
 [homeassistantservs]
-mainhost
+k3scontroller
 
 [zigbee2mqttservs]
 mainhost
