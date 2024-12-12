@@ -38,11 +38,27 @@
   ansible.builtin.include_tasks: setup_backups.yml
 
 - name: Run a backup
-  become: true
-  become_user: postgres
-  community.postgresql.postgresql_db:
-    state: dump
-    name: "{{ db }}"
-    target: "~/backups/{{ db }}/dump-{{ db }}-{{ now(fmt='%Y-%m-%d_%H:%M') }}.tar.gz"
+  vars:
+    dump_path: "/tmp/dump-{{ db }}-{{ now(fmt='%Y-%m-%d_%H:%M') }}.tar.gz"
+    backup_dir: "/backups/{{ db }}"
   no_log: "{{ postgres_no_log }}"
   tags: never,backup
+  block:
+    - name: Dump the database
+      become: true
+      become_user: postgres
+      community.postgresql.postgresql_db:
+        state: dump
+        name: "{{ db }}"
+        target: "{{ dump_path }}"
+    - name: Give ownership to nfs user
+      become: true
+      ansible.builtin.file:
+        path: "{{ dump_path }}"
+        owner: "nfs"
+        group: "nfs"
+    - name: Move the dump file to backups folder
+      changed_when: true
+      become: true
+      become_user: nfs
+      ansible.builtin.shell: "mkdir -p {{ backup_dir }}; mv {{ dump_path }} {{ backup_dir }}"
