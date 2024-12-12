@@ -1,0 +1,5 @@
+---
+postgres_no_log: true
+postgres_global_options:
+  - option: listen_addresses
+    value: "{{ postgres_host_ip }}"

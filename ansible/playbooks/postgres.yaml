@@ -2,73 +2,12 @@
 - name: Install and setup PostgreSQL
   hosts: postgresservs
   become: true
-  become_user: postgres
+  # become_user: postgres
   vars:
-    client_ip: "{{ k3s_controller_ip }}/32"
     ansible_ssh_pipelining: true
   roles:
-    - role: geerlingguy.postgresql
-      become: true
-      become_user: postgres
+    - role: postgres
       vars:
-        postgres_users_no_log: true
-  pre_tasks:
-    - name: Set facts for global options
-      ansible.builtin.set_fact:
-        postgresql_global_config_options: "{{ (postgresql_global_config_options | default([])) + global_options }}"
-      no_log: true
-    - name: Set facts for databases and access
-      ansible.builtin.set_fact:
-        postgresql_databases: >-
-          {{
-            (postgresql_databases | default([])) + [{
-              'name': item.name
-            }]
-          }}
-        postgresql_users: >-
-          {{
-            (postgresql_users | default([])) + [{
-              'db': item.name,
-              'name': item.user,
-              'password': item.password,
-              'encrypted': true,
-              'priv': 'CONNECT/CREATE'
-            }]
-          }}
-        # TODO turn into a role to get more flexible settings for access to each database with default etc
-        postgresql_hba_entries: >-
-          {{
-            (postgresql_hba_entries | default([
-              { 'type': 'local', 'database': 'all', 'user': 'postgres', 'auth_method': 'peer' },
-              { 'type': 'local', 'database': 'all', 'user': 'all', 'auth_method': 'peer' },
-              { 'type': 'host', 'database': 'all', 'user': 'all', 'address': '127.0.0.1/32', 'auth_method': 'md5' },
-              { 'type': 'host', 'database': 'all', 'user': 'all', 'address': '::1/128', 'auth_method': 'md5' }
-          ])) + [
-            { 'type': 'host', 'database': item.name, 'user': item.user, 'address': lan_cidr, 'auth_method': 'md5' },
-            { 'type': 'host', 'database': item.name, 'user': item.user, 'address': client_ip, 'auth_method': 'md5' }
-          ]
-          }}
-      with_items: "{{ databases }}"
-      no_log: true
-  post_tasks:
-    - name: Every created user becomes owner of the public schema of its database
-      community.postgresql.postgresql_owner:
-        db: "{{ item.name }}"
-        new_owner: "{{ item.user }}"
-        obj_name: public
-        obj_type: schema
-      with_items: "{{ databases }}"
-      no_log: true
-
-    - name: Ensure backups dir exist
-      ansible.builtin.file:
-        path: "~/backups/home-assistant"
-        state: directory
-        mode: "0755"
-
-    - name: Test a backup
-      community.postgresql.postgresql_db:
-        state: dump
-        name: "home-assistant"
-        target: "~/backups/home-assistant/dump3.tar.gz"
-      register: backup_result
+        postgres_host_ip: "{{ ansible_host }}"
+        postgres_client_cidr: "{{ k3s_controller_ip }}/32"
+        postgres_lan_cidr: "{{ lan_cidr }}"

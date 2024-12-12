@@ -1,0 +1,86 @@
+---
+# - name: Set facts for direct postgres calls
+#   ansible.builtin.set_fact:
+#     ansible_ssh_pipelining: true
+
+- name: Set facts for present databases
+  ansible.builtin.set_fact:
+    query: "[?state != 'absent']"
+- name: Set facts for present databases
+  ansible.builtin.set_fact:
+    present_databases: "{{ postgres_databases | json_query(query) | list }}"
+- name: Set facts for global options
+  ansible.builtin.set_fact:
+    postgresql_global_config_options: "{{ (postgresql_global_config_options | default([])) + postgres_global_options }}"
+  no_log: "{{ postgres_no_log }}"
+- name: Set facts for databases
+  ansible.builtin.set_fact:
+    postgresql_databases: >-
+      {{
+        (postgresql_databases | default([])) + [{
+          'name': item.name,
+          'state': item.state | default('present')
+        }]
+      }}
+  with_items: "{{ postgres_databases }}"
+  no_log: "{{ postgres_no_log }}"
+- name: Set facts for user access
+  ansible.builtin.set_fact:
+    postgresql_users: >-
+      {{
+        (postgresql_users | default([])) + [{
+          'db': item.name,
+          'name': item.user,
+          'password': item.password,
+          'encrypted': true,
+          'priv': 'CONNECT/CREATE'
+        }]
+      }}
+    postgresql_hba_entries: >-
+      {{
+        (postgresql_hba_entries | default([
+          { 'type': 'local', 'database': 'all', 'user': 'postgres', 'auth_method': 'peer' },
+          { 'type': 'local', 'database': 'all', 'user': 'all', 'auth_method': 'peer' },
+          { 'type': 'host', 'database': 'all', 'user': 'all', 'address': '127.0.0.1/32', 'auth_method': 'md5' },
+          { 'type': 'host', 'database': 'all', 'user': 'all', 'address': '::1/128', 'auth_method': 'md5' }
+      ])) + [
+        { 'type': 'host', 'database': item.name, 'user': item.user, 'address': postgres_lan_cidr, 'auth_method': 'md5' },
+        { 'type': 'host', 'database': item.name, 'user': item.user, 'address': postgres_client_cidr, 'auth_method': 'md5' }
+      ]
+      }}
+  with_items: "{{ present_databases }}"
+  no_log: "{{ postgres_no_log }}"
+
+- name: Call postgres setup role
+  become: true
+  ansible.builtin.import_role:
+    name: geerlingguy.postgresql
+  vars:
+    postgres_users_no_log: "{{ postgres_no_log }}"
+
+- name: Every created user becomes owner of the public schema of its database
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+  community.postgresql.postgresql_owner:
+    db: "{{ item.name }}"
+    new_owner: "{{ item.user }}"
+    obj_name: public
+    obj_type: schema
+  with_items: "{{ present_databases }}"
+  no_log: "{{ postgres_no_log }}"
+
+# - name: Ensure backups dir exist
+#   ansible.builtin.file:
+#     path: "~/backups/home-assistant"
+#     state: directory
+#     mode: "0755"
+#
+# - name: Test a backup
+#   community.postgresql.postgresql_db:
+#     state: dump
+#     name: "home-assistant"
+#     target: "~/backups/home-assistant/dump3.tar.gz"
+#   register: backup_result
+#   no_log: "{{ postgres_no_log }}"
