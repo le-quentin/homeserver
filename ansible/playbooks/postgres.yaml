@@ -59,3 +59,16 @@
         obj_type: schema
       with_items: "{{ databases }}"
       no_log: true
+
+    - name: Ensure backups dir exist
+      ansible.builtin.file:
+        path: "~/backups/home-assistant"
+        state: directory
+        mode: "0755"
+
+    - name: Test a backup
+      community.postgresql.postgresql_db:
+        state: dump
+        name: "home-assistant"
+        target: "~/backups/home-assistant/dump3.tar.gz"
+      register: backup_result

@@ -1,0 +1,76 @@
+---
+- name: Restore a postgres database from a dump
+  hosts: postgresservs
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+    backup: "latest" # Latest or filename
+
+    backups_root: "~/backups"
+  tasks:
+    - name: Verify inputs
+      ansible.builtin.assert:
+        that: db is defined
+        fail_msg: "Please define the 'db' variable for the database to restore"
+
+    - name: Find backups directory
+      ansible.builtin.set_fact:
+        backups_dir: "{{ backups_root }}/{{ db }}"
+
+    - name: Get the latest backup file
+      when: backup == "latest"
+      block:
+        - name: List all backups
+          ansible.builtin.find:
+            paths: "{{ backups_dir }}"
+          register: all_backups
+        - name: Get latest file
+          ansible.builtin.set_fact:
+            backup: "{{ (all_backups.files | sort(attribute='mtime') | last).path | basename }}"
+            debug: true
+
+    - name: Create tmp db
+      community.general.postgresql_db:
+        state: "{{ item }}"
+        name: "tmp"
+      loop:
+        - absent
+        - present
+    - name: Restore from the backup file to temporary db
+      community.postgresql.postgresql_db:
+        state: restore
+        name: "tmp"
+        target: "{{ backups_dir }}/{{ backup }}"
+
+    - name: Collect info about databases
+      community.postgresql.postgresql_info:
+        filter:
+          - "databases"
+      register: info
+
+    - name: Secure the existing database if it is there
+      when: db in info.databases
+      block:
+        - name: Stop connections to the existing database
+          community.postgresql.postgresql_query:
+            db: "{{ db }}"
+            query:
+              # Delete all connections but this one
+              - >
+                SELECT pg_terminate_backend(pg_stat_activity.pid)
+                FROM pg_stat_activity
+                WHERE pg_stat_activity.datname = '{{ db }}' AND pid <> pg_backend_pid()
+        - name: Rename the existing database (the copy will be kept for a little while just in case)
+          community.postgresql.postgresql_db:
+            state: rename
+            name: "{{ db }}"
+            target: "before_restore.{{ db }}.{{ '%Y-%m-%d-%H-%M-%S' | strftime(ansible_date_time.epoch) }}"
+
+    - name: Make the tmp database the new database
+      community.postgresql.postgresql_db:
+        state: rename
+        name: "tmp"
+        target: "{{ db }}"
+
+    # TODO use a cron and `psql -c "\l" --csv --tuples-only` to purge before_restore. dbs
