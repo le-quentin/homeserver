@@ -1,6 +1,6 @@
 ---
 - name: Install Zigbee2MQTT
-  hosts: zigbee2mqttservs
+  hosts: mainhost
   tasks:
     - name: Ensure docker is installed
       ansible.builtin.include_tasks: "tasks/install-docker.yaml"

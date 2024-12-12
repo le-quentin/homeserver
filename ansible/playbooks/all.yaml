@@ -1,19 +1,5 @@
 ---
 - name: Install adguard
   import_playbook: "./adguard.yaml"
-- name: Setup backups
-  import_playbook: "./backups.yaml"
-- name: Install Zigbee2MQTT
-  import_playbook: "./zigbee2mqtt.yaml"
-- name: Install Home-Assistant
-  import_playbook: "./home-assistant.yaml"
-- name: Install Mautic
-  import_playbook: "./mautic.yaml"
-- name: Install Portainer
-  import_playbook: "./portainer.yaml"
-- name: Install the Nginx Gateway
-  import_playbook: "./gateway.yaml"
-- name: Install monitoring services
-  import_playbook: "./monitoring.yaml"
-- name: Install Cocobot
-  import_playbook: "./cocobot.yaml"
+- name: Instal legacy services
+  import_playbook: "./legacy/all.yaml"

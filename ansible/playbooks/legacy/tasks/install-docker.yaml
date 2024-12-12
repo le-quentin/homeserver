@@ -1,0 +1,16 @@
+---
+- name: Check If Docker Is Installed
+  ansible.builtin.command: docker --version
+  register: docker_installed
+  ignore_errors: true
+  failed_when: false
+  changed_when: false
+- name: Ensure docker is installed
+  ansible.builtin.include_tasks: "install-docker-{{ ansible_os_family }}.yaml"
+  when: docker_installed.rc != 0
+- name: Install docker python dependencies
+  become: true
+  ansible.builtin.package:
+    name:
+      - python3-docker
+      - python3-compose

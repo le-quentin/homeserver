@@ -1,0 +1,7 @@
+---
+# The linux commands to get hardware architecture info don't give the most common labels for those architectures
+# For some repos, we have to use these common labels instead.
+alt_arch_names:
+  x86_64: amd64
+  aarch64: arm64
+ansible_architecture_alt: "{{ alt_arch_names[ansible_architecture] | default(ansible_architecture) }}"

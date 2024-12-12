@@ -1,0 +1,46 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# Root URL for nginx access
+homeassistant:
+  internal_url: http://assistant.{{ homeserver_domain }}
+
+logger:
+  default: info
+
+recorder:
+  db_url: "postgresql://{{ db.user }}:{{ db.password }}@{{ database_ip }}/{{ db.name }}"
+  purge_keep_days: 56
+  auto_purge: true
+  auto_repack: false
+  # Maybe someday do something like this if DB gets too huge
+  # include:
+  #   domains:
+  #     - sensor
+  #   entity_globs:
+  #     - sensor.*linkquality
+  #     - sensor.*battery
+  #
+  #     - sensor.*temperature
+  #     - sensor.*humidity
+  #
+  #     - sensor.*current
+  #     - sensor.*energy
+  #     - sensor.*power
+  #     - sensor.*voltage
+
+http:
+  use_x_forwarded_for: true     # To ensure HA understands that client requests come via reverse proxy
+  trusted_proxies:
+    - {{ k3s_cluster_cidr }}   # Access via kubernetes cluster: this is the pods ip range (and as far as the container is conconcerned, the pod is making the request)
+    - 127.0.0.1                 # Add the localhost IPv4 address
+    - ::1                       # Add the localhost IPv6 address
+

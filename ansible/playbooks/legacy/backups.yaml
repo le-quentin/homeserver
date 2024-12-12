@@ -1,6 +1,6 @@
 ---
 - name: Setup backups
-  hosts: backupservs
+  hosts: mainhost
   vars:
     docker_volume_backup_root: "{{ ansible_files_root }}/docker-volume-backup"
     backups_dir: "{{ home_dir }}/backups"

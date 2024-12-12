@@ -1,6 +1,6 @@
 ---
 - name: Install Home Assistant
-  hosts: homeassistantservs
+  hosts: mainhost
   tasks:
     - name: Ensure docker is installed
       ansible.builtin.include_tasks: "tasks/install-docker.yaml"
