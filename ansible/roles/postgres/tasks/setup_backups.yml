@@ -1,0 +1,5 @@
+- name: Ensure backups dir exist
+  ansible.builtin.file:
+    path: "~/backups/{{ item.name }}"
+    state: directory
+    mode: "0755"

@@ -33,16 +33,16 @@
   no_log: "{{ postgres_no_log }}"
   tags: databases
 
-# - name: Ensure backups dir exist
-#   ansible.builtin.file:
-#     path: "~/backups/home-assistant"
-#     state: directory
-#     mode: "0755"
-#
-# - name: Test a backup
-#   community.postgresql.postgresql_db:
-#     state: dump
-#     name: "home-assistant"
-#     target: "~/backups/home-assistant/dump3.tar.gz"
-#   register: backup_result
-#   no_log: "{{ postgres_no_log }}"
+- name: Setup backups
+  with_items: "{{ present_databases }}"
+  ansible.builtin.include_tasks: setup_backups.yml
+
+- name: Run a backup
+  become: true
+  become_user: postgres
+  community.postgresql.postgresql_db:
+    state: dump
+    name: "{{ db }}"
+    target: "~/backups/{{ db }}/dump-{{ db }}-{{ now(fmt='%Y-%m-%d_%H:%M') }}.tar.gz"
+  no_log: "{{ postgres_no_log }}"
+  tags: never,backup
