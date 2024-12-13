@@ -23,11 +23,9 @@ Uses [geerlinguy.postgresql](https://github.com/geerlingguy/ansible-role-postgre
 Role Variables
 --------------
 
-On top of the required vars shown in the example playbook, there can be some expectations depending on tags. Tags are used to run some specific operations.
-
 By default the role installs postgres and setups your databses. See the example playbook below for a full example.
 
-Then, with tags, you can do the following:
+Then, with tags, you can run specific operations:
 
 ### Run a backup manually
 ```
@@ -49,7 +47,7 @@ Only give the base filename, not the path to it (so "dump-db-date.tar.gz", not "
 Dependencies
 ------------
 
-geerlinguy.postgresql
+[geerlinguy.postgresql](https://github.com/geerlingguy/ansible-role-postgresql) 
 
 Example Playbook
 ----------------
@@ -62,7 +60,8 @@ Example Playbook
             postgres_client_cidr: "{{ k3s_controller_ip }}/32"
             postgres_lan_cidr: "{{ lan_cidr }}"
             postgres_no_log: false # Optional, defaults to true. Useful in testing.
-            postgres_backup_user: nfs # Optional, defaults to postgres user. Useful if, like me, your backups folder is on a network mounted folder with specific user.
+            postgres_backup_user: nfs # Optional, defaults to postgres user. Useful if, like me, 
+                                      # your backups folder is on a network mounted folder with specific user.
             postgres_databases:
               - name: my-db
                 user: db-user
