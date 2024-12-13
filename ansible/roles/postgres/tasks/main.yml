@@ -1,4 +1,7 @@
 ---
+- name: Verify inputs
+  ansible.builtin.import_tasks: verify_inputs.yml
+
 - name: Set the general facts
   ansible.builtin.import_tasks: general_facts.yml
   tags: always
@@ -11,8 +14,19 @@
   ansible.builtin.import_tasks: databases_facts.yml
   tags: databases
 
+- name: Set backups facts
+  tags: never,backup,restore
+  ansible.builtin.set_fact:
+    backup_dir: "/backups/{{ db }}"
+    backups_root: "/backups"
+
+- name: Prepare restoration
+  ansible.builtin.import_tasks: restore.yml
+  tags: never,restore
+
 - name: Call postgres setup role
   become: true
+  when: "'restore' not in ansible_run_tags"
   ansible.builtin.import_role:
     name: geerlingguy.postgresql
   vars:
@@ -40,7 +54,6 @@
 - name: Run a backup
   vars:
     dump_path: "/tmp/dump-{{ db }}-{{ now(fmt='%Y-%m-%d_%H:%M') }}.tar.gz"
-    backup_dir: "/backups/{{ db }}"
   no_log: "{{ postgres_no_log }}"
   tags: never,backup
   block:
@@ -62,3 +75,6 @@
       become: true
       become_user: nfs
       ansible.builtin.shell: "mkdir -p {{ backup_dir }}; mv {{ dump_path }} {{ backup_dir }}"
+
+# - name: Restore from a backup
+#   tags: never,restore
