@@ -1,38 +1,86 @@
-Role Name
+Ansible Role: Postgres
 =========
 
-A brief description of the role goes here.
+Setup and manage a postgres instance listening on your private network: install, setup automatic backups, restore from backup.
+
+geerlinguy has made a great job at providing a cross-distro setup of postgres. For my home server, I wanted something a little more feature-rich, while not having to redo all the setup logic. So I made this role, which is an encapsulation of geerlinguy's work. 
+
+This is opinionated, tilted towards my homeserver use case; if you're in a similar use case you should be able to use it out of the box. If not, it should not be too hard to tweak a little.
+
+Assumptions:
+  - The postgres instance is on a private network and listens for TCP connections on its network interface
+  - Each database has *one* user, which can do anything to the database and nothing on other databases
+  - Each database can be reached from the local lan, and from one additional subnet
+  - Your backup folder can be accessed rwx by `postgres` user, or you can provide a user that can with the `postgres_backup_user=username` variable
+
+By default, it will install postgres and set it up with your databases. You can run other operations with tags (see "Role Variables" section below). 
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Uses geerlinguy.postgresql and therefore has the same requirements.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+On top of the required vars shown in the example playbook, there can be some expectations depending on tags. Tags are used to run some specific operations.
+
+By default the role installs postgres and setups your databses. See the example playbook below for a full example.
+
+Then, with tags, you can do the following:
+
+### Run a backup manually
+```
+ansible-playbook yourplaybook.yml --tags "backup" --extra-vars "db=mydb"
+```
+
+### Restore from a backup
+Latest backup in the backups folder:
+```
+ansible-playbook yourplaybook.yml --tags "restore" --extra-vars "db=mydb" 
+```
+
+Specific backup in the backups folder:
+```
+ansible-playbook yourplaybook.yml --tags "restore" --extra-vars "db=mydb" --extra-vars "backup=my_backup_filename"
+```
+Only give the base filename, not the path to it (so "dump-db-date.tar.gz", not "/my/backup/dir/dump-db-date.tar.gz").
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+geerlinguy.postgresql
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
+    - hosts: postgresservs
       roles:
-         - { role: username.rolename, x: 42 }
+        - role: postgres
+          vars:
+            postgres_host_ip: "{{ ansible_host }}"
+            postgres_client_cidr: "{{ k3s_controller_ip }}/32"
+            postgres_lan_cidr: "{{ lan_cidr }}"
+            postgres_no_log: false # Optional, defaults to true. Useful in testing.
+            postgres_backup_user: nfs # Optional, defaults to postgres user. Useful if, like me, your backups folder is on a network mounted folder with specific user.
+            postgres_databases:
+              - name: my-db
+                user: db-user
+                password: apassword
+                backup_cron:
+                  # Dump the database on NFS share everyday at 5
+                  # Uses the builtin ansible cron module, so you can use all cron parameters 
+                  hour: 5
+                  minute: 0
 
 License
 -------
 
-BSD
+MIT
 
-Author Information
-------------------
+Implementation details
+-------
 
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+I wanted to use the same role interface for creation/backup/restore operations, in order to guarantee that dbs are always setup the exact same. The use of tags achieves that, however it makes the code a little spaghetti-esque (following the exact run path for a given tag is not the easiest thing).
+
+After comparing the various `pg_dump` methods, I settled on tar dump with explicit call of gzip, which lets me specify the compression level. I settled on `-6`, which seems to be a sweet spot between compression ratio and time.

@@ -1,10 +1,6 @@
 ---
 - name: Install and setup PostgreSQL
   hosts: postgresservs
-  become: true
-  # become_user: postgres
-  vars:
-    ansible_ssh_pipelining: true
   roles:
     - role: postgres
       vars:

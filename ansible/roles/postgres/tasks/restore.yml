@@ -9,16 +9,28 @@
 - name: Find backups directory
   ansible.builtin.set_fact:
     backups_dir: "{{ backups_root }}/{{ db }}"
+    backups_user: "{{ postgres_backup_user | default('postgres') }}"
 
 - name: Get the latest backup file
   when: backup == "latest"
   block:
+    # - name: List all backups
+    #   become: true
+    #   become_user: "postgres"
+    #   ansible.builtin.file:
+    #     path: "{{ backups_dir }}"
+    #     state: existing
+    #
     - name: List all backups
       become: true
-      become_user: nfs
+      become_user: "{{ backups_user }}"
       ansible.builtin.find:
         paths: "{{ backups_dir }}"
       register: all_backups
+    - name: Verify the backups folder was found
+      ansible.builtin.assert:
+        that: all_backups.skipped_paths | length == 0
+        fail_msg: "The backups folder {{ backups_dir }} is not found or not reachable for {{ backups_user }} user"
     - name: Get latest file
       ansible.builtin.set_fact:
         backup: "{{ (all_backups.files | sort(attribute='mtime') | last).path | basename }}"
@@ -32,31 +44,34 @@
   community.general.postgresql_db:
     state: "absent"
     name: "tmp"
+  vars:
+    ansible_ssh_pipelining: true
 - name: Call postgres setup role to create the tmp database with the right settings
   become: true
   ansible.builtin.import_role:
     name: geerlingguy.postgresql
   vars:
+    ansible_ssh_pipelining: true
     postgres_users_no_log: "{{ postgres_no_log }}"
 
 - name: Copy the backup file
   become: true
-  become_user: nfs
+  become_user: "{{ backups_user }}"
   ansible.builtin.copy:
     remote_src: true
     src: "{{ backups_dir }}/{{ backup }}"
     dest: "/tmp/"
     mode: "0744"
 
-    # owner: postgres
-    # group: postgres
 - name: Restore from the backup file to temporary db
   become: true
   become_user: postgres
-  community.postgresql.postgresql_db:
-    state: restore
-    name: "tmp"
-    target: "/tmp/{{ backup }}"
+  ansible.builtin.shell:
+    cmd: >
+      set -o pipefail && gunzip -c "/tmp/{{ backup }}" | pg_restore -d tmp
+    executable: /bin/bash
+
+  changed_when: true
 
 - name: Collect info about databases
   become: true
@@ -65,11 +80,15 @@
     filter:
       - "databases"
   register: info
+  vars:
+    ansible_ssh_pipelining: true
 
 - name: Secure the existing database if it is there
   when: db in info.databases
   become: true
   become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
   block:
     - name: Stop connections to the existing database
       community.postgresql.postgresql_query:
@@ -89,6 +108,8 @@
 - name: Make the tmp database the new database
   become: true
   become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
   community.postgresql.postgresql_db:
     state: rename
     name: "tmp"
