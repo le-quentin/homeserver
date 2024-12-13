@@ -18,7 +18,7 @@ By default, it will install postgres and set it up with your databases. You can 
 Requirements
 ------------
 
-Uses geerlinguy.postgresql and therefore has the same requirements.
+Uses [geerlinguy.postgresql](https://github.com/geerlingguy/ansible-role-postgresql) and therefore has the same requirements.
 
 Role Variables
 --------------
