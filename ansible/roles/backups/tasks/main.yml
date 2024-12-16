@@ -1,0 +1,10 @@
+---
+- name: Validate and initialise variables
+  tags: always
+  ansible.builtin.include_tasks: init_vars.yml
+- name: Install dependencies
+  tags: always
+  ansible.builtin.include_tasks: install-dependencies.yml
+- name: Setup local backups
+  tags: always
+  ansible.builtin.include_tasks: setup_local_backups.yml

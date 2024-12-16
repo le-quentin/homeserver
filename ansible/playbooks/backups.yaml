@@ -1,0 +1,15 @@
+---
+- name: Setup backups
+  hosts: backupservs
+  roles:
+    - role: backups
+      vars:
+        backups_local:
+          - default_compression_level: 6
+            default_cron:
+              hour: 22
+              minute: 49
+            src_root: /srv/nfs/k3s/volumes
+            target_root: /srv/nfs/backups
+            directories:
+              - path: home-assistant/all-data

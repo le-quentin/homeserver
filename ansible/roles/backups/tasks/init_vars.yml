@@ -1,0 +1,18 @@
+---
+- name: Build local backup dirs list from input vars
+  tags: always
+  loop: "{{ backups_local | subelements('directories') }}"
+  ansible.builtin.set_fact:
+    _local_backups_dirs: >-
+      {{ (_local_backups_dirs | default([])) + [
+      {
+        'name': item[1].path | replace('/', '-'),
+        'compression': item[0].default_compression_level,
+        'cron': item[0].default_cron,
+        'src': [item[0].src_root, item[1].path] | path_join,
+        'target': [item[0].target_root, item[1].path] | path_join,
+      }
+      ] }}
+- name: Display local backup dirs
+  ansible.builtin.debug:
+    var: _local_backups_dirs

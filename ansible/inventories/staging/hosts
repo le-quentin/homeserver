@@ -10,11 +10,11 @@ dbhost
 [postgresservs]
 dbhost
 
+[backupservs]
+nfshost
+
 [adguardservs]
 dnshost
-
-[backupservs]
-mainhost
 
 [gatewayservs]
 mainhost
