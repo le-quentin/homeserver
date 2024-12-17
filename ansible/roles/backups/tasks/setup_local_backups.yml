@@ -8,11 +8,6 @@
     mode: "0744"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-- name: Delete the cron file
-  ansible.builtin.cron:
-    name: "toto"
-    cron_file: local-backups
-    state: absent
 - name: Setup local backups cron
   loop: "{{ _local_backups_dirs }}"
   ansible.builtin.cron:
