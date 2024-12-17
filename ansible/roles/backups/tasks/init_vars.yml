@@ -7,8 +7,8 @@
       {{ (_local_backups_dirs | default([])) + [
       {
         'name': item[1].path | replace('/', '-'),
-        'compression_level': item[0].default_compression_level,
-        'cron': item[0].default_cron,
+        'compression_level': item[1].compression_level | default(item[0].default_compression_level | default(backups_default_compression_level)),
+        'cron': item[1].cron | default(item[0].default_cron),
         'src': [item[0].src_root, item[1].path] | path_join,
         'target': [item[0].target_root, item[1].path] | path_join,
       }
