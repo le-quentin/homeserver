@@ -1,0 +1,9 @@
+---
+# TODO replace this with a Packer image (no CloudInit for LXC in Proxmox)
+- name: Setup LXC containers
+  hosts: lxccontainers
+  tasks:
+    - name: Set the timezone
+      become: true
+      community.general.timezone:
+        name: Europe/Paris
