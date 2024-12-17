@@ -9,17 +9,13 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
 - name: Setup local backups cron
-  loop: "{{ _local_backups_dirs }}"
-  ansible.builtin.cron:
-    name: "[{{ item.name }}] local backups"
-    cron_file: "local-backups"
-    user: "{{ ansible_user }}"
-    minute: "{{ item.cron.minute | default('*') }}"
-    hour: "{{ item.cron.hour | default('*') }}"
-    day: "{{ item.cron.day | default('*') }}"
-    month: "{{ item.cron.month | default('*') }}"
-    weekday: "{{ item.cron.weekday | default('*') }}"
-    job: "/usr/local/bin/local-backup-{{ item.name }} > /tmp/local-backup-{{ item.name }}.last.log 2>/tmp/local-backup-{{ item.name }}.err.log"
+  ansible.builtin.template:
+    src: "local-backups.crontab.j2"
+    dest: "/etc/cron.d/local-backups_ansible"
+    mode: "0644"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  notify: "Restart cron service"
 
 - name: Run a local backup for all directories
   loop: "{{ _local_backups_dirs }}"
