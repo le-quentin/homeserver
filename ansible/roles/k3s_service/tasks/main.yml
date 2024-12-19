@@ -16,6 +16,12 @@
       kubernetes.core.k8s:
         state: "{{ 'present' if k3s_service_state == 'present' and config_map_enabled else 'absent' }}"
         template: "configmap.yml.j2"
+        append_hash: true
+      register: configmap
+    - name: Register configmap name
+      when: config_map_enabled and k3s_service_state == 'present'
+      ansible.builtin.set_fact:
+        configmap_name: "{{ configmap.result.metadata.name }}"
     - name: StorageClass
       kubernetes.core.k8s:
         state: present

@@ -26,11 +26,6 @@ spec:
             - name:  "volume-{{ volume.name }}"
               mountPath: "{{ volume.mount_path }}"
 {% endfor %}
-{% for file in config_map_files | selectattr('init_only', 'equalto', false) %}
-            - name:  "volume-configuration"
-              mountPath: "{{ file.mount_path }}"
-              subPath: "{{ file.name }}"
-{% endfor %}
 
 {#################### Volumes ####################}
       volumes:
@@ -38,27 +33,29 @@ spec:
       - name: "volume-{{ volume.name }}"
         persistentVolumeClaim:
           claimName: "{{ volume.name }}"
-{% if volume.type == 'sqlite' %}
-      - name: "volume-nfs-sync-{{ volume.name }}"
-        persistentVolumeClaim:
-          claimName: "synced-{{ volume.name }}"
-{% endif %}
 {% endfor %}
 {% if config_map_enabled %}
       - name: "volume-configuration"
         configMap:
-          name: "{{ k3s_service_name }}-config-files"
+          name: "{{ configmap_name | default("configmap") }}"
+          items:
+          # TODO this seems to be the correct way... use this, and then if it works try mounting it directly rather than copying
+{% for file in config_map_files %}
+          - key: {{ file.name }}
+            path: {{ file.name }}
+{% endfor %}
 {% endif %}
 
 {#################### Init containers ####################}
-{% if config_map_files | selectattr('init_only', 'equalto', true) | length>0 %}
+{% if config_map_enabled %}
       initContainers:
       - name: "{{ k3s_service_name }}-init"
         image: busybox
         command:
 {% set commands = [] %}
-{% for file in config_map_files | selectattr('init_only', 'equalto', true) %}
-  {{ commands.append("cp -n '/tmp"~(file.mount_path)~"' '"~file.mount_path~"'") }}
+{% for file in config_map_files %}
+{% set dont_overwrite_option = '-n' if file.init_only else '' %}
+  {{ commands.append("cp "~dont_overwrite_option~" '/tmp/"~(file.name)~"' '"~file.mount_path~"'") }}
 {% endfor %}
         - "sh"
         - "-c"
@@ -68,9 +65,6 @@ spec:
         - name:  "volume-{{ volume.name }}"
           mountPath: "{{ volume.mount_path }}"
 {% endfor %}
-{% for file in config_map_files | selectattr('init_only', 'equalto', true) %}
         - name:  "volume-configuration"
-          mountPath: "/tmp{{ file.mount_path }}"
-          subPath: "{{ file.name }}"
-{% endfor %}
+          mountPath: "/tmp"
 {% endif %}

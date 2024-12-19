@@ -2,7 +2,6 @@
 - name: Setup k3s cluster (install k3s and helm on nodes)
   hosts: k3scontroller
   vars:
-    k3s_release_version: v1.31.2+k3s1
     k3s_become: true
   tasks:
     - name: Python dependencies for kubernetes modules
@@ -40,7 +39,8 @@
           ansible.builtin.include_role:
             name: xanmanning.k3s
           vars:
-            k3s_release_version: v1.31.2+k3s1
+            k3s_release_version: v1.31.3+k3s1
+            # TODO set node-status-update-frequency to something like 5s here, cuz the 5 minutes timeout by default in k3s is a lil long in a non HA setup
             k3s_server:
               node-name: controller-vm
               node-label:
@@ -49,6 +49,8 @@
               cluster-cidr: "{{ k3s_cluster_cidr }}"
               service-cidr: "{{ k3s_services_cidr }}"
               cluster-dns: "{{ k3s_cluster_dns }}"
+              write-kubeconfig-mode: "{{ k3s_write_kubeconfig_mode | default('0600') }}"
+              debug: "{{ k3s_debug | default(false) }}"
     - name: Ensure kube folder exists
       ansible.builtin.file:
         path: "{{ home_dir }}/.kube"
