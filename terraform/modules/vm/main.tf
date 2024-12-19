@@ -142,7 +142,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
     enabled = true
   }
   # if agent is not enabled, the VM may not be able to shutdown properly, and may need to be forced off
-  # stop_on_destroy = true
+  stop_on_destroy = true
 
 }
 
