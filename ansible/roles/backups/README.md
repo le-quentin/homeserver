@@ -1,7 +1,7 @@
 Role Name
 =========
 
-A brief description of the role goes here.
+Reminder: the inner `path` property can begin with a '/', in which case it is an absolute path ignoring the target_root property; or not begin with a '/', in which case it is a relative path added to the root.
 
 Requirements
 ------------
