@@ -9,6 +9,7 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
 - name: Setup local backups cron
+  become: true
   ansible.builtin.template:
     src: "local-backups.crontab.j2"
     dest: "/etc/cron.d/local-backups_ansible"

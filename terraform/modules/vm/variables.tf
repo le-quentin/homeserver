@@ -72,3 +72,9 @@ variable "usb_mappings" {
   default     = []
 }
 
+variable "disks" {
+  type        = list(any)
+  description = "Additional disks for the VM"
+  default     = []
+}
+

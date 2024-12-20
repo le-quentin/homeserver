@@ -1,5 +1,6 @@
 ---
 - name: Setup NFS server
+  become: true
   hosts: nfsservs
   tasks:
     - name: Create nfs group

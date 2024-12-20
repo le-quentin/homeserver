@@ -16,7 +16,6 @@ variable "vm_params" {
       ssh_key  = string
       username = string
     })
-
   })
 }
 
@@ -109,6 +108,23 @@ resource "proxmox_virtual_environment_vm" "vm" {
     file_id      = var.images.debian
     interface    = "scsi0"
     size         = var.vm_params.disk_size
+  }
+
+  # disk {
+  #   datastore_id = var.disk_storage
+  #   file_format      = "raw"
+  #   interface    = "scsi1"
+  #   size         = 16
+  # }
+
+  dynamic "disk" {
+    for_each = var.disks
+    content {
+      size         = disk.value.size
+      datastore_id = lookup(disk.value, "datastore_id", var.disk_storage)
+      interface    = "scsi${disk.key + 1}"
+      file_format = "raw"
+    }
   }
 
   dynamic "usb" {
