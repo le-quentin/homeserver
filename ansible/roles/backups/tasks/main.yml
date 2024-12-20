@@ -9,5 +9,5 @@
   tags: always
   ansible.builtin.include_tasks: setup_local_backups.yml
 - name: Restore from backups
-  tags: restore
+  tags: never,restore
   ansible.builtin.import_tasks: restore.yml

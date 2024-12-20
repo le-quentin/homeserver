@@ -9,4 +9,5 @@ target={{ [item.target, "$filename"] | path_join }}
 
 [[ -d $src ]] || (echo "Directory $src not found"; exit 1)
 mkdir -p "{{ item.target }}"
+sync
 tar -cvf - -C "$src" . | gzip -{{ item.compression_level }} > "$target" 
