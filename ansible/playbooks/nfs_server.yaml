@@ -73,14 +73,34 @@
         state: present
         extra_zfs_properties:
           mountpoint: /srv/nfs/k3s/volumes
+    - name: Create a zfs file system for each k3s app
+      community.general.zfs:
+        name: "nfs_pool/k3s_volumes/{{ item }}"
+        state: present
+        extra_zfs_properties:
+          mountpoint: "/srv/nfs/k3s/volumes/{{ item }}"
+      loop:
+        - home-assistant
 
+    - name: List database nfs exports
+      ansible.builtin.set_fact:
+        database_nfs_exports:
+          - "/srv/nfs/backups/postgres {{ database_ip }}(rw,sync,no_subtree_check)"
+    - name: List k3s nfs exports
+      ansible.builtin.set_fact:
+        k3s_nfs_exports: >
+          {{
+            (nfs_exports | default([])) + [
+               '/srv/nfs/k3s/volumes/'~item~' '~k3s_controller_ip~'(rw,sync,no_subtree_check)'
+            ]
+          }}
+      loop:
+        - home-assistant
     - name: Install nfs server
       ansible.builtin.include_role:
         name: "geerlingguy.nfs"
       vars:
-        nfs_exports:
-          - "/srv/nfs/k3s/volumes {{ k3s_controller_ip }}(rw,sync,no_subtree_check)"
-          - "/srv/nfs/backups/postgres {{ database_ip }}(rw,sync,no_subtree_check)"
+        nfs_exports: "{{ database_nfs_exports + k3s_nfs_exports }}"
     - name: Setup permissions for exported k3s volumes directory
       ansible.builtin.file:
         dest: "/srv/nfs/k3s/volumes"
