@@ -1,3 +1,4 @@
+---
 galaxy_info:
   author: postgres
   description: Manage a postgres instance (deploy, configure, backup, restore)

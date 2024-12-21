@@ -123,7 +123,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
       size         = disk.value.size
       datastore_id = lookup(disk.value, "datastore_id", var.disk_storage)
       interface    = "scsi${disk.key + 1}"
-      file_format = "raw"
+      file_format  = "raw"
     }
   }
 

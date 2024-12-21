@@ -1,3 +1,4 @@
+---
 - name: Check mountpoint exist
   become: true
   when: item.state in ['unmounted', 'mounted']
@@ -16,7 +17,6 @@
     fstype: nfs
     opts: "{{ item.opts | default('rw,sync,user,hard') }}"
     state: "{{ 'mounted' if item.state == 'mounted' else 'unmounted' }}"
-
 
 - name: Delete mountpoint
   become: true

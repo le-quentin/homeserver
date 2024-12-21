@@ -1,3 +1,4 @@
+---
 - name: Set facts for global options
   ansible.builtin.set_fact:
     postgresql_global_config_options: "{{ (postgresql_global_config_options | default([])) + postgres_global_options }}"

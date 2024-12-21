@@ -1,3 +1,4 @@
+---
 - name: Set private facts
   ansible.builtin.set_fact:
     _query: "[?state != 'absent']"

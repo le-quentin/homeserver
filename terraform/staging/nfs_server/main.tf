@@ -22,7 +22,7 @@ module "nfs_server" {
   vm_floating_memory  = 2048
 
   disks = [
-    { 
+    {
       size = 16
     }
   ]
