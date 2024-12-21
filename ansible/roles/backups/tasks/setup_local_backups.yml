@@ -1,0 +1,27 @@
+---
+- name: Generate local backup scripts
+  become: true
+  tags: always
+  loop: "{{ _local_backups_dirs }}"
+  ansible.builtin.template:
+    src: "local-backup.sh.j2"
+    dest: "/usr/local/bin/local-backup-{{ item.name }}"
+    mode: "0744"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+- name: Setup local backups cron
+  become: true
+  ansible.builtin.template:
+    src: "local-backups.crontab.j2"
+    dest: "/etc/cron.d/local-backups_ansible"
+    mode: "0644"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  notify: "Restart cron service"
+
+- name: Run a local backup for all directories
+  loop: "{{ _local_backups_dirs }}"
+  tags: never,run-local
+  ansible.builtin.command:
+    cmd: "local-backup-{{ item.name }}"
+  changed_when: true

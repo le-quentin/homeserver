@@ -1,3 +1,4 @@
+---
 ansible_host: 10.142.1.200
 ansible_user: legacy_user
 home_dir: /home/{{ hostvars.mainhost.ansible_user }}

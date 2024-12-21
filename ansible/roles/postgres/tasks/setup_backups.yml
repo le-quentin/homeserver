@@ -1,0 +1,16 @@
+---
+- name: Install crontab
+  become: true
+  ansible.builtin.package:
+    name: cron
+- name: Copy backup scripts to host
+  become: true
+  ansible.builtin.copy:
+    src: "./create-backup.sh"
+    dest: "/usr/local/bin"
+    mode: "0744"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+- name: Backup crons
+  with_items: "{{ present_databases }}"
+  ansible.builtin.include_tasks: backup_crons.yml

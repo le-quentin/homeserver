@@ -1,14 +1,29 @@
-[adguardservs]
-dnshost
+[k3snodes]
+k3scontroller
+
+[lxccontainers]
+nfshost
+
+[nfsservs]
+nfshost
+
+[nfsclients]
+dbhost
+
+[postgresservs]
+dbhost
 
 [backupservs]
-mainhost
+nfshost
+
+[adguardservs]
+dnshost
 
 [gatewayservs]
 mainhost
 
 [homeassistantservs]
-mainhost
+k3scontroller
 
 [zigbee2mqttservs]
 mainhost
