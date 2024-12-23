@@ -1,8 +1,6 @@
 Role Name
 =========
 
-Reminder: the inner `path` property can begin with a '/', in which case it is an absolute path ignoring the target_root property; or not begin with a '/', in which case it is a relative path added to the root.
-
 Requirements
 ------------
 
@@ -13,6 +11,25 @@ Role Variables
 
 A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
 
+### Run a backup manually
+```
+ansible-playbook yourplaybook.yml --tags "run-local"
+```
+
+### Restore from a local backup
+Restore from latest local backups:
+```
+ansible-playbook yourplaybook.yml --tags "restore-local" --extra-vars "backups_restore_directory_regex=.*"
+```
+This will restore from all configs, but any regex can be used to restore specific directories.
+
+### Restore from a ZFS snapshot
+Restore from latest snapshots:
+```
+ansible-playbook yourplaybook.yml --tags "restore-snapshot" --extra-vars "backups_restore_snapshot_regex=.*"
+```
+This will restore from all configs, but any regex can be used to restore specific snapshot.
+
 Dependencies
 ------------
 
@@ -21,16 +38,35 @@ A list of other roles hosted on Galaxy should go here, plus any details in regar
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
+Setup local backups with tar:
 
-    - hosts: servers
+    - name: Setup backups
+      hosts: backupservs
       roles:
-         - { role: username.rolename, x: 42 }
+        - role: backups
+          vars:
+            backups_local:
+              - default_compression_level: 6
+                default_cron:
+                  hour: 13
+                  minute: 54
+                src_root: /srv/nfs/k3s/volumes
+                target_root: /srv/nfs/backups
+                directories:
+                  - path: home-assistant/all-data # can begin with a '/', in which case it is an absolute path ignoring the target_root property; or not begin with a '/', in which case it is a relative path added to the root.
+
+            backups_snapshots:
+              - default_cron:
+                  hour: 6
+                  minute: 0
+                zfs_pool: nfs_pool
+                filesystems:
+                  - name: home-assistant
 
 License
 -------
 
-BSD
+MIT
 
 Author Information
 ------------------

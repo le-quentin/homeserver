@@ -4,12 +4,10 @@
   roles:
     - role: backups
       vars:
-        backups_local:
-          - default_compression_level: 6
-            default_cron:
-              hour: 13
-              minute: 54
-            src_root: /srv/nfs/k3s/volumes
-            target_root: /srv/nfs/backups
-            directories:
-              - path: home-assistant/all-data
+        backups_snapshots:
+          - default_cron:
+              hour: 6
+              minute: 0
+            zfs_pool: nfs_pool
+            filesystems:
+              - name: home-assistant

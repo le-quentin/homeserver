@@ -1,3 +1,5 @@
 ---
+backups_local: []
+backups_snapshots: []
 backups_default_compression_level: 6
 backups_default_restore_version: latest

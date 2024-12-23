@@ -9,11 +9,21 @@
     mode: "0744"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-- name: Setup local backups cron
+- name: Generate snapshot scripts
+  become: true
+  tags: always
+  loop: "{{ _zfs_snapshots }}"
+  ansible.builtin.template:
+    src: "zfs-snapshot.sh.j2"
+    dest: "/usr/local/bin/zfs-snapshot-{{ item.name }}"
+    mode: "0744"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+- name: Setup backups cron jobs
   become: true
   ansible.builtin.template:
-    src: "local-backups.crontab.j2"
-    dest: "/etc/cron.d/local-backups_ansible"
+    src: "backups.crontab.j2"
+    dest: "/etc/cron.d/backups_ansible"
     mode: "0644"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
@@ -24,4 +34,10 @@
   tags: never,run-local
   ansible.builtin.command:
     cmd: "local-backup-{{ item.name }}"
+  changed_when: true
+- name: Run a snapshot for all filesystems
+  loop: "{{ _zfs_snapshots }}"
+  tags: never,run-snapshot
+  ansible.builtin.command:
+    cmd: "zfs-snapshot-{{ item.name }}"
   changed_when: true

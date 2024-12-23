@@ -1,0 +1,13 @@
+---
+- name: Restore {{ item.filesystem }}
+  when: item.filesystem is regex(backups_restore_snapshot_regex)
+  become: true
+  block:
+    - name: Set facts
+      ansible.builtin.set_fact:
+        restore_snapshot_name: "{{ item.pool }}/{{ item.filesystem }}"
+
+    - name: "Restore backup [{{ backup_to_restore }}]"
+      ansible.builtin.command:
+        cmd: "zfs rollback {{ restore_snapshot_name }}@{{ restore_version }}"
+      changed_when: true

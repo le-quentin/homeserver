@@ -1,4 +1,10 @@
 ---
+- name: Set default facts
+  tags: always
+  ansible.builtin.set_fact:
+    _local_backups_dirs: []
+    _zfs_snapshots: []
+
 - name: Build local backup dirs list from input vars
   tags: always
   loop: "{{ backups_local | subelements('directories') }}"
@@ -8,11 +14,28 @@
       {
         'name': item[1].path | replace('/', '-'),
         'compression_level': item[1].compression_level | default(item[0].default_compression_level | default(backups_default_compression_level)),
-        'cron': item[1].cron | default(item[0].default_cron),
         'src': [item[0].src_root, item[1].path] | path_join,
         'target': [item[0].target_root, item[1].path] | path_join,
+        'cron': item[1].cron | default(item[0].default_cron),
       }
       ] }}
 - name: Display local backup dirs
   ansible.builtin.debug:
     var: _local_backups_dirs
+
+- name: Build zfs snapshots list from input vars
+  tags: always
+  loop: "{{ backups_snapshots | subelements('filesystems') }}"
+  ansible.builtin.set_fact:
+    _zfs_snapshots: >-
+      {{ (_zfs_snapshots | default([])) + [
+      {
+        'name': item[1].name | replace('/', '-'),
+        'pool': item[0].zfs_pool,
+        'filesystem': item[1].name,
+        'cron': item[1].cron | default(item[0].default_cron),
+      }
+      ] }}
+- name: Display zfs snapshots
+  ansible.builtin.debug:
+    var: _zfs_snapshots

@@ -1,3 +1,0 @@
-{% for backup in _local_backups_dirs %}
-{{ backup.cron.minute | default('*') }} {{ backup.cron.hour | default('*') }} {{ backup.cron.day | default('*') }} {{ backup.cron.month | default('*') }} {{ backup.cron.weekday | default('*') }} {{ ansible_user }} /usr/local/bin/local-backup-{{ backup.name }} > /tmp/local-backup-{{ backup.name }}.last.log 2>/tmp/local-backup-{{ backup.name }}.err.log
-{% endfor %}
