@@ -11,3 +11,10 @@
             zfs_pool: nfs_pool
             filesystems:
               - name: home-assistant
+        backups_rclone_conf_template_path: ./resources/backups/rclone.conf
+        backups_rclone:
+          - cron:
+              hour: 7
+              minute: 0
+            src: /srv/nfs/backups
+            target: "proton:/backups/homeserver-staging"

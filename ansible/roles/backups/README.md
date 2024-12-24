@@ -63,6 +63,14 @@ Setup local backups with tar:
                 filesystems:
                   - name: home-assistant
 
+            backups_rclone:
+              - default_cron:
+                  hour: 7
+                  minute: 0
+                conf_template_path: ./resources/backups/rclone.conf
+                src_root: /srv/nfs/backups
+                target_root: /backups/homeserver-staging
+
 License
 -------
 

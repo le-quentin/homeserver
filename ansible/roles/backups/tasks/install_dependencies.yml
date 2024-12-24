@@ -1,5 +1,37 @@
 ---
 - name: Install cron
-  become: true
   ansible.builtin.package:
     name: cron
+- name: Install rclone
+  when: backups_rclone_conf_template_path is defined
+  block:
+    - name: Install unzip
+      become: true
+      ansible.builtin.package:
+        name: unzip
+    - name: Arch names facts
+      ansible.builtin.set_fact:
+        rclone_arch_names:
+          x86_64: amd64
+          aarch64: arm64
+    - name: Rclone arch name
+      ansible.builtin.set_fact:
+        rclone_arch_name: "{{ rclone_arch_names[ansible_architecture] | default(ansible_architecture) }}"
+    - name: Install rclone (used for syncing backups in the cloud)
+      become: true
+      ansible.builtin.script: "./install-rclone.sh {{ rclone_arch_name }} {{ backups_rclone_version }}"
+      args:
+        creates: "/usr/local/bin/rclone"
+    - name: Ensure rclone config folder exists
+      become: true
+      ansible.builtin.file:
+        path: "/opt/rclone"
+        state: directory
+        mode: "0755"
+        recurse: true
+    - name: Copy rclone config
+      become: true
+      ansible.builtin.template:
+        src: "{{ backups_rclone_conf_template_path }}"
+        dest: "/opt/rclone/rclone.conf"
+        mode: "0644"

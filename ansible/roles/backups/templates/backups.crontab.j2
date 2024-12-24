@@ -5,3 +5,7 @@
 {% for snapshot in _zfs_snapshots %}
 {{ snapshot.cron.minute | default('*') }} {{ snapshot.cron.hour | default('*') }} {{ snapshot.cron.day | default('*') }} {{ snapshot.cron.month | default('*') }} {{ snapshot.cron.weekday | default('*') }} {{ ansible_user }} /usr/local/bin/zfs-snapshot-{{ snapshot.name }} > /tmp/zfs-snapshot-{{ snapshot.name }}.last.log 2>/tmp/zfs-snapshot-{{ snapshot.name }}.err.log
 {% endfor %}
+
+{% for backup in _rclone_backups_dirs %}
+{{ backup.cron.minute | default('*') }} {{ backup.cron.hour | default('*') }} {{ backup.cron.day | default('*') }} {{ backup.cron.month | default('*') }} {{ backup.cron.weekday | default('*') }} {{ ansible_user }} sudo /usr/local/bin/rclone --config /opt/rclone/rclone.conf copy {{ backup.src }} {{ backup.target }} > /tmp/rclone-backup{{ backup.name }}.last.log 2>/tmp/rclone-backup{{ backup.name }}.err.log
+{% endfor %}

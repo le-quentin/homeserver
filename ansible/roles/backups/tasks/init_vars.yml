@@ -39,3 +39,20 @@
 - name: Display zfs snapshots
   ansible.builtin.debug:
     var: _zfs_snapshots
+
+- name: Build rclone backups list from input vars
+  tags: always
+  loop: "{{ backups_rclone }}"
+  ansible.builtin.set_fact:
+    _rclone_backups_dirs: >-
+      {{ (_rclone_backups_dirs | default([])) + [
+      {
+        'name': item.src | replace('/', '-'),
+        'src': item.src,
+        'target': item.target,
+        'cron': item.cron,
+      }
+      ] }}
+- name: Display rclone backups dirs
+  ansible.builtin.debug:
+    var: _rclone_backups_dirs
