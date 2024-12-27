@@ -8,4 +8,3 @@ filesystem={{ item.filesystem }}
 snapshot_name=$poolname/$filesystem
 
 sudo zfs snapshot $snapshot_name@$date
-sudo zfs destroy $snapshot_name@latest && sudo zfs snapshot $snapshot_name@latest
