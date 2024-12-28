@@ -34,6 +34,7 @@
         'pool': item[0].zfs_pool,
         'filesystem': item[1].name,
         'cron': item[1].cron | default(item[0].default_cron),
+        'archiving': item[0].archiving | default(false),
       }
       ] }}
 - name: Display zfs snapshots

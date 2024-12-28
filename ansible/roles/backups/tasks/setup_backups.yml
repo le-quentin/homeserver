@@ -19,6 +19,17 @@
     mode: "0744"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
+- name: Generate snapshots archiving scripts
+  become: true
+  tags: always
+  loop: "{{ _zfs_snapshots }}"
+  when: item.archiving
+  ansible.builtin.template:
+    src: "zfs-snapshot-archiving.sh.j2"
+    dest: "/usr/local/bin/zfs-snapshot-archiving-{{ item.name }}"
+    mode: "0744"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
 - name: Setup backups cron jobs
   become: true
   ansible.builtin.template:
@@ -40,6 +51,12 @@
   tags: never,run-snapshot
   ansible.builtin.command:
     cmd: "zfs-snapshot-{{ item.name }}"
+  changed_when: true
+- name: Archive latest snapshot for all filesystems
+  loop: "{{ _zfs_snapshots }}"
+  tags: never,run-archiving
+  ansible.builtin.command:
+    cmd: "zfs-snapshot-archiving-{{ item.name }}"
   changed_when: true
 - name: Push rclone backups
   loop: "{{ _rclone_backups_dirs }}"

@@ -4,6 +4,10 @@
 
 {% for snapshot in _zfs_snapshots %}
 {{ snapshot.cron.minute | default('*') }} {{ snapshot.cron.hour | default('*') }} {{ snapshot.cron.day | default('*') }} {{ snapshot.cron.month | default('*') }} {{ snapshot.cron.weekday | default('*') }} {{ ansible_user }} /usr/local/bin/zfs-snapshot-{{ snapshot.name }} > /tmp/zfs-snapshot-{{ snapshot.name }}.last.log 2>/tmp/zfs-snapshot-{{ snapshot.name }}.err.log
+{% if snapshot.archiving is not false %}
+{% set archiving_cron = snapshot.archiving.cron %}
+{{ archiving_cron.minute | default('*') }} {{ archiving_cron.hour | default('*') }} {{ archiving_cron.day | default('*') }} {{ archiving_cron.month | default('*') }} {{ archiving_cron.weekday | default('*') }} {{ ansible_user }} /usr/local/bin/zfs-snapshot-archiving-{{ snapshot.name }} > /tmp/zfs-snapshot-archiving-{{ snapshot.name }}.last.log 2>/tmp/zfs-snapshot-archiving-{{ snapshot.name }}.err.log
+{% endif %}
 {% endfor %}
 
 {% for backup in _rclone_backups_dirs %}
