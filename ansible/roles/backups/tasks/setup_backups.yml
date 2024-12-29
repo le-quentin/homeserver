@@ -30,6 +30,16 @@
     mode: "0744"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
+- name: Generate rclone pull latest scripts
+  become: true
+  tags: always
+  loop: "{{ _rclone_backups_dirs }}"
+  ansible.builtin.template:
+    src: "pull-latest-rclone-files.sh.j2"
+    dest: "/usr/local/bin/pull-latest-rclone-files{{ item.name }}"
+    mode: "0744"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
 - name: Setup backups cron jobs
   become: true
   ansible.builtin.template:
@@ -65,3 +75,7 @@
   ansible.builtin.command:
     cmd: "/usr/local/bin/rclone --config /opt/rclone/rclone.conf copy {{ item.src }} {{ item.target }}"
   changed_when: true
+- name: Pull rclone backups
+  tags: never,pull-rclone
+  loop: "{{ _rclone_backups_dirs }}"
+  ansible.builtin.include_tasks: pull_from_rclone.yml

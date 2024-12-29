@@ -1,4 +1,5 @@
 ---
+backups_user: "{{ ansible_user }}"
 backups_local: []
 backups_snapshots: []
 backups_default_compression_level: 6

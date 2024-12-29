@@ -4,6 +4,7 @@
   roles:
     - role: backups
       vars:
+        backups_user: nfs
         backups_snapshots:
           - default_cron:
               hour: 6
@@ -38,5 +39,3 @@
             dir: /srv/nfs/backups
             # Can also add  "regex" here, it defaults to '.*\.tar\.gz'
             older_than_days: 7
-
-
