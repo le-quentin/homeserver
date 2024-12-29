@@ -30,3 +30,13 @@
               minute: 0
             src: /srv/nfs/backups
             target: "proton:/backups/homeserver-staging"
+
+        backups_cleanup:
+          - cron:
+              hour: 7
+              minute: 30
+            dir: /srv/nfs/backups
+            # Can also add  "regex" here, it defaults to '.*\.tar\.gz'
+            older_than_days: 7
+
+
