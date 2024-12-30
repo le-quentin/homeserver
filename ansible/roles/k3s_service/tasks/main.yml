@@ -7,39 +7,56 @@
     api_version: v1
     kind: Namespace
 - name: Set module defaults
-  module_defaults:
-    kubernetes.core.k8s:
-      namespace: "{{ k3s_service_namespace }}"
-      apply: true
   block:
-    - name: ConfigMaps
-      kubernetes.core.k8s:
-        state: "{{ 'present' if k3s_service_state == 'present' and config_map_enabled else 'absent' }}"
-        template: "configmap.yml.j2"
-        append_hash: true
-      register: configmap
-    - name: Register configmap name
-      when: config_map_enabled and k3s_service_state == 'present'
-      ansible.builtin.set_fact:
-        configmap_name: "{{ configmap.result.metadata.name }}"
-    - name: StorageClass
-      kubernetes.core.k8s:
-        state: present
-        template: "storage-classes.yaml.j2"
-    - name: Storage
-      with_items: "{{ data_volumes }}"
-      loop_control:
-        loop_var: "volume"
-      ansible.builtin.include_tasks: setup-storage.yml
-    - name: Deployment
-      kubernetes.core.k8s:
-        state: "{{ k3s_service_state }}"
-        template: "deployment.yaml.j2"
-    - name: Service
-      kubernetes.core.k8s:
-        state: "{{ k3s_service_state }}"
-        template: "service.yaml.j2"
-    - name: Ingress
-      kubernetes.core.k8s:
-        state: "{{ k3s_service_state }}"
-        template: "ingress.yaml.j2"
+    - name: "Update all k3s resources for the service [{{ k3s_service_state }}]"
+      when: _action in ['create', 'delete']
+      module_defaults:
+        kubernetes.core.k8s:
+          namespace: "{{ k3s_service_namespace }}"
+          apply: true
+      block:
+        - name: Set facts
+          ansible.builtin.set_fact:
+            resources_state: "{{ 'absent' if _action == 'delete' else 'present' }}"
+        - name: ConfigMaps
+          kubernetes.core.k8s:
+            state: "{{ 'present' if resources_state == 'present' and config_map_enabled else 'absent' }}"
+            template: "configmap.yml.j2"
+            append_hash: true
+          register: configmap
+        - name: Register configmap name
+          when: config_map_enabled and resources_state == 'present'
+          ansible.builtin.set_fact:
+            configmap_name: "{{ configmap.result.metadata.name }}"
+        - name: StorageClass
+          kubernetes.core.k8s:
+            state: present
+            template: "storage-classes.yaml.j2"
+        - name: Storage
+          with_items: "{{ data_volumes }}"
+          loop_control:
+            loop_var: "volume"
+          ansible.builtin.include_tasks: setup-storage.yml
+        - name: Deployment
+          kubernetes.core.k8s:
+            state: "{{ resources_state }}"
+            template: "deployment.yaml.j2"
+        - name: Service
+          kubernetes.core.k8s:
+            state: "{{ resources_state }}"
+            template: "service.yaml.j2"
+        - name: Ingress
+          kubernetes.core.k8s:
+            state: "{{ resources_state }}"
+            template: "ingress.yaml.j2"
+    - name: "Restart the service (by deleting the pods)"
+      when: _action == 'restart'
+      module_defaults:
+        kubernetes.core.k8s:
+          namespace: "{{ k3s_service_namespace }}"
+      block:
+        - name: Delete all pods so that they get recreated
+          kubernetes.core.k8s:
+            kind: pod
+            state: absent
+            delete_all: true

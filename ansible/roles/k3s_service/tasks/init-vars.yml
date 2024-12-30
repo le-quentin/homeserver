@@ -11,6 +11,7 @@
 
 - name: Set default facts
   ansible.builtin.set_fact:
+    _action: "{{ action | default('create') }}"
     config_map_files: []
     data_volumes: "{{ k3s_service_data_volumes | default([]) }}"
     config_map_enabled: false

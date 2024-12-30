@@ -10,5 +10,5 @@
 
     - name: "Setup volume: {{ volume.type }}"
       kubernetes.core.k8s:
-        state: "{{ k3s_service_state }}"
+        state: "{{ resources_state }}"
         template: "storage/{{ volume.type }}.yaml.j2"
