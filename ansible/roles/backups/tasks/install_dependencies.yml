@@ -1,5 +1,6 @@
 ---
 - name: Install cron
+  become: true
   ansible.builtin.package:
     name: cron
 - name: Install rclone

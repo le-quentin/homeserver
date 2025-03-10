@@ -30,6 +30,13 @@ ansible-playbook yourplaybook.yml --tags "restore-snapshot" --extra-vars "backup
 ```
 This will restore from all configs, but any regex can be used to restore specific snapshot.
 
+### Pull from distant storage (rclone)
+After a disaster or a migration, it can be useful to pull all latest backups from distant storage (with rclone):
+```
+ansible-playbook yourplaybook.yml --tags "pull-rclone"
+```
+This will pull the most recent (from the timestamp in names) archive for each backup, in their expected location as defined in the `backups_rclone` config
+
 Dependencies
 ------------
 
