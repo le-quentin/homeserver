@@ -51,6 +51,7 @@
         - name: List tmp dir files
           ansible.builtin.find:
             paths: "{{ unarchive_result.dest }}"
+            recurse: true
             hidden: true
           register: unarchived_files
         - name: Check that tmp dir contains files
@@ -58,14 +59,55 @@
           ansible.builtin.fail:
             msg: The unarchived backup seems empty. Nothing was restored.
 
+        - name: create the save directory
+          ansible.builtin.file:
+            path: "{{ save_before_restore_path }}"
+            mode: "0744"
+            state: "{{ state }}"
+          loop_control:
+            loop_var: state
+          loop:
+            - absent
+            - directory
         - name: Save the existing directory before restoring, just in case
-          ansible.builtin.command: "mv {{ restore_target_path }} {{ save_before_restore_path }}"
-          args:
-            removes: "{{ restore_target_path }}"
-            creates: "{{ save_before_restore_path }}"
+          become: true
+          failed_when: false
+          ansible.builtin.shell:
+            cmd: "mv \"{{ restore_target_path }}\"/* \"{{ restore_target_path }}\"/.* \"{{ save_before_restore_path }}/\""
+            executable: "/bin/bash"
+        - name: Verify target dir is empty
+          ansible.builtin.find:
+            paths: "{{ restore_target_path }}"
+            recurse: true
+          register: target_dir_after
+          failed_when: target_dir_after.matched > 0
+          changed_when: false
+        - name: Move the restored directory content to the target
+          become: true
+          failed_when: false
+          ansible.builtin.shell:
+            cmd: "mv \"{{ unarchive_result.dest }}\"/* \"{{ unarchive_result.dest }}\"/.* \"{{ restore_target_path }}/\""
+            executable: "/bin/bash"
+        - name: Set ownership of the restored directory to nfs user
+          become: true
+          ansible.builtin.file:
+            path: "{{ restore_target_path }}"
+            owner: nobody
+            group: nogroup
+            recurse: true
 
-        - name: Move the restored directory to where the existing directory was
-          ansible.builtin.command: "mv {{ unarchive_result.dest }} {{ restore_target_path }}"
-          args:
-            removes: "{{ unarchive_result.dest }}"
-            creates: "{{ restore_target_path }}"
+        - name: Verify tmp dir is empty
+          ansible.builtin.find:
+            paths: "{{ unarchive_result.dest }}"
+            recurse: true
+          register: tmp_dir_after
+          failed_when: tmp_dir_after.matched > 0
+          changed_when: false
+        - name: Verify target dir is not empty
+          become: true
+          ansible.builtin.find:
+            paths: "{{ restore_target_path }}"
+            recurse: true
+          register: target_dir_after
+          failed_when: target_dir_after.matched == 0
+          changed_when: false
