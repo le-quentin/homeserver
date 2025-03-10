@@ -7,3 +7,5 @@
 - import_playbook: "./gateway.yaml"
 - import_playbook: "./monitoring.yaml"
 - import_playbook: "./cocobot.yaml"
+- import_playbook: "./duckdns.yaml"
+  

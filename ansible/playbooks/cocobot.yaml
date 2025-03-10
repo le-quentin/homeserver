@@ -1,4 +1,4 @@
-- name: Install gateway
+- name: Install cocobot
   hosts: cocobotservs
   tasks:
     - include_tasks: "tasks/install-docker.yaml"

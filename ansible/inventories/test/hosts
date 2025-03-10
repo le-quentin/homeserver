@@ -19,3 +19,6 @@ mainhost
 [cocobotservs]
 mainhost
 
+[duckdnsservs]
+mainhost
+
