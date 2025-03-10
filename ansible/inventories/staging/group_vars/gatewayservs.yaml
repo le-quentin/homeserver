@@ -1,1 +1,2 @@
-gateway_ip: "{{ ansible_host }}" 
+---
+gateway_ip: "{{ ansible_host }}"

@@ -1,0 +1,51 @@
+# Install ZFS role or playbook or task file
+- name: Ensure apt cache is updated
+  ansible.builtin.apt:
+    update_cache: true
+# - name: Add ZFS repository (backports)
+#   ansible.builtin.apt_repository:
+#     repo: "deb http://deb.debian.org/debian bookworm-backports main contrib"
+#     state: present
+# - name: Add ZFS source repository (optional)
+#   ansible.builtin.apt_repository:
+#     repo: "deb-src http://deb.debian.org/debian bookworm-backports main contrib"
+#     state: present
+#
+# Use this instead if issues (older version more tested with Debian)
+- name: Add ZFS repository
+  ansible.builtin.apt_repository:
+    repo: "deb http://deb.debian.org/debian bookworm contrib"
+    state: present
+- name: Update apt cache after adding ZFS repositories
+  ansible.builtin.apt:
+    update_cache: true
+- name: Install ZFS kernel module and tools
+  ansible.builtin.apt:
+    name:
+      - "linux-headers-{{ ansible_kernel }}"
+      - zfs-dkms
+      - zfsutils-linux
+    state: present
+- name: Ensure ZFS module is loaded
+  community.general.modprobe:
+    name: zfs
+    state: present
+- name: Enable ZFS services at boot
+  ansible.builtin.systemd:
+    name: zfs-import-cache
+    enabled: true
+    state: started
+- name: Verify ZFS installation
+  ansible.builtin.command: zfs --version
+  register: zfs_version
+  changed_when: false
+- name: Debug ZFS version
+  ansible.builtin.debug:
+    msg: "ZFS installed successfully: {{ zfs_version.stdout }}"
+- name: Create a ZFS pool
+  ansible.builtin.command:
+    # TODO pool_name and partition_name var
+    cmd: "zpool create -f {{ zfs_pool_name }} {{ disk_partition }}"
+  register: zpool_result
+  changed_when: "'pool already exists' not in zpool_result.stderr and 'is in use' not in zpool_result.stderr"
+  failed_when: "zpool_result.rc != 0 and 'is in use' not in zpool_result.stderr"

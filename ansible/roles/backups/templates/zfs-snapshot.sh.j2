@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+printf -v date '%(%Y-%m-%d_%H-%M)T' -1
+poolname={{ item.pool }}
+filesystem={{ item.filesystem }}
+snapshot_name=$poolname/$filesystem
+
+sudo zfs snapshot $snapshot_name@$date

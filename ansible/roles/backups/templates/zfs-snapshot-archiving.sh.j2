@@ -1,0 +1,47 @@
+#!/bin/bash
+
+set -e
+
+# Cleanup
+function cleanup() {
+  echo "Cleaning up..."
+  sudo zfs destroy "$clone_name"
+}
+trap cleanup EXIT
+
+printf -v date '%(%Y-%m-%d_%H-%M)T' -1
+# set vars
+poolname={{ item.pool }} filesystem={{ item.filesystem }}
+snapshot_name="$poolname/$filesystem"
+clone_name="$poolname/${filesystem}_archiving_clone"
+latest_snapshot=$(zfs list -t snapshot -o name -s creation | grep "^${snapshot_name}@" | tail -n 1)
+target_dir={{ item.archiving.target_dir }}
+if [ "{{ item.archiving.subdir_per_filesystem }}" = "true" ]; then
+	target_dir=$target_dir/{{ item.filesystem }}
+fi
+if [ -z "$latest_snapshot" ]; then
+  >&2 echo "No snapshots found for ${snapshot_name}. Exiting."
+  exit 1
+fi
+snapshot_version=$(echo "$latest_snapshot" | awk -F'@' '{print $2}')
+archive_name={{ item.name }}
+archive_file="${target_dir}/${archive_name}_${snapshot_version}.tar.gz"
+
+sudo mkdir -p $target_dir
+
+# Create a clone of the snapshot
+echo "Cloning snapshot to temporary dataset: $clone_name"
+sudo zfs clone "$latest_snapshot" "$clone_name" || { echo "Failed to clone snapshot. Exiting."; exit 1; }
+
+# Get mount point of the clone (automatically determined by ZFS)
+mount_point=$(zfs get -H -o value mountpoint "$clone_name")
+
+# Mount the snapshot's content
+echo "Latest snapshot: $latest_snapshot"
+echo "Mounting snapshot at $mount_point..."
+
+# Create tar.gz archive
+echo "Creating archive: $archive_file"
+sudo sh -c "tar -cvf - -C \"$mount_point\" . | sudo gzip -{{ item.archiving.compression_level | default(backups_default_compression_level) }} > \"$archive_file\""
+
+echo "Snapshot archived successfully: $archive_file"

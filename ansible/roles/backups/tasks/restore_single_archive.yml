@@ -1,0 +1,71 @@
+---
+- name: Restore {{ item.name }}
+  when: item.src is regex(backups_restore_directory_regex)
+  block:
+    - name: Set facts
+      ansible.builtin.set_fact:
+        restore_src_dir: "{{ item.target }}"
+        restore_target_path: "{{ item.src }}"
+        backup_apply_time: "{{ now(fmt='%Y-%m-%d_%H-%M') }}"
+    - name: Set facts
+      ansible.builtin.set_fact:
+        save_before_restore_path: "/tmp/save-before-backup-{{ item.name }}-{{ backup_apply_time }}"
+
+    - name: Get the latest backup file
+      when: restore_version == "latest"
+      block:
+        - name: List all backups
+          ansible.builtin.find:
+            paths: "{{ restore_src_dir }}"
+          register: all_backups
+        - name: Verify the backups folder was found
+          ansible.builtin.assert:
+            that: all_backups.skipped_paths | length == 0
+            fail_msg: "The backups folder {{ restore_src_dir }} is not found or not reachable for {{ ansible_user }} user"
+        - name: Get latest file
+          ansible.builtin.set_fact:
+            backup_to_restore: "{{ (all_backups.files | sort(attribute='mtime') | last).path | basename }}"
+        - name: Message to user
+          ansible.builtin.debug:
+            msg: "No backup arg, using latest dump: {{ backup_to_restore }}"
+
+    - name: "Restore backup [{{ backup_to_restore }}]"
+      block:
+        - name: Create tmp dir for unarchiving
+          ansible.builtin.file:
+            path: "/tmp/{{ item.name }}-{{ backup_apply_time }}"
+            mode: "0744"
+            state: "{{ state }}"
+          loop_control:
+            loop_var: state
+          loop:
+            - absent
+            - directory
+        - name: Unarchive into tmp dir
+          ansible.builtin.unarchive:
+            src: "{{ restore_src_dir }}/{{ backup_to_restore }}"
+            remote_src: true
+            dest: "/tmp/{{ item.name }}-{{ backup_apply_time }}"
+          register: unarchive_result
+
+        - name: List tmp dir files
+          ansible.builtin.find:
+            paths: "{{ unarchive_result.dest }}"
+            hidden: true
+          register: unarchived_files
+        - name: Check that tmp dir contains files
+          when: unarchived_files.matched == 0
+          ansible.builtin.fail:
+            msg: The unarchived backup seems empty. Nothing was restored.
+
+        - name: Save the existing directory before restoring, just in case
+          ansible.builtin.command: "mv {{ restore_target_path }} {{ save_before_restore_path }}"
+          args:
+            removes: "{{ restore_target_path }}"
+            creates: "{{ save_before_restore_path }}"
+
+        - name: Move the restored directory to where the existing directory was
+          ansible.builtin.command: "mv {{ unarchive_result.dest }} {{ restore_target_path }}"
+          args:
+            removes: "{{ unarchive_result.dest }}"
+            creates: "{{ restore_target_path }}"

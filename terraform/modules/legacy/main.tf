@@ -51,11 +51,6 @@ resource "proxmox_virtual_environment_file" "cloudinit_user" {
   }
 }
 
-resource "proxmox_virtual_environment_time" "node_time" {
-  node_name = var.node_name
-  time_zone = "CET"
-}
-
 resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
   name        = "legacy-homeserver"
   node_name   = var.node_name
