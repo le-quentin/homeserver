@@ -18,11 +18,17 @@
     - name: Rclone arch name
       ansible.builtin.set_fact:
         rclone_arch_name: "{{ rclone_arch_names[ansible_architecture] | default(ansible_architecture) }}"
-    - name: Install rclone (used for syncing backups in the cloud)
+    - name: Check current rclone version
+      ansible.builtin.command: "rclone --version"
+      register: rclone_current_version
+      changed_when: false
+      failed_when: false
+    - name: Install or update rclone
       become: true
       ansible.builtin.script: "./install-rclone.sh {{ rclone_arch_name }} {{ backups_rclone_version }}"
-      args:
-        creates: "/usr/local/bin/rclone"
+      when: >
+        rclone_current_version.rc != 0 or
+        not rclone_current_version.stdout is search('v' + backups_rclone_version)
     - name: Ensure rclone config folder exists
       become: true
       ansible.builtin.file:
