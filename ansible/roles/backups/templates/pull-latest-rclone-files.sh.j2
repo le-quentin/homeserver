@@ -8,7 +8,7 @@ GROUP_REGEX="(.*)[0-9]{4}"                  # Regex to group files
 LOCAL_DEST="{{ item.src }}"      # Local destination path
 
 # Fetch the list of files recursively
-FILES=$(rclone lsf "$RCLONE_REMOTE" --files-only --recursive)
+FILES=$(rclone lsf --config /opt/rclone/rclone.conf "$RCLONE_REMOTE" --files-only --recursive)
 
 # Declare an associative array for grouped files
 declare -A file_groups
@@ -38,13 +38,13 @@ for group_key in "${!file_groups[@]}"; do
     local_target_dir="$LOCAL_DEST/$remote_path_dir"
     
     # Create the local directory if it doesn't exist
-    sudo -u "{{ backups_user }}" mkdir -p "$local_target_dir"
+    sudo mkdir -p "$local_target_dir"
 
     # Copy the file to the local destination
     sudo rclone copy --config /opt/rclone/rclone.conf "$RCLONE_REMOTE/$latest_file" "$local_target_dir"
 
-    # Change ownership to NFS user and group
-    sudo chown -R "{{ backups_user }}:{{ backups_user }}" "$local_target_dir"
+    # Change ownership to nobody:nogroup (not ideal but functional for now)
+    sudo chown -R "nobody:nogroup" "$local_target_dir"
 
     echo "File $latest_file copied to $local_target_dir"
   else

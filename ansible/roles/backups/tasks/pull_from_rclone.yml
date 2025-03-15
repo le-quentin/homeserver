@@ -1,4 +1,5 @@
 - name: Count the backup files before
+  become: true
   tags: always
   register: before
   changed_when: false
@@ -11,6 +12,7 @@
   ansible.builtin.command:
     cmd: "pull-latest-rclone-files{{ item.name }}"
 - name: Count the backup files after
+  become: true
   tags: always
   register: after
   changed_when: after.stdout != before.stdout
