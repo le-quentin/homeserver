@@ -3,9 +3,9 @@
 set -e
 
 # Configurable variables
-RCLONE_REMOTE="{{ item.target }}" # Replace with your rclone remote
-GROUP_REGEX="(.*)[0-9]{4}"                  # Regex to group files
-LOCAL_DEST="{{ item.src }}"      # Local destination path
+RCLONE_REMOTE="{{ item.target }}"
+GROUP_REGEX="(.*)[0-9]{4}" # Regex to group files
+LOCAL_DEST="{{ item.src }}" # Local destination path
 
 # Fetch the list of files recursively
 FILES=$(rclone lsf --config /opt/rclone/rclone.conf "$RCLONE_REMOTE" --files-only --recursive)
@@ -21,32 +21,61 @@ while IFS= read -r file; do
   fi
 done <<< "$FILES"
 
+pull_latest_file() {
+  local latest_file="$1"
+  local local_target_dir="$2"
+
+  # Create the local directory if it doesn't exist
+  sudo mkdir -p "$local_target_dir"
+
+  # Copy the file to the local destination
+  sudo rclone copy --config /opt/rclone/rclone.conf "$RCLONE_REMOTE/$latest_file" "$local_target_dir"
+
+  # Change ownership to nobody:nogroup
+  sudo chown -R "nobody:nogroup" "$local_target_dir"
+
+  echo "File $latest_file copied to $local_target_dir"
+}
+
 # Iterate over each group
 for group_key in "${!file_groups[@]}"; do
-  echo "Processing group: $group_key"
+  echo "" && echo "#########Processing group: $group_key"
 
-   # Read the group files into a properly handled list
+  # Read the group files into a properly handled list
   group_files=$(echo -e "${file_groups[$group_key]}")
   # Sort files and get the latest one
   latest_file=$(echo "$group_files" | sort | tail -n 1)
 
   if [[ -n "$latest_file" ]]; then
-    echo "Fetching the latest file: $latest_file"
+    echo "Latest remote file: $latest_file"
 
     # Determine the local path preserving the directory structure
-    remote_path_dir=$(dirname "$latest_file")
-    local_target_dir="$LOCAL_DEST/$remote_path_dir"
+    remote_path_dir_prefix="$(dirname "$latest_file")/"
+    [ "$remote_path_dir_prefix" = "./" ] && remote_path_dir_prefix=""
+    local_target_dir="$LOCAL_DEST/$remote_path_dir_prefix"    local_target_dir="$LOCAL_DEST/$remote_path_dir_prefix"
     
-    # Create the local directory if it doesn't exist
-    sudo mkdir -p "$local_target_dir"
+    # Find latest local file (if any) in the same directory
+    local_latest_file=""
+    local_latest_subpath=""
 
-    # Copy the file to the local destination
-    sudo rclone copy --config /opt/rclone/rclone.conf "$RCLONE_REMOTE/$latest_file" "$local_target_dir"
+    if sudo [ -d "$LOCAL_DEST/$remote_path_dir_prefix" ]; then
+      local_latest_file=$(sudo find "$LOCAL_DEST/$remote_path_dir_prefix" -maxdepth 1 -type f -name "*.tar.gz" | sort | tail -n 1)
+      local_latest_subpath="$remote_path_dir_prefix$(basename "$local_latest_file")"
+    fi
 
-    # Change ownership to nobody:nogroup (not ideal but functional for now)
-    sudo chown -R "nobody:nogroup" "$local_target_dir"
-
-    echo "File $latest_file copied to $local_target_dir"
+    if [ -n "$local_latest_file" ]; then
+      echo "Testing remote $latest_file vs local $local_latest_subpath"
+      if [[ "$latest_file" > "$local_latest_subpath" ]]; then
+        echo "Remote file is newer, pulling update..."
+        pull_latest_file "$latest_file" "$local_target_dir"
+      else
+        echo "Local file is up to date, skipping..."
+        continue
+      fi
+    else
+      echo "No local file found, pulling..."
+      pull_latest_file "$latest_file" "$local_target_dir"
+    fi
   else
     echo "No files found for group $group_key"
   fi
