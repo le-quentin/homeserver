@@ -35,7 +35,6 @@
         path: "/opt/rclone"
         state: directory
         mode: "0755"
-        recurse: true
     - name: Copy rclone config
       become: true
       ansible.builtin.template:
