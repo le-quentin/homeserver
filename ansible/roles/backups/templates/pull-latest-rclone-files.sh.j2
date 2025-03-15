@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # Configurable variables
 RCLONE_REMOTE="{{ item.target }}" # Replace with your rclone remote
 GROUP_REGEX="(.*)[0-9]{4}"                  # Regex to group files
