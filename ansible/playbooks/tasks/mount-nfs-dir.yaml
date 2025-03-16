@@ -15,7 +15,7 @@
     src: "{{ nfs_server }}:{{ item.target }}"
     path: "{{ item.path }}"
     fstype: nfs
-    opts: "{{ item.opts | default('rw,sync,user,hard') }}"
+    opts: "{{ item.opts | default('rw,sync,user,soft,timeo=300,retrans=20,retry=10') }}"
     state: "{{ 'mounted' if item.state == 'mounted' else 'unmounted' }}"
 
 - name: Delete mountpoint
