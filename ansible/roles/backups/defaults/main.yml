@@ -5,5 +5,6 @@ backups_snapshots: []
 backups_default_compression_level: 6
 backups_default_restore_version: latest
 backups_rclone_version: 1.69.1
-backups_default_cleanup_regex: .*\.tar\.gz
+backups_default_dirs_cleanup_regex: .*\.tar\.gz
+backups_default_snapshots_cleanup_regex: .*
 backups_default_older_than_days: 0

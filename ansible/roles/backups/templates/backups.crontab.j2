@@ -17,3 +17,6 @@
 {% for cleanup in _cleanup_backups_dirs %}
 {{ cleanup.cron.minute | default('*') }} {{ cleanup.cron.hour | default('*') }} {{ cleanup.cron.day | default('*') }} {{ cleanup.cron.month | default('*') }} {{ cleanup.cron.weekday | default('*') }} {{ ansible_user }} sudo find "{{ cleanup.dir }}" -type f -mtime +{{ cleanup.older_than_days }} -regex '{{ cleanup.regex }}' -delete > /tmp/cleanup-backup{{ cleanup.name }}.last.log 2>/tmp/cleanup-backup{{ cleanup.name }}.err.log
 {% endfor %}
+{% for cleanup in _cleanup_snapshots %}
+{{ cleanup.cron.minute | default('*') }} {{ cleanup.cron.hour | default('*') }} {{ cleanup.cron.day | default('*') }} {{ cleanup.cron.month | default('*') }} {{ cleanup.cron.weekday | default('*') }} {{ ansible_user }} /usr/local/bin/cleanup-zfs-snapshots.sh "{{ cleanup.regex }}" {{ cleanup.older_than_days }} > /tmp/cleanup-zfs-snapshots.last.log 2>/tmp/cleanup-zfs-snapshots.err.log
+{% endfor %}

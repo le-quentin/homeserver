@@ -18,11 +18,6 @@
                 # day: 1
                 hour: 6
                 minute: 30
-              # TODO use this to generate a tar.gz archive from the latest snapshots
-              # Then create a backups_cleanup property with a list of cron+regex+retention_days dicts to run cleanup jobs
-              # Then modify restore job so that when a matching rclone config exists, the search for latest item includes rclone dir
-              # Then final test: recreate nfs serv from scratch, and restore : should get functional home assistant with previous data
-
         backups_rclone_conf_template_path: ./resources/backups/rclone.conf
         backups_rclone:
           - cron:
@@ -38,3 +33,10 @@
             dir: /srv/nfs/backups
             # Can also add  "regex" here, it defaults to '.*\.tar\.gz'
             older_than_days: 7
+        snapshots_cleanup:
+          - cron:
+              hour: 7
+              minute: 30
+            # Can also add  "regex" here, it defaults to '.*'
+            older_than_days: 31
+
