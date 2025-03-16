@@ -4,7 +4,6 @@
   roles:
     - role: backups
       vars:
-        backups_user: nfs
         backups_snapshots:
           - default_cron:
               hour: 6
