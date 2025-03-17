@@ -10,6 +10,8 @@
         subdirs:
           - name: home-assistant
             client: "{{ k3s_controller_ip }}"
+          - name: websites
+            client: "{{ k3s_controller_ip }}"
       basic:
         root: /srv/nfs/backups
         user: nfs

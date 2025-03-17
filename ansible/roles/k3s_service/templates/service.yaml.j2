@@ -9,5 +9,4 @@ spec:
     - protocol: TCP
       port: {{ service_port }}
       targetPort: {{ k3s_service_container_port }}
-      nodePort: 30042
-  type: NodePort
+  type: ClusterIP

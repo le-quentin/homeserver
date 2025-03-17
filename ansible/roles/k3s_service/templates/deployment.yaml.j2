@@ -8,7 +8,7 @@ spec:
     matchLabels:
       name: "{{ k3s_service_name }}"
   replicas: 1 
-  template: 
+  template:
     metadata:
       labels:
         name: "{{ k3s_service_name }}"
@@ -55,7 +55,8 @@ spec:
 {% set commands = [] %}
 {% for file in config_map_files %}
 {% set dont_overwrite_option = '-n' if file.init_only else '' %}
-  {{ commands.append("cp "~dont_overwrite_option~" '/tmp/"~(file.name)~"' '"~file.mount_path~"'") }}
+  {{ commands.append(" mkdir -p '"~(file.mount_path | dirname)~"'") }}
+  {{ commands.append(" cp "~dont_overwrite_option~" '/tmp/"~(file.name)~"' '"~file.mount_path~"'") }}
 {% endfor %}
         - "sh"
         - "-c"

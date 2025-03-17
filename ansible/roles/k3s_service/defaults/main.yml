@@ -3,3 +3,6 @@
 k3s_service_namespace: "{{ k3s_service_name }}"
 k3s_service_state:
 k3s_service_config_files: []
+# New TLS-related defaults
+k3s_service_tls_enabled: false
+k3s_service_tls_issuer: "{{ cert_manager_issuer_name }}"

@@ -16,6 +16,7 @@
     data_volumes: "{{ k3s_service_data_volumes | default([]) }}"
     config_map_enabled: false
     service_port: 80
+    service_domain: "{{ k3s_service_domain | default(k3s_service_name ~ '.' ~  homeserver_domain, true) }}"
 
 - name: Set config_map_files
   ansible.builtin.set_fact:
