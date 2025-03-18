@@ -17,6 +17,8 @@
     config_map_enabled: false
     service_port: 80
     service_domain: "{{ k3s_service_domain | default(k3s_service_name ~ '.' ~  homeserver_domain, true) }}"
+    tls_certificates_enabled: "{{ k3s_service_tls and not k3s_service_tls.issuer | default(false) }}"
+    tls_issuer_enabled: "{{ k3s_service_tls and k3s_service_tls.issuer | default(false) }}"
 
 - name: Set config_map_files
   ansible.builtin.set_fact:

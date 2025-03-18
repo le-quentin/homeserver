@@ -11,7 +11,9 @@
         k3s_service_image: "webdevops/php-nginx:8.2-alpine"
         k3s_service_container_port: 80
         k3s_service_domain: "{{ website_domain | default(None) }}"
-        k3s_service_tls_enabled: true
+        k3s_service_tls:
+          cert_file_path: "resources/websites/cert.pem"
+          key_file_path: "resources/websites/key.pem"
         k3s_service_data_volumes:
           - type: nfs
             name: websites

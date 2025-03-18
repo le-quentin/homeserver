@@ -6,5 +6,5 @@ ansible_files_root: /home/{{ hostvars.k3scontroller.ansible_user }}/ansible-file
 ansible_python_interpreter: /home/{{ hostvars.k3scontroller.ansible_user }}/python/ansible_venv/bin/python
 ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
 
-cert_manager_issuer_name: "letsencrypt-staging"
-cert_manager_server: "https://acme-staging-v02.api.letsencrypt.org/directory"
+cert_file_path: "resources/websites/prod/cert.pem"
+key_file_path: "resources/websites/prod/key.pem"

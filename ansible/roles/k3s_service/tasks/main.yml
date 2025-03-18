@@ -24,6 +24,10 @@
             template: "configmap.yml.j2"
             append_hash: true
           register: configmap
+        - name: Secrets
+          kubernetes.core.k8s:
+            state: "{{ resources_state }}"
+            template: "secrets.yaml.j2"
         - name: Register configmap name
           when: config_map_enabled and resources_state == 'present'
           ansible.builtin.set_fact:
