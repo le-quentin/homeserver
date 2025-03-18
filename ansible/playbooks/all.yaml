@@ -1,5 +1,13 @@
 ---
+- name: General settings on a linux server
+  import_playbook: "./linux_server.yaml"
 - name: Install adguard
   import_playbook: "./adguard.yaml"
-- name: Instal legacy services
+- name: Install legacy services
   import_playbook: "./legacy/all.yaml"
+- name: Install nfs server
+  import_playbook: "./nfs_server.yaml"
+- name: Install k3s
+  import_playbook: "./k3s_setup.yaml"
+- name: Install websites
+  import_playbook: "./websites.yaml"
