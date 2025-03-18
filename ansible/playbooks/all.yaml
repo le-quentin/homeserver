@@ -1,4 +1,3 @@
----
 - name: General settings on a linux server
   import_playbook: "./linux_server.yaml"
 - name: Install adguard

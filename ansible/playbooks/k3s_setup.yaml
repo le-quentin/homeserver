@@ -122,8 +122,10 @@
             create_namespace: false
             values:
               installCRDs: true
+          register: cert_manager_install
 
         - name: Wait for cert-manager webhook to be ready
+          when: cert_manager_install.changed
           ansible.builtin.wait_for:
             timeout: 30
 
