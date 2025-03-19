@@ -1,6 +1,6 @@
 ---
-- name: Install gateway
-  hosts: mainhost
+- name: Install cocobot
+  hosts: cocobotservs
   tasks:
     - name: Ensure docker is installed
       ansible.builtin.include_tasks: "tasks/install-docker.yaml"

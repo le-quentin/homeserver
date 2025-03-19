@@ -13,3 +13,5 @@
   import_playbook: "./websites.yaml"
 - name: Setup backups
   import_playbook: "./backups.yaml"
+- name: Setup duckdns
+  import_playbook: "./duckdns.yaml"
