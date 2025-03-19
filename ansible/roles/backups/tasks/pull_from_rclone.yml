@@ -1,3 +1,4 @@
+---
 - name: Count the backup files before
   become: true
   tags: always

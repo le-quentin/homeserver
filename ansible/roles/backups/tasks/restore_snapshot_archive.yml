@@ -28,7 +28,7 @@
         'name': item.name,
         'zfs_path':  item.pool + '/' + item.filesystem,
         'target': (
-          item.archiving.target_dir if not item.archiving.subdir_per_filesystem 
+          item.archiving.target_dir if not item.archiving.subdir_per_filesystem
           else item.archiving.target_dir + '/' + item.filesystem
         ),
          'src': (zfs_mounts.results | selectattr('item.name', 'eq', item.name) | map(attribute='stdout') | first),

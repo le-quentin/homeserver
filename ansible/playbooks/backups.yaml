@@ -40,4 +40,3 @@
               minute: 30
             # Can also add  "regex" here, it defaults to '.*'
             older_than_days: 31
-

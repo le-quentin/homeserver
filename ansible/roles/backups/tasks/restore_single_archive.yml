@@ -59,7 +59,7 @@
           ansible.builtin.fail:
             msg: The unarchived backup seems empty. Nothing was restored.
 
-        - name: create the save directory
+        - name: Create the save directory
           ansible.builtin.file:
             path: "{{ save_before_restore_path }}"
             mode: "0744"

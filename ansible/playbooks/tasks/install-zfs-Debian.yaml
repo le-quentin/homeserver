@@ -1,3 +1,4 @@
+---
 # Install ZFS role or playbook or task file
 - name: Ensure apt cache is updated
   ansible.builtin.apt:

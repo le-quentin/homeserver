@@ -21,4 +21,4 @@
             size: 5Gi
         k3s_service_config_files:
           - template: "./resources/websites/nginx.conf.j2"
-            dest: "/opt/docker/etc/nginx/vhost.conf" 
+            dest: "/opt/docker/etc/nginx/vhost.conf"
