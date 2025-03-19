@@ -73,18 +73,18 @@
     - name: Setup permissions for exported nfs directories (ZFS)
       ansible.builtin.file:
         dest: "{{ nfs_server_exports.zfs.root }}/{{ item.name }}"
-        owner: "{{ nfs_server_exports.zfs.user | default('nobody') }}"
-        group: "{{ nfs_server_exports.zfs.group | default('nogroup') }}"
-        mode: "744"
+        owner: "{{ nfs_server_exports.zfs.user | default(ansible_user) }}"
+        group: "{{ nfs_server_exports.zfs.group | default(ansible_user) }}"
+        mode: "777" # TODO not ideal, fix nfs permissions
         state: directory
         recurse: true
       loop: "{{ nfs_server_exports.zfs.subdirs }}"
     - name: Setup permissions for exported nfs directories (basic)
       ansible.builtin.file:
         dest: "{{ nfs_server_exports.basic.root }}/{{ item.name }}"
-        owner: "{{ nfs_server_exports.basic.user | default('nobody') }}"
-        group: "{{ nfs_server_exports.basic.group | default('nogroup') }}"
-        mode: "744"
+        owner: "{{ nfs_server_exports.basic.user | default(ansible_user) }}"
+        group: "{{ nfs_server_exports.basic.group | default(ansible_user) }}"
+        mode: "777" # TODO not ideal, fix nfs permissions
         state: directory
         recurse: true
       loop: "{{ nfs_server_exports.basic.subdirs }}"
