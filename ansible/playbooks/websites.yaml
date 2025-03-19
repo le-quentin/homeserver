@@ -1,0 +1,24 @@
+---
+- name: Deploy nginx websites server
+  hosts: k3scontroller
+  tasks:
+    - name: Deploy the nginx websites service
+      ansible.builtin.include_role:
+        name: "k3s_service"
+      vars:
+        k3s_service_namespace: websites
+        k3s_service_name: web
+        k3s_service_image: "webdevops/php-nginx:8.2-alpine"
+        k3s_service_container_port: 80
+        k3s_service_domain: "{{ website_domain | default(None) }}"
+        k3s_service_tls:
+          cert_file_path: "resources/websites/cert.pem"
+          key_file_path: "resources/websites/key.pem"
+        k3s_service_data_volumes:
+          - type: nfs
+            name: websites
+            mount_path: /app
+            size: 5Gi
+        k3s_service_config_files:
+          - template: "./resources/websites/nginx.conf.j2"
+            dest: "/opt/docker/etc/nginx/vhost.conf"

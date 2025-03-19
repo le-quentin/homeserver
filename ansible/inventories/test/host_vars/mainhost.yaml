@@ -1,4 +1,5 @@
-ansible_host: 192.168.121.101 #VM static ip
+---
+ansible_host: 192.168.121.101 # VM static ip
 ansible_user: vagrant
 home_dir: /home/vagrant
 ansible_files_root: /home/vagrant/ansible-files

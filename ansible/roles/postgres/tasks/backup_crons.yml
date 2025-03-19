@@ -1,0 +1,12 @@
+---
+# TODO setup crons from databases var here
+- name: Setup backup crons
+  ansible.builtin.cron:
+    name: "local backups"
+    user: "{{ ansible_user }}"
+    minute: "{{ item.backup_cron.minute | default('*') }}"
+    hour: "{{ item.backup_cron.hour | default('*') }}"
+    day: "{{ item.backup_cron.day | default('*') }}"
+    month: "{{ item.backup_cron.month | default('*') }}"
+    weekday: "{{ item.backup_cron.weekday | default('*') }}"
+    job: "/usr/local/bin/create-backup.sh {{ item.name }} > /tmp/backup-{{ item.name }}.last.log 2>/tmp/backup-{{ item.name }}.err.log"

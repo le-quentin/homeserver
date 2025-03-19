@@ -1,0 +1,41 @@
+---
+- name: Restore {{ item.filesystem }}
+  when: item.filesystem is regex(backups_restore_snapshot_regex)
+  become: true
+  block:
+    - name: Set facts
+      ansible.builtin.set_fact:
+        restore_snapshot_name: "{{ item.pool }}/{{ item.filesystem }}"
+
+    - name: Get the latest snapshot
+      when: restore_version == "latest"
+      block:
+        - name: Get latest snapshot
+          ansible.builtin.shell:
+            cmd: >
+              set -o pipefail && zfs list -t snapshot -o name -s creation | grep {{ restore_snapshot_name }} | tail -n1
+            executable: /bin/bash
+          changed_when: false
+          register: latest_snapshot
+        - name: Verify the backups folder was found
+          ansible.builtin.assert:
+            that: latest_snapshot.stdout | length > 0
+            fail_msg: "Latest snapshot for {{ restore_snapshot_name }} not found"
+        - name: Set fact for latest snapshot
+          ansible.builtin.set_fact:
+            snapshot_to_restore: "{{ latest_snapshot.stdout }}"
+        - name: Message to user
+          ansible.builtin.debug:
+            msg: "No backup arg, using latest snapshot: {{ snapshot_to_restore }}"
+
+    - name: Get the specified snapshot
+      when: restore_version != "latest"
+      block:
+        - name: Build snapshot name
+          ansible.builtin.set_fact:
+            snapshot_to_restore: "{{ restore_snapshot_name }}@{{ restore_version }}"
+
+    - name: "Restore snapshot [{{ snapshot_to_restore }}]"
+      ansible.builtin.command:
+        cmd: "zfs rollback {{ snapshot_to_restore }}"
+      changed_when: true

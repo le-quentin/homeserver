@@ -1,0 +1,26 @@
+---
+- name: Check mountpoint exist
+  become: true
+  when: item.state in ['unmounted', 'mounted']
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.permission | default('0774') }}"
+    owner: "{{ item.owner | default(ansible_user) }}"
+    group: "{{ item.group | default(ansible_user) }}"
+
+- name: Mount network share
+  become: true
+  ansible.posix.mount:
+    src: "{{ nfs_server }}:{{ item.target }}"
+    path: "{{ item.path }}"
+    fstype: nfs
+    opts: "{{ item.opts | default('rw,sync,user,soft,timeo=300,retrans=20,retry=10') }}"
+    state: "{{ 'mounted' if item.state == 'mounted' else 'unmounted' }}"
+
+- name: Delete mountpoint
+  become: true
+  when: item.state == 'absent'
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent

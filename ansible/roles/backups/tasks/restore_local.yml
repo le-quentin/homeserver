@@ -1,0 +1,15 @@
+---
+- name: Verify input vars
+  tags: restore
+  when: backups_restore_directory_regex is undefined
+  ansible.builtin.fail:
+    msg: "You must define the backups_restore_directory_regex variable"
+- name: Set restore facts
+  tags: restore
+  ansible.builtin.set_fact:
+    restore_version: "{{ backups_restore_version | default(backups_default_restore_version) }}"
+
+- name: Restore all matching directories
+  tags: restore
+  loop: "{{ _local_backups_dirs }}"
+  ansible.builtin.include_tasks: restore_single_archive.yml

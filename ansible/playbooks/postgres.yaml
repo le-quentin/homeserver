@@ -1,0 +1,9 @@
+---
+- name: Install and setup PostgreSQL
+  hosts: postgresservs
+  roles:
+    - role: postgres
+      vars:
+        postgres_host_ip: "{{ ansible_host }}"
+        postgres_client_cidr: "{{ k3s_controller_ip }}/32"
+        postgres_lan_cidr: "{{ lan_cidr }}"

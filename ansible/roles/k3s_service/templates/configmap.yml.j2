@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "{{ k3s_service_name }}-config-files"
+  namespace: "{{ k3s_service_namespace }}"
+data:
+{# A little black magic producing this for every template:
+    <filename-without-j2-extension>: |
+      <raw content of the file>
+
+ We manually insert four white space after each line break, to create the right indentation in the configmap yaml file #}
+{% for file in config_map_files %}
+  {{ file.name }}: |
+    {{ file.value }}
+{% endfor %}

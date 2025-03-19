@@ -1,3 +1,7 @@
+---
 homeserver_domain: home
 dns_ip: 10.42.1.2
+nfs_server: 10.42.10.20
+database_ip: 10.42.10.21
 legacy_server_ip: 10.42.1.200
+k3s_controller_ip: 10.42.10.10

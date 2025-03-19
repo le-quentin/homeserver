@@ -1,21 +1,32 @@
-- hosts: all
+---
+- name: "Inspect variables"
+  hosts: all
   become: false
   tasks:
-    - name: user
-      debug: msg="{{ansible_user_id}}"
-    - name: architecture
-      debug: msg="{{ansible_architecture}}"
-    - name: architecture alt
-      debug: msg="{{ ansible_architecture_alt }}"
-    - name: distribution
-      debug: msg="{{ansible_distribution}}"
-    - name: os_family
-      debug: msg="{{ansible_os_family}}"
+    - name: User
+      ansible.builtin.debug:
+        msg: "{{ ansible_user_id }}"
+    - name: Architecture
+      ansible.builtin.debug:
+        msg: "{{ ansible_architecture }}"
+    - name: Architecture alt
+      ansible.builtin.debug:
+        msg: "{{ ansible_architecture_alt }}"
+    - name: Distribution
+      ansible.builtin.debug:
+        msg: "{{ ansible_distribution }}"
+    - name: Os_family
+      ansible.builtin.debug:
+        msg: "{{ ansible_os_family }}"
     - name: HOME
-      debug: msg="{{ansible_env.HOME}}"
-    - name: home_dir
-      debug: msg="{{home_dir}}"
-    - name: ansible_user
-      debug: msg="{{ansible_user}}"
-    - name: ansible_user_id
-      debug: msg="{{ansible_user_id}}"
+      ansible.builtin.debug:
+        msg: "{{ ansible_env.HOME }}"
+    - name: Home_dir
+      ansible.builtin.debug:
+        msg: "{{ home_dir }}"
+    - name: Ansible_user
+      ansible.builtin.debug:
+        msg: "{{ ansible_user }}"
+    - name: Ansible_user_id
+      ansible.builtin.debug:
+        msg: "{{ ansible_user_id }}"

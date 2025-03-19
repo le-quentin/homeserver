@@ -1,0 +1,16 @@
+---
+- name: General settings on a linux server
+  hosts: all, !mainhost, !dbhost
+  tasks:
+    - name: Setup a /tmp cleanup cron
+      block:
+        - name: Install cron
+          become: true
+          ansible.builtin.package:
+            name: cron
+        - name: Create the cleanup cron (every day, delete /tmp files and directories older than 3 days)
+          ansible.builtin.cron:
+            name: Cleanup /tmp dir
+            minute: "0"
+            hour: "23"
+            job: find /tmp -maxdepth 1 -atime +3 -print0 | xargs -0 -I {} /bin/rm -rf "{}"

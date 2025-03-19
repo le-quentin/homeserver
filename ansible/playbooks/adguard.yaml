@@ -1,27 +1,25 @@
+---
 - name: Setup AdGuard Home (DNS for LAN + filters for WAN)
   hosts: adguardservs
   tasks:
-    - include_tasks: "tasks/install-docker.yaml"
+    - name: Ensure docker is installed
+      ansible.builtin.include_tasks: "tasks/install-docker.yaml"
     - name: Copy systemd-resolved conf file over (turning off TCP 53 listen to free it for AdGuard)
-      become: yes
+      become: true
       ansible.builtin.copy:
         src: "./resources/adguard/systemd-resolved.conf"
         dest: "/etc/systemd/resolved.conf"
-      register: systemd_resolved_conf
-    - name: Restart systemd-resolved
-      become: yes
-      ansible.builtin.systemd:
-        name: "systemd-resolved"
-        enabled: true
-        state: restarted
-      when: systemd_resolved_conf.changed
+        mode: "0644"
+      notify: Restart systemd-resolved
+    - name: Restart systemd-resolved immediately if needed to free the TCP port
+      ansible.builtin.meta: flush_handlers
     - name: Ensure work and conf folders exist
-      become: yes
+      become: true
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
-        mode: '0755'
-        recurse: yes
+        mode: "0755"
+        recurse: true
       loop:
         - "{{ home_dir }}/work"
         - "{{ home_dir }}/conf"
@@ -29,25 +27,33 @@
       ansible.builtin.file:
         path: "{{ ansible_files_root }}/adguard"
         state: directory
-        mode: '0755'
-        recurse: yes
-    - block:
-      - name: Interpret docker compose template 
-        template:
-          src: ./resources/adguard/compose.yaml.j2
-          dest: "{{ ansible_files_root }}/adguard/compose.yaml"
-      - name: Interpret AdGuard configuration file
-        become: yes
-        template:
-          src: ./resources/adguard/config.yaml.j2
-          dest: "{{ home_dir }}/conf/AdGuardHome.yaml"
-          backup: true
-      notify: 
+        mode: "0755"
+        recurse: true
+    - name: Copy files
+      notify:
         - Run AdGuard-Home
+      block:
+        - name: Interpret docker compose template
+          ansible.builtin.template:
+            src: ./resources/adguard/compose.yaml.j2
+            dest: "{{ ansible_files_root }}/adguard/compose.yaml"
+            mode: "0644"
+        - name: Interpret AdGuard configuration file
+          become: true
+          ansible.builtin.template:
+            src: ./resources/adguard/config.yaml.j2
+            dest: "{{ home_dir }}/conf/AdGuardHome.yaml"
+            mode: "0644"
+            backup: true
   handlers:
+    - name: Restart systemd-resolved
+      become: true
+      ansible.builtin.systemd:
+        name: "systemd-resolved"
+        enabled: true
+        state: restarted
     - name: Run AdGuard-Home
-      become: yes
+      become: true
       community.docker.docker_compose_v2:
         project_src: "{{ ansible_files_root }}/adguard"
         recreate: always # so that changes in config are applied
-      

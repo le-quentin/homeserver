@@ -1,11 +1,17 @@
-- import_playbook: "./adguard.yaml"
-- import_playbook: "./backups.yaml"
-- import_playbook: "./zigbee2mqtt.yaml"
-- import_playbook: "./home-assistant.yaml"
-- import_playbook: "./mautic.yaml"
-- import_playbook: "./portainer.yaml"
-- import_playbook: "./gateway.yaml"
-- import_playbook: "./monitoring.yaml"
-- import_playbook: "./cocobot.yaml"
-- import_playbook: "./duckdns.yaml"
-  
+---
+- name: General settings on a linux server
+  import_playbook: "./linux_server.yaml"
+- name: Install adguard
+  import_playbook: "./adguard.yaml"
+#- name: Install legacy services
+#  import_playbook: "./legacy/all.yaml"
+- name: Install nfs server
+  import_playbook: "./nfs_server.yaml"
+- name: Install k3s
+  import_playbook: "./k3s_setup.yaml"
+- name: Install websites
+  import_playbook: "./websites.yaml"
+- name: Setup backups
+  import_playbook: "./backups.yaml"
+- name: Setup duckdns
+  import_playbook: "./duckdns.yaml"

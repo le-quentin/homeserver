@@ -1,0 +1,10 @@
+---
+ansible_host: 10.42.10.10
+ansible_user: k3s_user
+home_dir: /home/{{ hostvars.k3scontroller.ansible_user }}
+ansible_files_root: /home/{{ hostvars.k3scontroller.ansible_user }}/ansible-files
+ansible_python_interpreter: /home/{{ hostvars.k3scontroller.ansible_user }}/python/ansible_venv/bin/python
+ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
+
+cert_file_path: "resources/websites/prod/cert.pem"
+key_file_path: "resources/websites/prod/key.pem"
