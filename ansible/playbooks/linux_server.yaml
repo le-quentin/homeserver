@@ -1,6 +1,6 @@
 ---
 - name: General settings on a linux server
-  hosts: all
+  hosts: all, !mainhost, !dbhost
   tasks:
     - name: Setup a /tmp cleanup cron
       block:

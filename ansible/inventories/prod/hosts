@@ -1,8 +1,20 @@
-[adguardservs]
-dnshost
+[k3snodes]
+k3scontroller
+
+[nfsservs]
+nfshost
+
+[nfsclients]
+dbhost
+
+[postgresservs]
+dbhost
 
 [backupservs]
-mainhost
+nfshost
+
+[adguardservs]
+dnshost
 
 [gatewayservs]
 mainhost

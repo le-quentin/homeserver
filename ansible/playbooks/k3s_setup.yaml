@@ -130,6 +130,7 @@
             timeout: 30
 
         - name: Create Let's Encrypt ClusterIssuer
+          when: "{{ cert_manager_issuer_name is defined }}"
           kubernetes.core.k8s:
             state: present
             definition:

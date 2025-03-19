@@ -8,8 +8,8 @@
       zfs:
         root: /srv/nfs/k3s/volumes
         subdirs:
-          - name: home-assistant
-            client: "{{ k3s_controller_ip }}"
+#          - name: home-assistant
+#            client: "{{ k3s_controller_ip }}"
           - name: websites
             client: "{{ k3s_controller_ip }}"
       basic:
@@ -35,8 +35,6 @@
     - name: Install ZFS
       ansible.builtin.include_tasks:
         file: "tasks/install-zfs-{{ ansible_distribution }}.yaml"
-      vars:
-        disk_partition: /dev/sdb
 
     - name: Create a zfs file system for each zfs subdir
       community.general.zfs:

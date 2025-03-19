@@ -3,11 +3,13 @@
   import_playbook: "./linux_server.yaml"
 - name: Install adguard
   import_playbook: "./adguard.yaml"
-- name: Install legacy services
-  import_playbook: "./legacy/all.yaml"
+#- name: Install legacy services
+#  import_playbook: "./legacy/all.yaml"
 - name: Install nfs server
   import_playbook: "./nfs_server.yaml"
 - name: Install k3s
   import_playbook: "./k3s_setup.yaml"
 - name: Install websites
   import_playbook: "./websites.yaml"
+- name: Setup backups
+  import_playbook: "./backups.yaml"

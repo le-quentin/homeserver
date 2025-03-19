@@ -1,9 +1,6 @@
 [k3snodes]
 k3scontroller
 
-[lxccontainers]
-nfshost
-
 [nfsservs]
 nfshost
 
