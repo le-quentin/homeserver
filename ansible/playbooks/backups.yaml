@@ -10,7 +10,7 @@
               minute: 0
             zfs_pool: nfs_pool
             filesystems:
-              - name: home-assistant
+#              - name: home-assistant
               - name: websites
             archiving:
               target_dir: /srv/nfs/backups/k3s-volumes
