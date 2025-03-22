@@ -22,7 +22,7 @@ module "k3s_node" {
   # ]
 
   vm_cpu_cores        = 2
-  vm_dedicated_memory = 2048
+  vm_dedicated_memory = 4096
   vm_floating_memory  = 0 # Disable ballooning because k3s doesn't like swapping
 
   vm_params = {

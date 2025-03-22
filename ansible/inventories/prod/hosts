@@ -1,17 +1,8 @@
 [k3snodes]
 k3scontroller
 
-[nfsservs]
-nfshost
-
-[nfsclients]
-dbhost
-
 [postgresservs]
 dbhost
-
-[backupservs]
-nfshost
 
 [adguardservs]
 dnshost

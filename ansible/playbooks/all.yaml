@@ -5,13 +5,19 @@
   import_playbook: "./adguard.yaml"
 #- name: Install legacy services
 #  import_playbook: "./legacy/all.yaml"
-- name: Install nfs server
-  import_playbook: "./nfs_server.yaml"
+#- name: Install nfs server
+#  import_playbook: "./nfs_server.yaml"
 - name: Install k3s
   import_playbook: "./k3s_setup.yaml"
+- name: Setup Longhorn UI
+  import_playbook: "./longhorn_ui.yaml"
 - name: Install websites
   import_playbook: "./websites.yaml"
-- name: Setup backups
-  import_playbook: "./backups.yaml"
+- name: Install home-assistant
+  import_playbook: "./test_k3s_home_assistant.yaml"
+- name: Install uptime-kuma
+  import_playbook: "./uptime_kuma.yaml"
+#- name: Setup backups
+#  import_playbook: "./backups.yaml"
 - name: Setup duckdns
   import_playbook: "./duckdns.yaml"

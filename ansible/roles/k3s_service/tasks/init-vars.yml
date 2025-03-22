@@ -12,13 +12,15 @@
 - name: Set default facts
   ansible.builtin.set_fact:
     _action: "{{ action | default('create') }}"
+    task_name_prefix: "{{ k3s_service_namespace }} {{ k3s_service_name }}: "
     config_map_files: []
     data_volumes: "{{ k3s_service_data_volumes | default([]) }}"
     config_map_enabled: false
     service_port: 80
-    service_domain: "{{ k3s_service_domain | default(k3s_service_name ~ '.' ~  homeserver_domain, true) }}"
-    tls_certificates_enabled: "{{ k3s_service_tls and not k3s_service_tls.issuer | default(false) }}"
-    tls_issuer_enabled: "{{ k3s_service_tls and k3s_service_tls.issuer | default(false) }}"
+    service_domain: "{{ k3s_service_domain | default(k3s_service_name ~ '.k3s.' ~  homeserver_domain, true) }}"
+    tls_certificates_enabled: "{{ k3s_service_tls and k3s_service_tls.issuer is not defined | default(false) }}"
+    tls_issuer_enabled: "{{ k3s_service_tls and k3s_service_tls.issuer is defined |
+    default(false) }}"
 
 - name: Set config_map_files
   ansible.builtin.set_fact:

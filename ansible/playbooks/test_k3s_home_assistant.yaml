@@ -12,7 +12,7 @@
         k3s_service_container_port: 8123
         k3s_service_data_volume_mount_path: /config
         k3s_service_data_volumes:
-          - type: nfs
+          - type: longhorn-simple
             name: all-data
             mount_path: /config
             size: 1Gi

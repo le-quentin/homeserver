@@ -3,5 +3,3 @@ k3s_cluster_cidr: 172.42.0.0/16
 k3s_services_cidr: 172.43.0.0/16
 k3s_cluster_dns: 172.43.0.10
 k3s_write_kubeconfig_mode: "0644"
-
-nfs_root_path: /srv/nfs/k3s/volumes

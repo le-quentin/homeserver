@@ -1,9 +1,0 @@
----
-ansible_host: 10.142.10.20
-ansible_user: nfs_user
-home_dir: /home/{{ hostvars.nfshost.ansible_user }}
-ansible_files_root: /home/{{ hostvars.nfshost.ansible_user }}/ansible-files
-ansible_python_interpreter: /usr/bin/python3
-ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
-
-disk_partition: /dev/sdb
