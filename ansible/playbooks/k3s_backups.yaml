@@ -1,0 +1,18 @@
+---
+- name: Setup backups
+  hosts: k3scontroller
+  roles:
+    - role: k3s_longhorn_rclone_backups
+      vars:
+#        namespace: default
+#        backup_pvcs:
+#          - my-app-data
+        snapshot_job_name: twice-daily-snapshot
+        snapshot_schedule: "0 0,12 * * *"
+        # snapshot_schedule: "14 * * * *"
+        snapshot_retain: 28
+
+        rclone_config_path: "resources/backups/rclone.conf"
+        rclone_remote: "proton:{{ remote_backups_path }}"
+        backup_schedule: "0 1 * * *"
+        # backup_schedule: "17 * * * *"

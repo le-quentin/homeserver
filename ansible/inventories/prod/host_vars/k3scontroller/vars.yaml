@@ -8,3 +8,8 @@ ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
 
 cert_file_path: "resources/websites/prod/cert.pem"
 key_file_path: "resources/websites/prod/key.pem"
+
+default_k3s_backup_config:
+  cron: "0 0 * * *"
+  rclone_remote: "proton:backups/k3s"
+  rclone_config_path: "resources/backups/rclone.conf"

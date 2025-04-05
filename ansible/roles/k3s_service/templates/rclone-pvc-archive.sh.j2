@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+echo "[📦] Backing up PVC: $PVC_NAME"
+apk add --no-cache tar acl >/dev/null
+
+mkdir -p /tmp/rclone
+cp /config/rclone.conf /tmp/rclone/rclone.conf
+export RCLONE_CONFIG=/tmp/rclone/rclone.conf
+
+ARCHIVE=/tmp/backup/${ARCHIVE_NAME}
+
+echo "[📁] Creating archive at $ARCHIVE"
+tar czf "$ARCHIVE" -C /mnt/data .
+
+echo "[☁️] Uploading to $RCLONE_REMOTE"
+rclone copy "$ARCHIVE" "$RCLONE_REMOTE" --progress
+
+echo "[✅] Backup complete!"

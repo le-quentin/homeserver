@@ -3,6 +3,11 @@ kind: PersistentVolumeClaim
 metadata:
   name: "{{ volume.name }}"
   namespace: "{{ k3s_service_namespace }}"
+{% if k3s_service_backup_enabled %}
+  labels:
+    recurring-job.longhorn.io/source: "enabled"
+    recurring-job-group.longhorn.io/backup: "enabled"
+{% endif %}
 spec:
   accessModes:
     - ReadWriteOnce

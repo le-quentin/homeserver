@@ -198,3 +198,124 @@
             chart_version: "1.8.1"
             release_namespace: longhorn-system
             create_namespace: true
+        - name: external-snapshotter version
+          ansible.builtin.set_fact:
+            external_snapshotter_version: "v8.2.0"
+        - name: Install CSI snapshot CRDs
+          kubernetes.core.k8s:
+            state: present
+            src: "https://raw.githubusercontent.com/kubernetes-csi/external-snapshotter/{{ external_snapshotter_version }}/client/config/crd/{{ item }}.yaml"
+          loop:
+            - snapshot.storage.k8s.io_volumesnapshotclasses
+            - snapshot.storage.k8s.io_volumesnapshotcontents
+            - snapshot.storage.k8s.io_volumesnapshots
+        - name: Install CSI snapshot controller components
+          kubernetes.core.k8s:
+            state: present
+            src: "https://raw.githubusercontent.com/kubernetes-csi/external-snapshotter/{{ external_snapshotter_version }}/deploy/kubernetes/snapshot-controller/rbac-snapshot-controller.yaml"
+        - name: Deploy the snapshot-controller
+          kubernetes.core.k8s:
+            state: present
+            src: "https://raw.githubusercontent.com/kubernetes-csi/external-snapshotter/{{ external_snapshotter_version }}/deploy/kubernetes/snapshot-controller/setup-snapshot-controller.yaml"
+        - name: "Unset Longhorn backup target" # we use a fake target, and if enabled here Longhorn will poll it forever and not cleanup resources, which leads to frozen system...
+          kubernetes.core.k8s:
+            state: present
+            definition:
+              apiVersion: longhorn.io/v1beta2
+              kind: BackupTarget
+              metadata:
+                name: default
+                namespace: longhorn-system
+              spec:
+                credentialSecret:
+                pollInterval: "0"
+                backupTargetURL: ""
+
+#        - name: Create namespace for MinIO
+#          kubernetes.core.k8s:
+#            api_version: v1
+#            kind: Namespace
+#            name: minio
+#
+#        - name: Add the MinIO helm repo
+#          kubernetes.core.helm_repository:
+#            name: minio-operator
+#            repo_url: https://operator.min.io/
+#
+#        - name: Deploy MinIO Operator using Helm
+#          kubernetes.core.helm:
+#            name: minio
+#            chart_ref: minio-operator/operator
+#            release_namespace: minio
+#            create_namespace: false
+#            values:
+#              operator:
+#                replicas: 1 # TODO - fix this, I still get 2 replicas
+#
+#        - name: Wait for MinIO Operator to be ready
+#          kubernetes.core.k8s_info:
+#            api_version: apps/v1
+#            kind: Deployment
+#            namespace: minio
+#            name: minio-operator
+#          register: minio_operator_deploy
+#          until: minio_operator_deploy.resources[0].status.readyReplicas >= 1
+#          retries: 10
+#          delay: 15
+#
+#        - name: Create MinIO credentials secret
+#          kubernetes.core.k8s:
+#            state: present
+#            definition:
+#              apiVersion: v1
+#              kind: Secret
+#              metadata:
+#                name: minio-creds
+#                namespace: minio
+#              type: Opaque
+#              data:
+#              accesskey: "{{ 'minioadmin' | b64encode }}"
+#              secretkey: "{{ 'minioadmin' | b64encode }}"
+#
+#        - name: Deploy MinIO Tenant (Single Node Example)
+#          kubernetes.core.k8s:
+#            state: present
+#            definition:
+#              apiVersion: minio.min.io/v2
+#              kind: Tenant
+#              metadata:
+#                name: longhorn-backups
+#                namespace: minio
+#              spec:
+#                image: minio/minio:RELEASE.2023-08-04T17-40-21Z
+#                credsSecret:
+#                  name: minio-creds
+#                pools:
+#                  - name: pool-0
+#                    servers: 1
+#                    volumesPerServer: 1
+#                    volumeClaimTemplate:
+#                      metadata:
+#                        name: data
+#                      spec:
+#                        accessModes:
+#                          - ReadWriteOnce
+#                        resources:
+#                          requests:
+#                            storage: 10Gi
+#                mountPath: /export
+#                requestAutoCert: false
+#
+#        - name: Set Longhorn backup credential secret
+#          kubernetes.core.k8s:
+#            state: present
+#            definition:
+#              apiVersion: v1
+#              kind: Secret
+#              metadata:
+#                name: longhorn-backup-secret
+#                namespace: longhorn-system
+#              type: Opaque
+#              data:
+#                AWS_ACCESS_KEY_ID: "{{ 'minioadmin' | b64encode }}"
+#                AWS_SECRET_ACCESS_KEY: "{{ 'minioadmin' | b64encode }}"

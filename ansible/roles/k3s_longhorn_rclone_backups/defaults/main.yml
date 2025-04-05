@@ -1,0 +1,16 @@
+---
+namespace: longhorn-backups
+
+# Longhorn snapshot recurring job
+snapshot_job_name: pvc-snapshots
+snapshot_schedule: "0 0,12 * * *"  # Twice a day
+snapshot_retain: 28                # Keep 2 weeks
+snapshot_concurrency: 1
+recurring_job_label: backup        # Used for grouping and PVC selection
+
+# CronJob to tar.gz and rclone
+backup_cronjob_name: pvc-rclone-backup
+backup_schedule: "0 1 * * *"       # Daily at 1am
+backup_image: alpine:latest        # Should include rclone
+rclone_remote: "gdrive:longhorn-backups"
+rclone_config_path: "files/rclone.conf"

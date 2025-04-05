@@ -16,7 +16,8 @@
           - type: longhorn-simple
             name: websites
             mount_path: /app
-            size: 5Gi
+            size: 2Gi
+        k3s_service_backups: "{{ default_k3s_backup_config }}"
         k3s_service_config_files:
           - template: "./resources/websites/nginx.conf.j2"
             dest: "/opt/docker/etc/nginx/vhost.conf"
