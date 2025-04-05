@@ -1,0 +1,326 @@
+#- name: Load backup config from k3s_service_backups
+#  set_fact:
+#    rclone_remote: "{{ k3s_service_backups.rclone_remote }}"
+#    rclone_config_path: "{{ k3s_service_backups.rclone_config_path }}"
+#
+#- name: Create rclone config secret
+#  kubernetes.core.k8s:
+#    state: present
+#    namespace: minio
+#    definition:
+#      apiVersion: v1
+#      kind: Secret
+#      metadata:
+#        name: rclone-config
+#      type: Opaque
+#      stringData:
+#        rclone.conf: "{{ lookup('file', rclone_config_path) }}"
+#
+#- name: Patch Longhorn backup target to use MinIO
+#  ansible.builtin.shell: |
+#    kubectl -n longhorn-system patch settings.longhorn.io backup-target \
+#      --type merge \
+#      -p '{"value": "s3://minio@http://minio.minio.svc.cluster.local:9000"}'
+#  register: patch_result
+#  failed_when: patch_result.rc != 0
+#  changed_when: "'configured' in patch_result.stdout or patch_result.rc == 0"
+#
+#- name: Push MinIO data to cloud via rclone (Daily CronJob)
+#  kubernetes.core.k8s:
+#    state: present
+#    definition:
+#      apiVersion: batch/v1
+#      kind: CronJob
+#      metadata:
+#        name: minio-backup-to-cloud
+#        namespace: minio
+#      spec:
+#        schedule: "0 3 * * *"
+#        jobTemplate:
+#          spec:
+#            template:
+#              spec:
+#                containers:
+#                  - name: rclone-backup
+#                    image: rclone/rclone:latest
+#                    args:
+#                      - sync
+#                      - /data
+#                      - "{{ rclone_remote }}"
+#                    env:
+#                      - name: RCLONE_CONFIG_CONTENT
+#                        valueFrom:
+#                          secretKeyRef:
+#                            name: rclone-config
+#                            key: rclone.conf
+#                    volumeMounts:
+#                      - name: minio-data
+#                        mountPath: /data
+#                restartPolicy: OnFailure
+#                volumes:
+#                  - name: minio-data
+#                    persistentVolumeClaim:
+#                      claimName: minio-longhorn-backups-data-0
+
+- name: Load backup config from k3s_service_backups
+  set_fact:
+    namespace: "{{ k3s_service_namespace }}"
+    longhorn_namespace: "{{ longhorn_namespace | default('longhorn-system') }}"
+    snapshot_concurrency: "{{ k3s_service_backups.snapshot_concurrency | default(1) }}"
+    backup_cronjob_name: "{{ k3s_service_backups.backup_cronjob_name | default('pvc-rclone-backup') }}"
+    snapshot_job_name: "{{ k3s_service_backups.snapshot_job_name | default('pvc-snapshots') }}"
+    recurring_job_label: "{{ k3s_service_backups.recurring_job_label | default('backup') }}"
+    cron_random_hour: "{{ 4 | random }}"
+    cron_random_minute: "{{ (40 | random) + 10 }}"
+    rclone_remote: "{{ k3s_service_backups.rclone_remote }}"
+    rclone_config_path: "{{ k3s_service_backups.rclone_config_path }}"
+    raw_cron_parts: "{{ (k3s_service_backups.backup_cron | default('* * * * *')).split(' ') }}"
+    cron_parts: "{{ (k3s_service_backups.backup_cron | default('* * * * *')).split(' ') }}"
+
+- name: Compute cron with random hour/minute additions
+  set_fact:
+    backup_cron: >-
+      {{ cron_random_minute }} {{ cron_random_hour }} {{ cron_parts[2] }} {{ cron_parts[3] }} {{ cron_parts[4] }}
+
+- name: Filter enabled data volumes
+  set_fact:
+    data_volumes: >-
+      {{ k3s_service_data_volumes | map('combine', {'backup_disabled': false})
+       | selectattr('backup_disabled', 'equalto', false)
+       | list }}
+
+- name: Create rclone config secret from repo file
+  kubernetes.core.k8s:
+    state: "{{ resources_state }}"
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: rclone-config
+        namespace: "{{ namespace }}"
+      type: Opaque
+      data:
+        rclone.conf: "{{ lookup('file', rclone_config_path) | b64encode }}"
+
+- name: Load backup script content from role file
+  set_fact:
+    embedded_backup_script: "{{ lookup('file', role_path + '/files/backup-script.sh') }}"
+    embedded_backup_pvc_script: "{{ lookup('template', role_path + '/templates/rclone-pvc-archive.sh.j2') }}"
+
+- name: Create ConfigMap with backup cronjob script
+  kubernetes.core.k8s:
+    state: "{{ resources_state }}"
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: backup-script
+        namespace: "{{ namespace }}"
+      data:
+        backup-script.sh: "{{ embedded_backup_script }}"
+
+- name: Create ConfigMap with reusable PVC backup script
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: backup-pvc-script
+        namespace: "{{ namespace }}"
+      data:
+        backup.sh: "{{ embedded_backup_pvc_script }}"
+
+- name: Create Role for backup CronJob
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: Role
+      metadata:
+        name: backup-cronjob
+        namespace: "{{ namespace }}"
+      rules:
+        - apiGroups: ["snapshot.storage.k8s.io"]
+          resources:
+            - volumesnapshots
+            - volumesnapshots/status
+          verbs: ["get", "list", "watch", "create", "delete"]
+        - apiGroups: [""]
+          resources: ["persistentvolumeclaims"]
+          verbs: ["get", "list", "create", "delete"]
+        - apiGroups: ["batch"]
+          resources: ["jobs"]
+          verbs: ["create", "get", "list", "watch", "delete"]
+        - apiGroups: [""]
+          resources: ["pods"]
+          verbs: ["get", "list", "watch"]
+
+- name: Bind default service account to backup CronJob # Todo - use a specific service account
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: backup-cronjob-binding
+        namespace: "{{ namespace }}"
+      subjects:
+        - kind: ServiceAccount
+          name: default
+          namespace: "{{ namespace }}"
+      roleRef:
+        kind: Role
+        name: backup-cronjob
+        apiGroup: rbac.authorization.k8s.io
+
+- name: Deploy unified CronJob for backing up all PVCs sequentially
+  kubernetes.core.k8s:
+    state: "{{ resources_state }}"
+    definition:
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: "{{ backup_cronjob_name }}"
+        namespace: "{{ namespace }}"
+      spec:
+        schedule: "{{ backup_cron }}"
+        jobTemplate:
+          spec:
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: backup
+                    image: rclone/rclone:sha-61c3b27
+                    command: ["/bin/sh", "/scripts/backup-script.sh"]
+                    env:
+                      - name: DEBUG
+                        value: "true"
+                      - name: NAMESPACE
+                        value: "{{ namespace }}"
+                      - name: LONGHORN_NAMESPACE
+                        value: "{{ longhorn_namespace }}"
+                      - name: RCLONE_CONFIG
+                        value: "/config/rclone.conf"
+                      - name: RCLONE_REMOTE
+                        value: "{{ rclone_remote }}"
+                      - name: DATA_VOLUMES_JSON
+                        value: '{{ data_volumes | to_json }}'
+                    volumeMounts:
+                      - name: script
+                        mountPath: /scripts
+                      - name: rclone-config
+                        mountPath: /config
+                volumes:
+                  - name: script
+                    configMap:
+                      name: backup-script
+                      defaultMode: 493
+                  - name: rclone-config
+                    secret:
+                      secretName: rclone-config
+# CLEANUP
+- name: Create ServiceAccount for Longhorn cleanup job
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: longhorn-cleanup
+        namespace: longhorn-system
+
+- name: Create Role with permissions for cleanup
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      kind: Role
+      apiVersion: rbac.authorization.k8s.io/v1
+      metadata:
+        namespace: longhorn-system
+        name: longhorn-cleanup-role
+      rules:
+        - apiGroups: ["longhorn.io"]
+          resources: ["volumes"]
+          verbs: ["get", "list", "delete", "patch", "watch"]
+        - apiGroups: [""]
+          resources: ["persistentvolumeclaims", "pods"]
+          verbs: ["get", "list", "delete"]
+        - apiGroups: ["batch"]
+          resources: ["jobs"]
+          verbs: ["get", "list", "delete"]
+        - apiGroups: ["snapshot.storage.k8s.io"]
+          resources: ["volumesnapshots"]
+          verbs: ["get", "list", "delete"]
+
+- name: Bind Role to ServiceAccount for cleanup
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      kind: RoleBinding
+      apiVersion: rbac.authorization.k8s.io/v1
+      metadata:
+        name: longhorn-cleanup-rolebinding
+        namespace: longhorn-system
+      subjects:
+        - kind: ServiceAccount
+          name: longhorn-cleanup
+          namespace: longhorn-system
+      roleRef:
+        kind: Role
+        name: longhorn-cleanup-role
+        apiGroup: rbac.authorization.k8s.io
+
+- name: Deploy Longhorn faulted volume and PVC cleanup CronJob
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: longhorn-backup-cleanup
+        namespace: longhorn-system
+      spec:
+        schedule: "0 4 * * *"
+        jobTemplate:
+          spec:
+            template:
+              spec:
+                restartPolicy: OnFailure
+                serviceAccountName: longhorn-cleanup
+                containers:
+                  - name: cleanup
+                    image: bitnami/kubectl:latest
+                    command:
+                      - /bin/sh
+                      - -c
+                      - |
+                        echo "🧹 Cleaning up faulted volumes, PVCs, Jobs, Pods and VolumeSnapshots..."
+
+                        echo "🔸 Deleting faulted backup PVCs from failed snapshots..."
+                        kubectl get volumes.longhorn.io -n longhorn-system -o json \
+                        | jq -r '
+                            .items[]
+                            | select(
+                                .status.robustness == "faulted"
+                                and (.spec.dataSource // "" | test("^snap://"))
+                                and (.status.kubernetesStatus.pvcName | test("backup-.*-tmp"))
+                              )
+                            | .metadata.name
+                          ' \
+                        | xargs -r -n1 kubectl delete volumes.longhorn.io -n longhorn-system
+
+                        echo "🔸 Deleting orphaned PVCs..."
+                        kubectl get pvc -n longhorn-system | grep '-from-snap' | awk '{print $1}' | xargs -r kubectl delete pvc -n longhorn-system
+
+                        echo "🔸 Deleting failed Jobs..."
+                        kubectl get jobs -n longhorn-system | grep 'backup-.*-tmp-job' | awk '{print $1}' | xargs -r kubectl delete job -n longhorn-system
+
+                        echo "🔸 Deleting Pending Pods..."
+                        kubectl get pods -n longhorn-system | grep Pending | awk '{print $1}' | xargs -r kubectl delete pod -n longhorn-system
+
+                        echo "🔸 Deleting orphaned CSI VolumeSnapshots..."
+                        kubectl get volumesnapshots.snapshot.storage.k8s.io -n longhorn-system | grep 'backup-' | awk '{print $1}' | xargs -r kubectl delete volumesnapshot -n longhorn-system
+
+                        echo "✅ Cleanup done."

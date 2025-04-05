@@ -1,0 +1,117 @@
+- name: Namespace
+  kubernetes.core.k8s:
+    api_version: v1
+    name: "{{ namespace }}"
+    kind: Namespace
+- name: Create Longhorn recurring snapshot job
+  kubernetes.core.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    definition:
+      apiVersion: longhorn.io/v1beta2
+      kind: RecurringJob
+      metadata:
+        name: "{{ snapshot_job_name }}"
+        namespace: longhorn-system
+      spec:
+        name: "{{ snapshot_job_name }}"
+        task: snapshot
+        cron: "{{ snapshot_schedule }}"
+        retain: "{{ snapshot_retain }}"
+        concurrency: "{{ snapshot_concurrency }}"
+        groups: [ "{{ recurring_job_label }}" ]
+
+- name: Get all PVCs with Longhorn recurring-job-group={{ recurring_job_label }} annotation
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: PersistentVolumeClaim
+    label_selectors:
+      - "recurring-job-group.longhorn.io/{{ recurring_job_label }}=enabled"
+  register: backup_pvcs
+
+- name: Create rclone config secret from repo file
+  kubernetes.core.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: rclone-config
+        namespace: "{{ namespace }}"
+      type: Opaque
+      data:
+        rclone.conf: "{{ lookup('file', rclone_config_path) | b64encode }}"
+
+- name: Load backup script content from role file
+  set_fact:
+    embedded_backup_script: "{{ lookup('file', role_path + '/files/backup-script.sh') }}"
+
+- name: Create ConfigMap with backup script
+  kubernetes.core.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    definition:
+      apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: backup-script
+        namespace: "{{ namespace }}"
+      data:
+        backup-script.sh: "{{ embedded_backup_script }}"
+
+- name: Build list of PVC mounts
+  set_fact:
+    backup_cron_volume_mounts: "{{ backup_cron_volume_mounts | default([]) + [{
+  'name': pvc.metadata.namespace ~ '-' ~ pvc.metadata.name ~ '-vol',
+  'mountPath': '/mnt/' ~ pvc.metadata.namespace ~ '-' ~ pvc.metadata.name,
+  'readOnly': True
+}] }}"
+  loop: "{{ backup_pvcs.resources }}"
+  loop_control:
+    loop_var: pvc
+- name: Build list of PVC volumes
+  set_fact:
+    backup_cron_volumes: "{{ backup_cron_volumes | default([]) + [{
+  'name': pvc.metadata.namespace ~ '-' ~ pvc.metadata.name ~ '-vol',
+  'persistentVolumeClaim': { 'claimName': pvc.metadata.name }
+}] }}"
+  loop: "{{ backup_pvcs.resources }}"
+  loop_control:
+    loop_var: pvc
+
+- name: Deploy CronJob for tar.gz + rclone backup
+  when: backup_pvcs.resources | length > 0
+  kubernetes.core.k8s:
+    state: present
+    namespace: "{{ namespace }}"
+    definition:
+      apiVersion: batch/v1
+      kind: CronJob
+      metadata:
+        name: "{{ backup_cronjob_name }}"
+        namespace: "{{ namespace }}"
+      spec:
+        schedule: "{{ backup_schedule }}"
+        jobTemplate:
+          spec:
+            template:
+              spec:
+                restartPolicy: Never
+                containers:
+                  - name: backup
+                    image: "{{ backup_image }}"
+                    command: [ "/bin/sh", "/scripts/backup-script.sh" ]
+                    env:
+                      - name: RCLONE_REMOTE
+                        value: "{{ rclone_remote }}"
+                    volumeMounts: >-
+                      {{ backup_cron_volume_mounts + [
+                        { 'name': 'script', 'mountPath': '/scripts' },
+                        { 'name': 'rclone-config', 'mountPath': '/root/.config/rclone', 'readOnly': True }
+                      ] }}
+                volumes: >- 
+                  {{ backup_cron_volumes + [
+                    { 'name': 'script', 'configMap': { 'name': 'backup-script', 'defaultMode': 493 } },
+                    { 'name': 'rclone-config', 'secret': { 'secretName': 'rclone-config' } }
+                  ] }}

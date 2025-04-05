@@ -54,6 +54,8 @@
           kubernetes.core.k8s:
             state: "{{ resources_state }}"
             template: "ingress.yaml.j2"
+        - name: "{{ task_name_prefix }} Backups"
+          ansible.builtin.include_tasks: backups.yml
     - name: "{{ task_name_prefix }} Restart the service (by deleting the pods)"
       when: _action == 'restart'
       module_defaults:
