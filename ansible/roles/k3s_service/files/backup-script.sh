@@ -68,6 +68,22 @@ for entry in $VOLUME_DATA; do
     continue
   fi
 
+  # Determine if the PVC is a local path PVC
+  IS_LOCAL_PATH=$(echo "$entry" | jq -r '.storageClassName == "local-path"')
+
+  if [ "$IS_LOCAL_PATH" = "true" ]; then
+    log "🔍 Detected local path PVC: $PVC_NAME"
+    # Directly access and backup the data
+    log "📁 Archiving contents from $MOUNT_PATH"
+    tar czf "$BACKUP_DIR/$ARCHIVE_NAME" -C "$MOUNT_PATH" .
+
+    log "☁️ Uploading to $RCLONE_REMOTE/$ARCHIVE_NAME"
+    rclone copy "$BACKUP_DIR/$ARCHIVE_NAME" "$RCLONE_REMOTE/" --progress
+
+    log "✅ Done with $PVC_NAMESPACE/$PVC_NAME"
+    continue
+  fi
+
   # Create VolumeSnapshot
   log "📸 Creating CSI VolumeSnapshot: $SNAPSHOT_NAME"
   SNAPSHOT_PAYLOAD=$(cat <<EOF
