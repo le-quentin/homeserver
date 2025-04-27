@@ -83,6 +83,13 @@ resource "proxmox_virtual_environment_vm" "vm" {
   pool_id = var.pool
   vm_id   = local.vm_id
 
+  timeout_clone           = 300
+  timeout_create          = 600
+  timeout_migrate         = 300
+  timeout_reboot          = 300
+  timeout_shutdown_vm     = 300
+  timeout_start_vm        = 300
+
   initialization {
     user_data_file_id = proxmox_virtual_environment_file.cloudinit_user.id
 
