@@ -6,8 +6,7 @@
     name: "{{ k3s_service_namespace }}"
     api_version: v1
     kind: Namespace
-- name: Set module defaults
-  block:
+-  block:
     - name: "{{ task_name_prefix }} Update all k3s resources for the service [{{ k3s_service_state }}]"
       when: _action in ['create', 'delete']
       module_defaults:
@@ -18,6 +17,12 @@
         - name: "{{ task_name_prefix }} Set facts"
           ansible.builtin.set_fact:
             resources_state: "{{ 'absent' if _action == 'delete' else 'present' }}"
+        - name: Copy restore script to target host
+          become: true
+          ansible.builtin.copy:
+            src: "{{ role_path }}/files/restore-script.sh"
+            dest: "/usr/local/bin/restore-script.sh"
+            mode: "0755"
         - name: "{{ task_name_prefix }} ConfigMaps"
           kubernetes.core.k8s:
             state: "{{ 'present' if resources_state == 'present' and config_map_enabled else 'absent' }}"
@@ -67,3 +72,4 @@
             kind: pod
             state: absent
             delete_all: true
+

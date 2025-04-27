@@ -1,4 +1,19 @@
 ---
+- name: Check if PVC exists
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: PersistentVolumeClaim
+    namespace: "{{ k3s_service_namespace }}"
+    name: "{{ volume.name }}"
+  register: pvc_info
+- name: Check if Longhorn volume exists
+  shell: |
+    longhorn-cli volume list --format json | jq -r '.[] | select(.name == "{{ volume.name }}") | .name'
+  register: longhorn_volume_check
+- name: Set fact if volume is retained
+  set_fact:
+    is_retained_volume: "{{ longhorn_volume_check.stdout != '' }}"
+
 - name: Setup one volume
   block:
     - name: "Ensure local storage directory exists"
@@ -12,3 +27,14 @@
       kubernetes.core.k8s:
         state: "{{ resources_state }}"
         template: "storage/{{ volume.type }}.yaml.j2"
+
+- name: Restore from backup if PVC was created
+  become: true
+  when: pvc_info.resources | length == 0 and not is_retained_volume
+  ansible.builtin.command:
+    cmd: /usr/local/bin/restore-script.sh
+  environment:
+    PVC_NAMESPACE: "{{ k3s_service_namespace }}"
+    PVC_NAME: "{{ volume.name }}"
+    RCLONE_REMOTE: "{{  k3s_service_backups.rclone_remote }}"
+    K3S_SERVICE_NAME: "{{ k3s_service_name }}"

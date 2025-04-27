@@ -4,7 +4,8 @@ kind: StorageClass
 metadata:
   name: longhorn-simple
 provisioner: driver.longhorn.io
-reclaimPolicy: Delete
+reclaimPolicy: Retain
+allowVolumeExpansion: true
 volumeBindingMode: Immediate
 parameters:
   numberOfReplicas: "1"
