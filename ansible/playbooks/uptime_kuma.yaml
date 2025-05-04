@@ -1,0 +1,26 @@
+---
+- name: Install uptime-kuma
+  hosts: k3scontroller
+  tasks:
+    - name: Deploy the k3s service
+      ansible.builtin.include_role:
+        name: "k3s_service"
+      vars:
+        k3s_service_namespace: uptime-kuma
+        k3s_service_name: uptime
+        k3s_service_image: "louislam/uptime-kuma:1.23.16-alpine"
+        k3s_service_container_port: 3001
+        k3s_service_data_volumes:
+          - type: local_path
+            name: app-data
+            mount_path: /app/data
+            size: 2Gi
+    - name: Setup backups for the service
+      ansible.builtin.include_role:
+        name: "k3s_backups"
+      vars:
+        k3s_backups_namespace: uptime-kuma
+        k3s_backups_pvc_name: app-data
+        k3s_backups_rclone_conf_path: ./resources/backups/rclone.conf
+        k3s_backups_rclone_remote: proton
+        k3s_backups_rclone_target_dir: "{{ rclone_root_target_dir }}"
