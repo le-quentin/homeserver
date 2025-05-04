@@ -24,3 +24,4 @@
         k3s_backups_rclone_conf_path: ./resources/backups/rclone.conf
         k3s_backups_rclone_remote: proton
         k3s_backups_rclone_target_dir: "{{ rclone_root_target_dir }}"
+        k3s_backups_cron: "0 4 * * *"

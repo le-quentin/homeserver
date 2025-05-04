@@ -1,0 +1,12 @@
+- name: Setup rclone-config secret
+  kubernetes.core.k8s:
+    state: present
+    namespace: "{{ k3s_backups_namespace }}"
+    definition: "{{ lookup('template', 'rclone-secret.yaml.j2') }}"
+
+- name: Setup backup cron job
+  when: k3s_backups_cron != ''
+  kubernetes.core.k8s:
+    state: present
+    namespace: "{{ k3s_backups_namespace }}"
+    definition: "{{ lookup('template', 'backup-cronjob.yaml.j2') }}"

@@ -1,0 +1,12 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: backup
+  namespace: {{ k3s_backups_namespace }}
+spec:
+  schedule: "{{ k3s_backups_cron }}"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+{{ lookup('template', 'backup-base-job-spec.yaml.j2') | indent(width=6, first=True) }}
