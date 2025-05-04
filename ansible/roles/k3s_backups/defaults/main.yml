@@ -1,0 +1,11 @@
+---
+k3s_backups_action: install
+
+k3s_backups_backup_timestamp: "{{ lookup('pipe', 'date +%Y%m%d-%H%M') }}"
+k3s_backups_backup_base_name: "{{ k3s_backups_namespace }}-{{ k3s_backups_pvc_name }}"
+k3s_backups_backup_archive_name: "{{ k3s_backups_backup_base_name }}-{{ k3s_backups_backup_timestamp }}.tar.gz"
+
+k3s_backups_backup_mount_path: /data
+k3s_backups_rclone_secret_name: rclone-config
+
+k3s_backups_stop_app: true

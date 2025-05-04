@@ -6,3 +6,4 @@ k3s_debug: true
 k3s_write_kubeconfig_mode: "0644"
 
 nfs_root_path: /srv/nfs/k3s/volumes
+rclone_root_target_dir: /backups/k3s-staging
