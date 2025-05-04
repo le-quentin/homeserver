@@ -3,17 +3,7 @@ kind: Ingress
 metadata:
   name: "{{ k3s_service_name }}-ingress"
   namespace: "{{ k3s_service_namespace }}"
-{% if tls_issuer_enabled %}
-  annotations:
-    cert-manager.io/cluster-issuer: "{{ k3s_service_tls.issuer }}"
-{% endif %}
 spec:
-{% if tls_certificates_enabled %}
-  tls:
-    - hosts:
-        - "{{ service_domain }}"
-      secretName: "{{ k3s_service_name }}-tls"
-{% endif %}
   rules:
   - host: "{{ service_domain }}"
     http:
