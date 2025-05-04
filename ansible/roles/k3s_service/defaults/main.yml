@@ -3,3 +3,4 @@
 k3s_service_namespace: "{{ k3s_service_name }}"
 k3s_service_state:
 k3s_service_config_files: []
+k3s_service_action: create

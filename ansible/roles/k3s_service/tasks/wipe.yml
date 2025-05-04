@@ -1,0 +1,7 @@
+---
+- name: Wipe whole namespace
+  kubernetes.core.k8s:
+    name: "{{ k3s_service_namespace }}"
+    state: absent
+    api_version: v1
+    kind: Namespace
