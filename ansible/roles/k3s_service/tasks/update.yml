@@ -16,7 +16,7 @@
       block:
         - name: Set facts
           ansible.builtin.set_fact:
-            resources_state: "{{ 'absent' if _action == 'delete' else 'present' }}"
+            resources_state: "{{ 'absent' if k3s_service_action == 'delete' else 'present' }}"
         - name: ConfigMaps
           kubernetes.core.k8s:
             state: "{{ 'present' if resources_state == 'present' and config_map_enabled else 'absent' }}"
