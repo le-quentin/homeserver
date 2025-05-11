@@ -7,6 +7,9 @@ mainhost
 [uptime-kuma]
 mainhost
 
+[paperless]
+mainhost
+
 [zigbee2mqtt]
 mainhost
 

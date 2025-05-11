@@ -47,9 +47,10 @@
     owner: "{{ ansible_user }}"
     mode: "0644"
 
-- name: Make sure the data volume exists
+- name: Make sure the data volumes exists
   community.docker.docker_volume:
-    name: "{{ homelab_app_name }}-data"
+    name: "{{ homelab_app_name }}-{{ item }}"
+  loop: "{{ homelab_app_volume_names }}"
 
 - name: Bring up the app with compose
   community.docker.docker_compose_v2:

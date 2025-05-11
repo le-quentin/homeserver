@@ -1,0 +1,31 @@
+services:
+  broker:
+    image: docker.io/library/redis:7
+    container_name: paperless-broker
+    restart: always
+    networks:
+      - default
+    volumes:
+      - redisdata:/data
+
+  paperless:
+    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    depends_on:
+      - broker
+    restart: always
+    networks: 
+      - default
+    volumes:
+      - paperless-data:/usr/src/paperless/data
+      - paperless-media:/usr/src/paperless/media
+      - ./export:/usr/src/paperless/export
+      - ./consume:/usr/src/paperless/consume
+    environment:
+      PAPERLESS_REDIS: redis://paperless-broker:6379
+
+volumes:
+  paperless-data:
+    external: true
+  paperless-media:
+    external: true
+  redisdata:
