@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: MIT-0
+galaxy_info:
+  author: Quentin Bonnet
+  description: An opiniated role to deploy a new app in my (or maybe your) homelab
+  company: Q.Bonnet Software&IT
+
+  license: MIT
+
+  min_ansible_version: 2.18.4
+
+  galaxy_tags:
+    - homelab
+    - docker
+    - traefik
+
+dependencies: []

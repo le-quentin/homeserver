@@ -1,0 +1,5 @@
+---
+homelab_app_target_root_dir: "/srv/apps/{{ homelab_app_name }}"
+homelab_app_rendered_compose: "{{ homelab_app_target_root_dir }}/base-compose.yml"
+homelab_app_rendered_patch: "{{ homelab_app_target_root_dir }}/patch.yml"
+homelab_app_full_dns_name: "{{ homelab_app_name }}.{{ homelab_app_apps_domain }}"

@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: MIT-0
+---
+- name: Ensure app config dir exists
+  file:
+    path: "{{ homelab_app_target_root_dir }}"
+    state: directory
+    mode: "0744"
+
+- name: Render base compose template
+  template:
+    src: "{{ homelab_app_compose_template }}"
+    dest: "{{ homelab_app_rendered_compose }}"
+    mode: "0644"
+
+- name: Render patch template
+  template:
+    src: "patch.yml.j2"
+    dest: "{{ homelab_app_rendered_patch }}"
+    mode: "0644"
+
+- name: Load rendered compose
+  slurp:
+    src: "{{ homelab_app_rendered_compose }}"
+  register: base_compose_raw
+
+- name: Load rendered patch
+  slurp:
+    src: "{{ homelab_app_rendered_patch }}"
+  register: patch_raw
+
+- name: Parse YAMLs
+  set_fact:
+    base_compose: "{{ base_compose_raw.content | b64decode | from_yaml }}"
+    patch_data: "{{ patch_raw.content | b64decode | from_yaml }}"
+
+- name: Deep merge base and patch
+  set_fact:
+    final_compose: >-
+      {{
+        base_compose | combine(patch_data, recursive=True, list_merge='append_rp')
+      }}
+
+- name: Save merged compose file
+  copy:
+    dest: "{{ homelab_app_target_root_dir }}/compose.yml"
+    content: "{{ final_compose | to_nice_yaml(indent=2) }}"
+    owner: "{{ ansible_user }}"
+    mode: "0644"
+
+- name: Make sure the data volume exists
+  community.docker.docker_volume:
+    name: "{{ homelab_app_name }}-data"
+
+- name: Bring up the app with compose
+  community.docker.docker_compose_v2:
+    project_src: "{{ homelab_app_target_root_dir }}"
+    state: present
