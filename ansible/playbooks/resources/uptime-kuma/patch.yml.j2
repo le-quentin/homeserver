@@ -1,0 +1,13 @@
+services:
+  {{ app_name }}:
+    networks:
+      - {{ traefik_network }}
+    container_name: app_uptime-kuma
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.{{ app_name }}.rule: "Host(`uptime-kuma.staging.home`)"
+      traefik.http.services.{{ app_name }}.loadbalancer.server.port: "{{ app_internal_port }}"  # internal port
+networks:
+  traefik:
+    external: true
+

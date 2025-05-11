@@ -2,24 +2,43 @@
   hosts: uptime-kuma
   vars:
     app_name: uptime-kuma
+    app_internal_port: 3001
     app_path: "./resources/{{ app_name }}"
     app_target_root_dir: "{{ apps_root }}/{{ app_name }}"
+    compose_template: "{{ app_path }}/compose.yml.j2"
+    patch_template: "{{ app_path }}/patch.yml.j2"
+    rendered_compose: "/tmp/base-compose.yml"
+    rendered_patch: "/tmp/patch.yml"
+
   tasks:
     - name: Ensure app config dir exists
       file:
         path: "{{ app_target_root_dir }}"
         state: directory
         mode: "0744"
-    - name: Load base compose
+
+    - name: Render base compose template
+      delegate_to: localhost
+      template:
+        src: "{{ compose_template }}"
+        dest: "{{ rendered_compose }}"
+
+    - name: Render patch template
+      delegate_to: localhost
+      template:
+        src: "{{ patch_template }}"
+        dest: "{{ rendered_patch }}"
+
+    - name: Load rendered compose
       delegate_to: localhost
       slurp:
-        src: "{{ app_path }}/compose.yml"
+        src: "{{ rendered_compose }}"
       register: base_compose_raw
 
-    - name: Load patch
+    - name: Load rendered patch
       delegate_to: localhost
       slurp:
-        src: "{{ app_path }}/patch.yml"
+        src: "{{ rendered_patch }}"
       register: patch_raw
 
     - name: Parse YAMLs
