@@ -154,8 +154,6 @@ filtering:
       answer: {{ dns_ip }}
     - domain: '*.{{ homeserver_domain }}'
       answer: {{ legacy_server_ip }}
-    - domain: '*.k3s.{{ homeserver_domain }}'
-      answer: {{ k3s_controller_ip }}
     - domain: adguard.staging.home
       answer: 10.142.1.2
     - domain: '*.staging.home'

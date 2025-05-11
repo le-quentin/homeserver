@@ -1,0 +1,14 @@
+---
+- name: Setup a new apps host
+  hosts: mainhost
+  tasks:
+    - name: Install docker
+      ansible.builtin.include_tasks: ./tasks/install-docker.yaml
+    - name: Ensure root /srv directory exists
+      become: true
+      file:
+        path: /srv
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0744"

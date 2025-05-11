@@ -1,6 +1,0 @@
----
-- name: Verify inputs (backup,restore)
-  tags: never,backup,restore
-  ansible.builtin.assert:
-    that: db is defined
-    fail_msg: "Please define the 'db' variable for the database to backup"

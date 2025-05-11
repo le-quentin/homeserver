@@ -1,8 +1,0 @@
----
-- name: Initialise role variables (check required inputs, and set computed values)
-  ansible.builtin.include_tasks: init-vars.yml
-- name: Delete all pods so that they get recreated
-  kubernetes.core.k8s:
-    kind: pod
-    state: absent
-    delete_all: true

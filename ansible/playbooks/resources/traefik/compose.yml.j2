@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: traefik:latest
+    container_name: traefik
+    restart: always
+    command:
+      - "--configFile=/etc/traefik/traefik.yml"
+    ports:
+      - "80:80"
+{% if enable_tls %}
+      - "443:443"
+{% endif %}
+    volumes:
+      - "{{ traefik_dir }}/traefik.yml:/etc/traefik/traefik.yml:ro"
+      - "{{ traefik_dir }}/dynamic.yml:/etc/traefik/dynamic.yml:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+{% if enable_tls %}
+      - "{{ traefik_dir }}/acme.json:/acme.json"
+{% endif %}
+    networks:
+      - {{ traefik_network }}
+    labels:
+      traefik.enable: "false"
+
+networks:
+  {{ traefik_network }}:
+    external: true
+

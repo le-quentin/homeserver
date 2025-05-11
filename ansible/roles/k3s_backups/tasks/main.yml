@@ -1,9 +1,0 @@
-- name: Install backups
-  when: k3s_backups_action == 'install'
-  ansible.builtin.include_tasks: ./install.yml
-- name: Uninstall backups
-  when: k3s_backups_action == 'uninstall'
-  ansible.builtin.include_tasks: ./uninstall.yml
-- name: Run backup now
-  when: k3s_backups_action == 'backup'
-  ansible.builtin.include_tasks: ./backup.yml

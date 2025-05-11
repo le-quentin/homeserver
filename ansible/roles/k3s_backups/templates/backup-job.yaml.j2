@@ -1,7 +1,0 @@
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: manual-backup
-  namespace: {{ k3s_backups_namespace }}
-spec:
-{{ lookup('template', 'backup-base-job-spec.yaml.j2') | indent(width=2, first=True) }}

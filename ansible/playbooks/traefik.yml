@@ -1,0 +1,38 @@
+- name: Deploy Traefik reverse proxy
+  hosts: traefik
+  vars:
+    enable_tls: false
+    email: "quentin@famille-bonnet.fr"
+    traefik_dir: "/srv/traefik"
+
+  tasks:
+    - name: Ensure Traefik config dir exists
+      file:
+        path: "{{ traefik_dir }}"
+        state: directory
+        mode: "0744"
+    - name: Create public network if not exists
+      community.docker.docker_network:
+        name: "{{ traefik_network }}"
+        driver: bridge
+        state: present
+
+    - name: Copy static config
+      ansible.builtin.copy:
+        src: ./resources/traefik/config.yml
+        dest: "{{ traefik_dir }}/traefik.yml"
+        mode: "0644"
+    - name: Render dynamic config template
+      ansible.builtin.template:
+        src: ./resources/traefik/dynamic-config.yml.j2
+        dest: "{{ traefik_dir }}/dynamic.yml"
+    - name: Render compose template
+      ansible.builtin.template:
+        src: resources/traefik/compose.yml.j2
+        dest: "{{ traefik_dir }}/compose.yml"
+        
+
+    - name: Bring up Traefik with Compose
+      community.docker.docker_compose_v2:
+        project_src: "{{ traefik_dir }}"
+        state: present

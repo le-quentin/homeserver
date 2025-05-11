@@ -57,17 +57,17 @@
     - docker-buildx-plugin
     - docker-compose-plugin
 
-# Uncomment to run docker without sudo
-# - name: Add Docker group
-#   ansible.builtin.group:
-#     name: docker
-#     state: present
-#
-# - name: Add user to Docker group
-#   ansible.builtin.user:
-#     name: "{{ ansible_user }}"
-#     groups: docker
-#     append: true
+- name: Add Docker group
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: Add user to Docker group
+  become: true
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: true
 
 - name: Enable and start Docker services
   become: true
