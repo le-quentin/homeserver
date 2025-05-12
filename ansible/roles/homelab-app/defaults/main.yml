@@ -5,3 +5,8 @@ homelab_app_rendered_patch: "{{ homelab_app_target_root_dir }}/patch.yml"
 homelab_app_full_dns_name: "{{ homelab_app_name }}.{{ homelab_app_apps_domain }}"
 homelab_app_volume_names:
   - data
+homelab_app_backups_enabled: true
+homelab_app_backups_target_dir: /backups
+homelab_app_backups:
+  - volume: data
+    cron: "0 5 * * *"
