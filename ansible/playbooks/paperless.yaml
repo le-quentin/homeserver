@@ -15,4 +15,6 @@
       - volume: data
         cron: "0 6 * * *"
       - volume: media
-        cron: "10 6 * * *"
+        cron: "10 6 * * sun"
+        remote_retention_days: 30
+        retention_days: 14
