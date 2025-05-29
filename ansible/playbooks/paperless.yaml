@@ -11,8 +11,6 @@
     homelab_app_volume_names:
       - data
       - media
-    homelab_app_backups_target_dir: "/backups"
-    homelab_app_backups_rclone_conf: "./resources/backups/rclone.conf"
     homelab_app_backups:
       - volume: data
         cron: "0 6 * * *"

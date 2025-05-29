@@ -1,5 +1,31 @@
 # SPDX-License-Identifier: MIT-0
 ---
+- name: Ensure backup dockerfile dir exists
+  file:
+    path: "{{ homelab_app_backups_dockerfile_dir }}"
+    state: directory
+    mode: "0744"
+
+- name: Copy rclone conf
+  template:
+    src: "{{ homelab_app_backups_rclone_conf }}"
+    dest: "{{ homelab_app_backups_dockerfile_dir }}/rclone.conf"
+    mode: "0644"
+
+- name: Render Dockerfile for backup image
+  template:
+    src: volume-backup.Dockerfile.j2
+    dest: "{{ homelab_app_backups_dockerfile_dir }}/volume-backup.Dockerfile"
+    mode: "0644"
+
+- name: Build custom backup image with rclone
+  community.docker.docker_image:
+    name: "{{ homelab_app_backups_image }}"
+    source: build
+    build:
+      path: "{{ homelab_app_backups_dockerfile_dir }}"
+      dockerfile: volume-backup.Dockerfile
+
 - name: Ensure app config dir exists
   file:
     path: "{{ homelab_app_target_root_dir }}"

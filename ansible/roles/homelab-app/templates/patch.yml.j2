@@ -12,10 +12,11 @@ services:
 {% for item in homelab_app_backups %}
 {% set volume_full_name = homelab_app_name ~ '-' ~ item.volume %}
   backup-{{ item.volume }}:
-    image: offen/docker-volume-backup:v2.43.3
+    image: {{ homelab_app_backups_image }}
     container_name: {{ homelab_app_name }}-backup-{{ item.volume }}
     labels:
       - homelab.container-category=backup
+      - docker-volume-backup.copy-post=/bin/sh -c 'rclone copy "$$COMMAND_RUNTIME_ARCHIVE_FILEPATH" {{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }} --config /config/rclone.conf'
     environment:
       BACKUP_CRON_EXPRESSION: "{{ item.cron }}"
       BACKUP_FILENAME: "backup-{{ volume_full_name }}-%Y-%m-%dT%H-%M-%S.tar.gz"
@@ -30,6 +31,7 @@ services:
       # `DOCKER_HOST` in the container
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - {{ volume_full_name }}:/backup/{{ item.volume }}:ro # backup of a volume
+      - {{ homelab_app_backups_dockerfile_dir }}/rclone.conf:/config/rclone.conf:ro
       # Mounting these ensures the container has the same timezone has the host, which will make cron expressions act as expected
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
