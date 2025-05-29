@@ -17,6 +17,7 @@ services:
     labels:
       - homelab.container-category=backup
     environment:
+      BACKUP_CRON_EXPRESSION: "{{ item.cron }}"
       BACKUP_FILENAME: "backup-{{ volume_full_name }}-%Y-%m-%dT%H-%M-%S.tar.gz"
       BACKUP_STOP_DURING_BACKUP_LABEL: {{ homelab_app_name }}
       GZIP_PARALLELISM: 3
@@ -29,6 +30,9 @@ services:
       # `DOCKER_HOST` in the container
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - {{ volume_full_name }}:/backup/{{ item.volume }}:ro # backup of a volume
+      # Mounting these ensures the container has the same timezone has the host, which will make cron expressions act as expected
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
       # If you mount a local directory or volume to `/archive` a local
       # copy of the backup will be stored there. You can override the
       # location inside of the container by setting `BACKUP_ARCHIVE`.
