@@ -1,0 +1,62 @@
+- name: Ensure rclone conf dir exists
+  become: true
+  file:
+    path: "{{ homelab_app_backups_rclone_conf_target_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0744"
+- name: Copy rclone conf
+  template:
+    src: "{{ homelab_app_backups_rclone_conf }}"
+    dest: "{{ homelab_app_backups_rclone_conf_target_dir }}/rclone.conf"
+    mode: "0644"
+- name: Set restic facts
+  ansible.builtin.set_fact:
+    restic_repositories_root: "{{ homelab_restic_repositories_root | default('/srv/backups/restic/') }}"
+- name: Ensure Restic repository is initialized
+  become: true
+  # environment:
+  #   RESTIC_PASSWORD: "{{ homelab_restic_password }}"
+  docker_container:
+    name: "restic-init-{{ homelab_app_name }}-{{ item.volume }}"
+    image: "{{ homelab_restic_image | default('restic/restic:0.18.0') }}"
+    entrypoint: sh
+    command: -c 'restic snapshots -r /repo --insecure-no-password || restic init -r /repo --insecure-no-password'
+    # auto_remove: true
+    volumes:
+      - "{{ restic_repositories_root }}/{{ homelab_app_name }}/{{ item.volume }}:/repo"
+      - /etc/localtime:/etc/localtime:ro
+  with_items: "{{ homelab_app_backups }}"
+  loop_control:
+    label: "{{ item.volume }}"
+
+- name: "Ensure restic backup scripts directory exists"
+  file:
+    path: "{{ homelab_app_target_root_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: "Create restic backup script for {{ item.volume }}"
+  template:
+    src: restic-backup.sh.j2
+    dest: "{{ homelab_app_target_root_dir }}/backup-{{ item.volume }}.sh"
+    mode: "0750"
+  loop: "{{ homelab_app_backups }}"
+  loop_control:
+    label: "{{ item.volume }}"
+
+- name: "Ensure cron job for restic backup of {{ item.volume }}"
+  become: true
+  cron:
+    name: "restic backup: {{ homelab_app_name }}/backup-{{ item.volume }}"
+    job: "/{{ homelab_app_target_root_dir }}/backup-{{ item.volume }}.sh"
+    # user: root
+    minute: "{{ item.cron.split(' ')[0] }}"
+    hour: "{{ item.cron.split(' ')[1] }}"
+    day: "{{ item.cron.split(' ')[2] }}"
+    month: "{{ item.cron.split(' ')[3] }}"
+    weekday: "{{ item.cron.split(' ')[4] }}"
+  loop: "{{ homelab_app_backups }}"
+  loop_control:
+    label: "{{ item.volume }}"

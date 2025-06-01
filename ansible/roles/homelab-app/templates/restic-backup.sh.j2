@@ -1,0 +1,38 @@
+#!/bin/bash
+set -euo pipefail
+
+export RESTIC_REPOSITORY="{{ restic_repositories_root }}/{{ homelab_app_name }}/{{ item.volume }}"
+export RCLONE_CONFIG={{ homelab_app_backups_rclone_conf_target_dir }}
+
+echo "[restic] Starting backup of volume {{ item.volume }} for app {{ homelab_app_name }}"
+docker run --rm \
+  -v {{ homelab_app_name }}-{{ item.volume }}:/data:ro \
+  -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY" \
+  -v /etc/localtime:/etc/localtime:ro \
+  -v $RCLONE_CONFIG:/root/.config/rclone \
+  -e RCLONE_CONFIG=/root/.config/rclone \
+  -e RESTIC_REPOSITORY \
+  {{ homelab_restic_image | default('restic/restic:0.18.0') }} \
+  backup --insecure-no-password /data
+
+echo "[restic] Applying retention for {{ item.retention_days | default(14) }}d"
+docker run --rm \
+  -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY" \
+  -v $RCLONE_CONFIG:/root/.config/rclone \
+  -e RCLONE_CONFIG=/root/.config/rclone \
+  -e RESTIC_REPOSITORY \
+  {{ homelab_restic_image | default('restic/restic:0.18.0') }} \
+  forget --insecure-no-password --keep-daily {{ item.retention_days | default(14) }} --prune
+
+echo "[restic] Syncing backup repo to remote via rclone"
+docker run --rm \
+  -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY:ro" \
+  -v $RCLONE_CONFIG:/config/rclone \
+  {{ homelab_rclone_image | default('rclone/rclone:sha-4fd5a3d') }} \
+  --config /config/rclone/rclone.conf \
+  sync "$RESTIC_REPOSITORY" "{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}" \
+  --copy-links \
+  --fast-list \
+  --transfers 4 \
+  --checkers 8 \
+  --log-level INFO

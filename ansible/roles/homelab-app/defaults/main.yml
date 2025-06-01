@@ -12,8 +12,7 @@ homelab_app_backups:
   - volume: data
     cron: "0 5 * * *"
 homelab_app_backups_rclone_conf: "./resources/backups/rclone.conf"
+homelab_app_backups_rclone_conf_target_dir: "/srv/rclone"
 homelab_app_backups_rclone_remote: "proton:/backups"
-homelab_app_backups_dockerfile_dir: "/srv/docker"
-homelab_app_backups_image: "homelab/volume-backup:rclone"
 homelab_app_backups_default_retention_days: 7
 homelab_app_backups_default_remote_retention_days: 180
