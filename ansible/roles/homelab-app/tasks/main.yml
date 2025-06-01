@@ -10,6 +10,12 @@
     state: directory
     mode: "0744"
 
+- name: Ensure logs dir exists
+  file:
+    path: "{{ homelab_app_logs_root_dir }}"
+    state: directory
+    mode: "0744"
+
 - name: Render base compose template
   template:
     src: "{{ homelab_app_compose_template }}"

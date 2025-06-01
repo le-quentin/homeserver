@@ -16,14 +16,12 @@
     restic_repositories_root: "{{ homelab_restic_repositories_root | default('/srv/backups/restic/') }}"
 - name: Ensure Restic repository is initialized
   become: true
-  # environment:
-  #   RESTIC_PASSWORD: "{{ homelab_restic_password }}"
   docker_container:
     name: "restic-init-{{ homelab_app_name }}-{{ item.volume }}"
     image: "{{ homelab_restic_image | default('restic/restic:0.18.0') }}"
     entrypoint: sh
     command: -c 'restic snapshots -r /repo --insecure-no-password || restic init -r /repo --insecure-no-password'
-    # auto_remove: true
+    auto_remove: true
     volumes:
       - "{{ restic_repositories_root }}/{{ homelab_app_name }}/{{ item.volume }}:/repo"
       - /etc/localtime:/etc/localtime:ro
@@ -50,7 +48,8 @@
   become: true
   cron:
     name: "restic backup: {{ homelab_app_name }}/backup-{{ item.volume }}"
-    job: "/{{ homelab_app_target_root_dir }}/backup-{{ item.volume }}.sh"
+    job: "{{ homelab_app_target_root_dir }}/backup-{{ item.volume }}.sh >> {{ homelab_app_logs_root_dir }}/restic-backup.log 2>&1"
+    user: "{{ ansible_user }}"
     # user: root
     minute: "{{ item.cron.split(' ')[0] }}"
     hour: "{{ item.cron.split(' ')[1] }}"
