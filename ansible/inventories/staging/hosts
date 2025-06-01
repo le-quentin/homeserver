@@ -10,6 +10,9 @@ mainhost
 [paperless]
 mainhost
 
+[jellyfin]
+mainhost
+
 [zigbee2mqtt]
 mainhost
 

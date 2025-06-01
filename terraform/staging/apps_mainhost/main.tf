@@ -17,9 +17,9 @@ module "k3s_node" {
   bridge_lan_interface  = "vmbr1010"
   bridge_lan_network_ip = "10.142.10.1"
 
-  # usb_mappings = [
-  #   { device_id = "toto" }
-  # ]
+  usb_mappings = [
+    { device_id = "0480:a009", usb3 = true }
+  ]
 
   vm_cpu_cores        = 2
   vm_dedicated_memory = 2048

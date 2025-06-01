@@ -1,0 +1,42 @@
+- name: "Deploy jellyfin"
+  hosts: jellyfin
+  roles:
+    - homelab-app
+  pre_tasks:
+    - name: Install NTFS
+      become: true
+      ansible.builtin.package:
+        name:
+          - ntfs-3g
+    - name: Mount media usb drive
+      become: true
+      ansible.posix.mount:
+        path: /mnt/media
+        src: UUID=344EEF6D4EEF25F8
+        fstype: ntfs
+        opts: noatime
+        state: mounted
+    - name: Make sure the media volumes exists
+      community.docker.docker_volume:
+        name: "jellyfin-media"
+        driver: local
+        driver_options:
+          type: none
+          device: /mnt/media
+          o: bind
+  vars:
+    homelab_app_name: jellyfin
+    homelab_app_traefik_network: traefik
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 8096
+    homelab_app_compose_template: "resources/jellyfin/compose.yml.j2"
+    homelab_app_volume_names:
+      - config
+      - cache
+    homelab_app_backups:
+      - volume: config
+        cron: "0 6 * * *"
+      - volume: media
+        cron: "10 6 * * sun"
+        remote_retention_days: 30
+        retention_days: 14

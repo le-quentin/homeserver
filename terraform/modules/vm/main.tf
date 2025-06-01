@@ -138,6 +138,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
     for_each = var.usb_mappings
     content {
       host = usb.value.device_id
+      usb3 = usb.value.usb3 ? usb.value.usb3 : false
     }
   }
 
