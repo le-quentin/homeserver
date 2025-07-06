@@ -1,4 +1,4 @@
-module "k3s_node" {
+module "apps_mainhost" {
   source = "../../modules/vm"
 
   //TODO use local datasource to communicate module outputs (https://developer.hashicorp.com/terraform/language/backend/local)
@@ -21,7 +21,7 @@ module "k3s_node" {
     { device_id = "0480:a009", usb3 = true }
   ]
 
-  vm_cpu_cores        = 2
+  vm_cpu_cores        = 4
   vm_dedicated_memory = 2048
   vm_floating_memory  = 2048
 

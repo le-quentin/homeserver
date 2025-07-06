@@ -1,6 +1,6 @@
 ---
 - name: Manually run local backups
-  hosts: mainhost
+  hosts: legacyhost
   vars:
     docker_volume_backup_root: "{{ ansible_files_root }}/docker-volume-backup"
     services: "{{ services-to-backup }}"

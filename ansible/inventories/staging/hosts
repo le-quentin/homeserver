@@ -1,4 +1,4 @@
-[adguardservs]
+[adguard]
 dnshost
 
 [traefik]
@@ -13,14 +13,11 @@ mainhost
 [jellyfin]
 mainhost
 
-[zigbee2mqtt]
-mainhost
+[homeassistant]
+legacyhost
 
-[mautic]
-mainhost
+[zigbee2mqtt]
+legacyhost
 
 [monitoring]
-mainhost
-
-[portainer]
-mainhost
+legacyhost

@@ -7,8 +7,8 @@ module "networking" {
   networking_lan_name    = "vmbr1"
   networking_lan_cidr_ip = "10.42.1.1/24"
 
-  k3s_lan_name    = "vmbr10"
-  k3s_lan_cidr_ip = "10.42.10.1/24"
+  apps_lan_name    = "vmbr10"
+  apps_lan_cidr_ip = "10.42.10.1/24"
 }
 
 moved {

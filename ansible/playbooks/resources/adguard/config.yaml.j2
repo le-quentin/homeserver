@@ -152,12 +152,32 @@ filtering:
   rewrites:
     - domain: adguard.{{ homeserver_domain }}
       answer: {{ dns_ip }}
-    - domain: '*.{{ homeserver_domain }}'
-      answer: {{ legacy_server_ip }}
     - domain: adguard.staging.home
       answer: 10.142.1.2
+    - domain: '*.{{ homeserver_domain }}'
+      answer: 10.42.10.10
     - domain: '*.staging.home'
       answer: 10.142.10.10
+    - domain: 'assistant.{{ homeserver_domain }}'
+      answer: {{ legacy_server_ip }}
+    - domain: 'mqtt.{{ homeserver_domain }}'
+      answer: {{ legacy_server_ip }}
+    - domain: 'zigbee2mqtt.{{ homeserver_domain }}'
+      answer: {{ legacy_server_ip }}
+    - domain: 'grafana.{{ homeserver_domain }}'
+      answer: {{ legacy_server_ip }}
+    - domain: 'prometheus.{{ homeserver_domain }}'
+      answer: {{ legacy_server_ip }}
+    - domain: 'assistant.staging.home'
+      answer: 10.142.1.200
+    - domain: 'mqtt.staging.home'
+      answer: 10.142.1.200
+    - domain: 'zigbee2mqtt.staging.home'
+      answer: 10.142.1.200
+    - domain: 'grafana.staging.home'
+      answer: 10.142.1.200
+    - domain: 'prometheus.staging.home'
+      answer: 10.142.1.200
     - domain: 'vps-staging.home'
       answer: 10.150.1.10
     - domain: '*.vps-staging.home'

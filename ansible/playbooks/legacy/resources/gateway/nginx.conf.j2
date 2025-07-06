@@ -137,18 +137,6 @@ http {
     }
 
     server {
-	server_name portainer.{{ homeserver_domain }};
-	listen 80;
-
-	set $target "http://portainer:9000";
-
-        location / {
-            proxy_pass $target;
-            proxy_set_header Host $http_host;
-	}
-    }
-
-    server {
 	server_name grafana.{{ homeserver_domain }};
 	listen 80;
 

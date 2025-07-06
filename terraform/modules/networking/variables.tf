@@ -18,14 +18,14 @@ variable "networking_lan_cidr_ip" {
   description = "The ip address of the network for the the network apps (DNS, Router, DHCP...) bridge LAN"
 }
 
-variable "k3s_lan_name" {
+variable "apps_lan_name" {
   type        = string
-  description = "The name of the network interface for the k3s bridge LAN"
+  description = "The name of the network interface for the apps bridge LAN"
 }
 
-variable "k3s_lan_cidr_ip" {
+variable "apps_lan_cidr_ip" {
   type        = string
-  description = "The ip address of the network for the the k3s bridge LAN"
+  description = "The ip address of the network for the the apps bridge LAN"
 }
 
 ##### Variables with defaults

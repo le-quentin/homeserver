@@ -24,10 +24,10 @@ resource "proxmox_virtual_environment_network_linux_bridge" "networking_lan" {
   comment   = "${var.environment} network apps (DNS, router, DHCP...)  LAN"
 }
 
-resource "proxmox_virtual_environment_network_linux_bridge" "k3s_lan" {
+resource "proxmox_virtual_environment_network_linux_bridge" "apps_lan" {
   node_name = var.node_name
-  name      = var.k3s_lan_name
-  address   = var.k3s_lan_cidr_ip
-  comment   = "${var.environment} k3s cluster LAN"
+  name      = var.apps_lan_name
+  address   = var.apps_lan_cidr_ip
+  comment   = "${var.environment} apps cluster LAN"
 }
 

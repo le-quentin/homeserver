@@ -1,42 +1,23 @@
-[k3snodes]
-k3scontroller
-
-[nfsservs]
-nfshost
-
-[nfsclients]
-dbhost
-
-[postgresservs]
-dbhost
-
-[backupservs]
-nfshost
-
-[adguardservs]
+[adguard]
 dnshost
 
-[gatewayservs]
+[traefik]
 mainhost
 
-[zigbee2mqttservs]
+[uptime-kuma]
 mainhost
 
-[homeassistantservs]
+[paperless]
 mainhost
 
-[mauticservs]
+[jellyfin]
 mainhost
 
-[monitoringservs]
-mainhost
+[homeassistant]
+legacyhost
 
-[portainerservs]
-mainhost
+[zigbee2mqtt]
+legacyhost
 
-[cocobotservs]
-mainhost
-
-[duckdnsservs]
-mainhost
-
+[monitoring]
+legacyhost

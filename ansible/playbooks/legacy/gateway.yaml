@@ -1,6 +1,6 @@
 ---
 - name: Install gateway
-  hosts: gatewayservs
+  hosts: legacyhost
   tasks:
     - name: Ensure docker is installed
       ansible.builtin.include_tasks: "tasks/install-docker.yaml"

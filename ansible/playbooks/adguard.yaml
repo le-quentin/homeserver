@@ -1,6 +1,6 @@
 ---
 - name: Setup AdGuard Home (DNS for LAN + filters for WAN)
-  hosts: adguardservs
+  hosts: adguard
   tasks:
     - name: Ensure docker is installed
       ansible.builtin.include_tasks: "tasks/install-docker.yaml"

@@ -1,4 +1,4 @@
-module "k3s_node" {
+module "apps_mainhost" {
   source = "../../modules/vm"
 
   //TODO use local datasource to communicate module outputs (https://developer.hashicorp.com/terraform/language/backend/local)
@@ -7,8 +7,8 @@ module "k3s_node" {
   }
 
   vm_id       = 1010
-  name        = "k3s-server"
-  description = "The k3s server node, running both the control plane and a kubelet for pods hosting"
+  name        = "apps-host"
+  description = "The main host for homeserver apps"
 
   environment = "prod"
   pool        = "prod"
@@ -17,13 +17,17 @@ module "k3s_node" {
   bridge_lan_interface  = "vmbr10"
   bridge_lan_network_ip = "10.42.10.1"
 
+  usb_mappings = [
+    { device_id = "0480:a009", usb3 = true }
+  ]
+
   vm_cpu_cores        = 4
-  vm_dedicated_memory = 8192
-  vm_floating_memory  = 0
+  vm_dedicated_memory = 16384
+  vm_floating_memory  = 8192
 
   vm_params = {
     address   = var.vm_address
-    disk_size = 50
+    disk_size = 100
     dns       = "10.42.1.2"
     user = {
       ssh_key  = var.vm_ssh_key
