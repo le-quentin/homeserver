@@ -8,3 +8,8 @@
     homelab_app_apps_domain: "{{ homeserver_domain }}"
     homelab_app_internal_port: 3001
     homelab_app_compose_template: "resources/uptime-kuma/compose.yml.j2"
+    homelab_app_volume_names:
+      - data
+    homelab_app_backups:
+      - volume: data
+        cron: "15 6 * * *"
