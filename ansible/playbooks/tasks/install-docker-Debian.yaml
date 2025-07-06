@@ -78,3 +78,7 @@
   loop:
     - docker.service
     - containerd.service
+
+- name: Reset ssh connection to allow user changes to affect ansible user
+  ansible.builtin.meta:
+    reset_connection
