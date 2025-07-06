@@ -1,0 +1,76 @@
+#!/bin/bash
+set -euo pipefail
+
+export RESTIC_REPOSITORY="{{ homelab_app_backups_restic_repositories_root }}/{{ homelab_app_name }}/{{ item.volume }}"
+export RCLONE_CONFIG={{ homelab_app_backups_rclone_conf_target_dir }}
+RESTORE_VOLUME="{{ homelab_app_name }}-{{ item.volume }}"
+TMP_RESTORE_VOLUME="${RESTORE_VOLUME}-restore"
+
+echo "[restic] Starting restore of volume '$RESTORE_VOLUME' for app '{{ homelab_app_name }}'"
+
+echo "[restic] Syncing remote restic repository with local one"
+docker run --rm \
+  -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY" \
+  -v "$RCLONE_CONFIG:/config/rclone" \
+  {{ homelab_rclone_image | default('rclone/rclone:sha-4fd5a3d') }} \
+  --config /config/rclone/rclone.conf \
+  sync "{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}" "$RESTIC_REPOSITORY" \
+  --copy-links \
+  --fast-list \
+  --transfers 4 \
+  --checkers 8 \
+  --log-level INFO
+
+# Check for snapshots
+echo "[restic] Checking for available snapshots..."
+if ! docker run --rm \
+  -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY" \
+  -v "$RCLONE_CONFIG:/root/.config/rclone" \
+  -e RCLONE_CONFIG=/root/.config/rclone \
+  -e RESTIC_REPOSITORY \
+  {{ homelab_restic_image | default('restic/restic:0.18.0') }} \
+  snapshots --insecure-no-password --json | grep -q '"short_id"'; then
+  echo "[restic] ❌ No snapshots found in $RESTIC_REPOSITORY"
+  exit 1
+fi
+
+# Create temporary volume
+echo "[restic] Creating temporary restore volume: $TMP_RESTORE_VOLUME"
+docker volume create "$TMP_RESTORE_VOLUME" >/dev/null
+
+# Perform restore
+echo "[restic] Restoring latest snapshot to temporary volume..."
+docker run --rm \
+  -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY" \
+  -v "$TMP_RESTORE_VOLUME:/restore" \
+  -v /etc/localtime:/etc/localtime:ro \
+  -v "$RCLONE_CONFIG:/root/.config/rclone" \
+  -e RCLONE_CONFIG=/root/.config/rclone \
+  -e RESTIC_REPOSITORY \
+  {{ homelab_restic_image | default('restic/restic:0.18.0') }} \
+  restore latest --insecure-no-password --target /restore
+
+# Safely replace original volume
+echo "[restic] Replacing volume $RESTORE_VOLUME"
+echo "[restic] Creating fresh volume"
+docker volume rm "$RESTORE_VOLUME" >/dev/null 2>&1 || true
+docker volume create "$RESTORE_VOLUME" >/dev/null
+
+echo "[restic] Copying data into restored volume"
+docker run --rm \
+  -v "$TMP_RESTORE_VOLUME:/from" \
+  -v "$RESTORE_VOLUME:/to" \
+  alpine ash -c "cd /from/data && cp -a . /to"
+
+# Validate copy
+if [ $? -ne 0 ]; then
+  echo "[restic] ❌ Failed to copy data into $RESTORE_VOLUME"
+  exit 1
+fi
+
+# Cleanup
+echo "[restic] Cleaning up temporary volume"
+docker volume rm "$TMP_RESTORE_VOLUME" >/dev/null
+
+echo "[restic] ✅ Restore complete for '{{ item.volume }}'"
+

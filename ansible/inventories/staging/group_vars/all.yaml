@@ -6,4 +6,4 @@ database_ip: 10.142.10.21
 legacy_server_ip: 10.142.1.200
 k3s_controller_ip: 10.142.10.10
 
-homelab_app_backups_rclone_remote: proton:/backups/homelab-staging
+homelab_app_backups_rclone_remote: proton:/backups/homelab-staging-restic

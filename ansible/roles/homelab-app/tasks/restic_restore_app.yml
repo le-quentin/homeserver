@@ -1,0 +1,37 @@
+- name: "Set fact for single volume to restore"
+  when: restore_volume is defined and restore_volume != ''
+  set_fact:
+    restore_volumes: ["{{ restore_volume }}"]
+- name: "Restoring all volumes, finding all restore scripts that can be run"
+  when: restore_volume is not defined or restore_volume == ''
+  block:
+    - name: "Find restore scripts"
+      ansible.builtin.find:
+        paths: "{{ homelab_app_target_root_dir }}"
+        patterns: "restore-*.sh"
+        file_type: file
+      register: restore_scripts
+    - name: "Extract volume names from restore scripts"
+      set_fact:
+        restore_volumes: >-
+          {{ restore_scripts.files
+             | map(attribute='path')
+             | map('basename')
+             | map('regex_replace', '.*restore-(.+)\.sh$', '\1')
+             | list }}
+
+- name: "Restic restore for {{ homelab_app_name }}"
+  block:
+    - name: "Stop {{ homelab_app_name }} container"
+      community.docker.docker_compose_v2:
+        project_src: "{{ homelab_app_target_root_dir }}"
+        state: absent
+    - name: "Restore each volume"
+      changed_when: true
+      ansible.builtin.command: "{{ homelab_app_target_root_dir }}/restore-{{ item }}.sh"
+      loop: "{{ restore_volumes }}"
+  always:
+    - name: "Ensure app is started"
+      community.docker.docker_compose_v2:
+        project_src: "{{ homelab_app_target_root_dir }}"
+        state: present

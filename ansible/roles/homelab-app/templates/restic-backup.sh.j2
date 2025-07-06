@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-export RESTIC_REPOSITORY="{{ restic_repositories_root }}/{{ homelab_app_name }}/{{ item.volume }}"
+export RESTIC_REPOSITORY="{{ homelab_app_backups_restic_repositories_root }}/{{ homelab_app_name }}/{{ item.volume }}"
 export RCLONE_CONFIG={{ homelab_app_backups_rclone_conf_target_dir }}
 
 echo "[restic] Starting backup of volume {{ item.volume }} for app {{ homelab_app_name }}"
