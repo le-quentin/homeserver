@@ -3,20 +3,35 @@
   roles:
     - homelab-app
   pre_tasks:
-    - name: Install NTFS
+    - name: Install NTFS support
       become: true
       ansible.builtin.package:
-        name:
-          - ntfs-3g
-    - name: Mount media usb drive
+        name: ntfs-3g
+
+    - name: Create systemd mount unit for /mnt/media
       become: true
-      ansible.posix.mount:
-        path: /mnt/media
-        src: UUID=344EEF6D4EEF25F8
-        fstype: ntfs
-        opts: noatime
-        state: mounted
-    - name: Make sure the media volumes exists
+      ansible.builtin.template:
+        src: ./resources/jellyfin/mnt-media.mount.j2
+        dest: /etc/systemd/system/mnt-media.mount
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Create systemd automount unit for /mnt/media
+      become: true
+      ansible.builtin.template:
+        src: ./resources/jellyfin/mnt-media.automount.j2
+        dest: /etc/systemd/system/mnt-media.automount
+        owner: root
+        group: root
+        mode: '0644'
+    - name: Reload systemd and enable/start automount
+      become: true
+      ansible.builtin.systemd:
+        name: mnt-media.automount
+        enabled: true
+        state: started
+        daemon_reload: true
+    - name: Make sure the media Docker volume exists
       community.docker.docker_volume:
         name: "jellyfin-media"
         driver: local
