@@ -83,12 +83,12 @@ resource "proxmox_virtual_environment_vm" "vm" {
   pool_id = var.pool
   vm_id   = local.vm_id
 
-  timeout_clone           = 300
-  timeout_create          = 600
-  timeout_migrate         = 300
-  timeout_reboot          = 300
-  timeout_shutdown_vm     = 300
-  timeout_start_vm        = 300
+  timeout_clone       = 300
+  timeout_create      = 600
+  timeout_migrate     = 300
+  timeout_reboot      = 300
+  timeout_shutdown_vm = 300
+  timeout_start_vm    = 300
 
   initialization {
     user_data_file_id = proxmox_virtual_environment_file.cloudinit_user.id
@@ -139,6 +139,15 @@ resource "proxmox_virtual_environment_vm" "vm" {
     content {
       host = usb.value.device_id
       usb3 = usb.value.usb3 ? usb.value.usb3 : false
+    }
+  }
+
+  dynamic "hostpci" {
+    for_each = var.pci_mappings
+    content {
+      device = hostpci.value.hostpci_id
+      id     = hostpci.value.device_id
+      xvga   = coalesce(hostpci.value.primary_gpu, false)
     }
   }
 

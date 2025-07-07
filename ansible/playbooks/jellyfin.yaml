@@ -2,12 +2,36 @@
   hosts: jellyfin
   roles:
     - homelab-app
+  vars:
+    homelab_app_name: jellyfin
+    homelab_app_traefik_network: traefik
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 8096
+    homelab_app_compose_template: "resources/jellyfin/compose.yml.j2"
+    homelab_app_volume_names:
+      - config
+      - cache
+    homelab_app_backups:
+      - volume: config
+        cron: "0 6 * * *"
+
+    gpu_card_path: "/dev/dri/renderD128" # Device id from the vm
+    gpu_group: "render" # According to jellyfin docs, is one of [video, input, render] depending on OS
+
   pre_tasks:
+    - name: Make sure the media Docker volume exists
+      community.docker.docker_volume:
+        name: "jellyfin-media"
+        driver: local
+        driver_options:
+          type: none
+          device: /mnt/media
+          o: bind
+    # Properly mounting the external drive
     - name: Install NTFS support
       become: true
       ansible.builtin.package:
         name: ntfs-3g
-
     - name: Create systemd mount unit for /mnt/media
       become: true
       ansible.builtin.template:
@@ -31,23 +55,37 @@
         enabled: true
         state: started
         daemon_reload: true
-    - name: Make sure the media Docker volume exists
-      community.docker.docker_volume:
-        name: "jellyfin-media"
-        driver: local
-        driver_options:
-          type: none
-          device: /mnt/media
-          o: bind
-  vars:
-    homelab_app_name: jellyfin
-    homelab_app_traefik_network: traefik
-    homelab_app_apps_domain: "{{ homeserver_domain }}"
-    homelab_app_internal_port: 8096
-    homelab_app_compose_template: "resources/jellyfin/compose.yml.j2"
-    homelab_app_volume_names:
-      - config
-      - cache
-    homelab_app_backups:
-      - volume: config
-        cron: "0 6 * * *"
+
+    # Setup the GPU for passthrough
+    - name: Ensure intel GPU packages are installed
+      become: true
+      ansible.builtin.apt:
+        name:
+          - firmware-misc-nonfree
+          - intel-media-va-driver-non-free
+        state: present
+        update_cache: true
+      register: gpu_packages
+    - name: Add user to 'render' group
+      become: true
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: render
+        append: true
+    - name: Reboot if firmware packages were newly installed
+      become: true
+      ansible.builtin.reboot:
+        msg: "Rebooting to activate Intel GPU firmware"
+        connect_timeout: 10
+        reboot_timeout: 300
+        test_command: uptime
+      when: gpu_packages is changed
+    - name: "Get id of the render group"
+      changed_when: false
+      shell: "set -o pipefail && getent group {{ gpu_group }} | cut -d: -f3"
+      args:
+        executable: /bin/bash
+      register: render_group
+    - name: "Set render_group_id"
+      ansible.builtin.set_fact:
+        render_group_id: "{{ render_group.stdout }}"

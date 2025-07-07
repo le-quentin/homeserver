@@ -68,13 +68,19 @@ variable "disk_storage" {
 
 variable "usb_mappings" {
   type        = list(any)
-  description = "Id of and usb device (int the \"<bus>-<device>\" format) to passthrough to the VM"
+  description = "Id and options of usb devices (in the \"<bus>-<device>\" format) to passthrough to the VM"
   default     = []
 }
 
 variable "disks" {
   type        = list(any)
   description = "Additional disks for the VM"
+  default     = []
+}
+
+variable "pci_mappings" {
+  type        = list(any)
+  description = "Ids of pci devices to passthrough to the VM. hostpci_id in the hostpciX format, from the proxmox hostpci list"
   default     = []
 }
 

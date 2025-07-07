@@ -4,6 +4,10 @@ services:
     container_name: jellyfin
     restart: always
     # user: uid:gid
+    devices:
+      - {{ gpu_card_path }}:{{ gpu_card_path }}
+    group_add:
+      - '{{ render_group_id }}'
     volumes:
       - jellyfin-config:/config
       - jellyfin-cache:/cache
