@@ -4,14 +4,10 @@ homelab_app_rendered_compose: "{{ homelab_app_target_root_dir }}/base-compose.ym
 homelab_app_rendered_patch: "{{ homelab_app_target_root_dir }}/patch.yml"
 homelab_app_full_dns_name: "{{ homelab_app_name }}.{{ homelab_app_apps_domain }}"
 homelab_app_traefik_network: traefik
-homelab_app_volume_names:
-  - data
+homelab_app_volume_names: []
 homelab_app_backups_enabled: true
 homelab_app_backups_restic_repositories_root: "/srv/backups/restic/"
 homelab_app_backups_target_dir: /backups
-homelab_app_backups:
-  - volume: data
-    cron: "0 5 * * *"
 homelab_app_backups_rclone_conf: "./resources/backups/rclone.conf"
 homelab_app_backups_rclone_conf_target_dir: "/srv/rclone"
 homelab_app_backups_rclone_remote: "proton:/backups"
