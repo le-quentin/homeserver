@@ -1,5 +1,6 @@
 services:
   {{ homelab_app_name }}:
+    restart: always
     networks:
       - {{ homelab_app_traefik_network }}
     container_name: {{ homelab_app_name }}
