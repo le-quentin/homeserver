@@ -1,11 +1,16 @@
 services:
   wiki:
     image: gollumwiki/gollum:6.1.0
+    user: root:root # Found no satisfying way of changing ownership of the mounted docker volume; and being root inside the container seems okay
     volumes:
       # - ${PWD}/config.rb:/etc/gollum/config.rb # if using config.rb in your current directory
-      - {{ homelab_app_target_root_dir }}/repo:/wiki # with your repository in the 'wiki' subdirectory of your current directory
+      - wiki-repo:/wiki
+      # - {{ homelab_app_target_root_dir }}/repo:/wiki
     command:
       # - "--config=/etc/gollum/config.rb" # if using config.rb
       - "--math"
       # - ... # your additional options here
+volumes:
+  wiki-repo:
+    external: true
 
