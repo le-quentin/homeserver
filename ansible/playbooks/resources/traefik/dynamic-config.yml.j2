@@ -5,3 +5,13 @@ http:
       service: api@internal
       entryPoints:
         - web
+  middlewares:
+    security-headers:
+      headers:
+        referrerPolicy: "strict-origin-when-cross-origin"
+        frameDeny: true
+        sslRedirect: false
+        browserXssFilter: true
+        contentTypeNosniff: true
+        customResponseHeaders:
+          X-Robots-Tag: "none" # Robots shouldn't crawl our apps if we ever expose some of them to the internet

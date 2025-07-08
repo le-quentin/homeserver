@@ -22,17 +22,19 @@
         src: ./resources/traefik/config.yml
         dest: "{{ traefik_dir }}/traefik.yml"
         mode: "0644"
+      notify: Restart traefik
     - name: Render dynamic config template
       ansible.builtin.template:
         src: ./resources/traefik/dynamic-config.yml.j2
         dest: "{{ traefik_dir }}/dynamic.yml"
+      notify: Restart traefik
     - name: Render compose template
       ansible.builtin.template:
         src: resources/traefik/compose.yml.j2
         dest: "{{ traefik_dir }}/compose.yml"
-        
-
-    - name: Bring up Traefik with Compose
+      notify: Restart traefik
+  handlers:
+    - name: Restart traefik
       community.docker.docker_compose_v2:
         project_src: "{{ traefik_dir }}"
-        state: present
+        state: restarted
