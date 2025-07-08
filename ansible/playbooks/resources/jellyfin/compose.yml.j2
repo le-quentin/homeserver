@@ -11,7 +11,7 @@ services:
     volumes:
       - jellyfin-config:/config
       - jellyfin-cache:/cache
-      - jellyfin-media:/media
+      - /mnt/media:/media
       # - type: bind
       #   source: /path/to/media
       #   target: /media
@@ -35,6 +35,4 @@ volumes:
   jellyfin-config:
     external: true
   jellyfin-cache:
-    external: true
-  jellyfin-media:
     external: true
