@@ -13,6 +13,9 @@ mainhost
 [jellyfin]
 mainhost
 
+[servarr]
+mainhost
+
 [homeassistant]
 legacyhost
 

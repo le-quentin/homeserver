@@ -1,0 +1,15 @@
+- name: "Deploy lidarr"
+  hosts: servarr
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: lidarr
+    homelab_app_traefik_network: traefik
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 8686
+    homelab_app_compose_template: "resources/lidarr/compose.yml.j2"
+    homelab_app_volume_names:
+      - config
+    homelab_app_backups:
+      - volume: config
+        cron: "45 6 * * *"

@@ -1,0 +1,15 @@
+- name: "Deploy sonarr"
+  hosts: servarr
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: sonarr
+    homelab_app_traefik_network: traefik
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 8989
+    homelab_app_compose_template: "resources/sonarr/compose.yml.j2"
+    homelab_app_volume_names:
+      - config
+    homelab_app_backups:
+      - volume: config
+        cron: "50 6 * * *"
