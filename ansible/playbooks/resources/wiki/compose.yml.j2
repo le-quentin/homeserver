@@ -1,0 +1,11 @@
+services:
+  wiki:
+    image: gollumwiki/gollum:6.1.0
+    volumes:
+      # - ${PWD}/config.rb:/etc/gollum/config.rb # if using config.rb in your current directory
+      - {{ homelab_app_target_root_dir }}/repo:/wiki # with your repository in the 'wiki' subdirectory of your current directory
+    command:
+      # - "--config=/etc/gollum/config.rb" # if using config.rb
+      - "--math"
+      # - ... # your additional options here
+

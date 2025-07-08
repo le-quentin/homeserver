@@ -1,0 +1,16 @@
+- name: Deploy Gollum (git based wiki)
+  hosts: mainhost
+  roles:
+    - homelab-app
+  pre_tasks:
+    - name: "Make sure git repo directory exists"
+      ansible.builtin.file:
+        path: "{{ homelab_app_target_root_dir }}/repo"
+        state: directory
+        mode: "0744"
+  vars:
+    homelab_app_name: wiki
+    homelab_app_traefik_network: traefik
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 4567
+    homelab_app_compose_template: "resources/wiki/compose.yml.j2"
