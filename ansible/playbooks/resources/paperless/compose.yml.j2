@@ -1,6 +1,6 @@
 services:
   broker:
-    image: docker.io/library/redis:7
+    image: docker.io/library/redis:8
     container_name: paperless-broker
     restart: always
     networks:
@@ -9,7 +9,7 @@ services:
       - redisdata:/data
 
   paperless:
-    image: ghcr.io/paperless-ngx/paperless-ngx:latest
+    image: ghcr.io/paperless-ngx/paperless-ngx:2.17.1
     depends_on:
       - broker
     restart: always
@@ -22,6 +22,8 @@ services:
       - ./consume:/usr/src/paperless/consume
     environment:
       PAPERLESS_REDIS: redis://paperless-broker:6379
+      PAPERLESS_URL: {{ homelab_app_url }}
+      PAPERLESS_BIND_ADDR: 0.0.0.0
 
 volumes:
   paperless-data:
@@ -29,3 +31,4 @@ volumes:
   paperless-media:
     external: true
   redisdata:
+    external: false
