@@ -1,8 +1,10 @@
 [Unit]
 Description=Mount media USB drive
+Requires=dev-disk-by\x2duuid-344EEF6D4EEF25F8.device
+After=dev-disk-by\x2duuid-344EEF6D4EEF25F8.device
 
 [Mount]
-What=UUID=344EEF6D4EEF25F8
+What=/dev/disk/by-uuid/344EEF6D4EEF25F8
 Where=/mnt/media
 Type=ntfs
 Options=noatime
