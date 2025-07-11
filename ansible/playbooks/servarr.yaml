@@ -1,0 +1,11 @@
+---
+- name: Install radarr
+  ansible.builtin.import_playbook: "./radarr.yaml"
+- name: Install sonarr
+  ansible.builtin.import_playbook: "./sonarr.yaml"
+- name: Install lidarr
+  ansible.builtin.import_playbook: "./lidarr.yaml"
+- name: Install prowlarr
+  ansible.builtin.import_playbook: "./prowlarr.yaml"
+- name: Install qbittorrent
+  ansible.builtin.import_playbook: "./qbittorrent.yaml"

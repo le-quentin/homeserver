@@ -13,3 +13,6 @@
     homelab_app_backups:
       - volume: config
         cron: "15 6 * * *"
+  pre_tasks:
+    - name: Servarr stack setup
+      ansible.builtin.import_tasks: tasks/servarr-setup.yaml
