@@ -1,0 +1,8 @@
+- name: "Restore an app data using restic"
+  hosts: mainhost
+  # gather_facts: false
+  tasks:
+    - name: "Restore {{ app }}"
+      ansible.builtin.include_tasks: ./tasks/restore-app.yaml
+      vars:
+        homelab_app_name: "{{ app }}"

@@ -1,0 +1,7 @@
+- name: "Run restore task from homelab-app role"
+  include_role:
+    name: homelab-app
+    tasks_from: restic_restore_app
+  vars:
+    homelab_app_name: "{{ app }}"
+    # restore_volume: config  # optional; omit to restore all
