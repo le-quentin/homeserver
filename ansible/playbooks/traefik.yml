@@ -33,8 +33,14 @@
         src: resources/traefik/compose.yml.j2
         dest: "{{ traefik_dir }}/compose.yml"
       notify: Restart traefik
+    - name: Start traefik
+      community.docker.docker_compose_v2:
+        project_src: "{{ traefik_dir }}"
+        state: present
+      register: start
   handlers:
     - name: Restart traefik
+      when: not start.changed
       community.docker.docker_compose_v2:
         project_src: "{{ traefik_dir }}"
         state: restarted

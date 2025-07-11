@@ -11,6 +11,8 @@
   ansible.builtin.import_playbook: "./paperless.yaml"
 - name: Jellyfin
   ansible.builtin.import_playbook: "./jellyfin.yaml"
+- name: Wiki
+  ansible.builtin.import_playbook: "./wiki.yaml"
 - name: Uptime-Kuma
   ansible.builtin.import_playbook: "./uptime-kuma.yaml"
 - name: Homepage

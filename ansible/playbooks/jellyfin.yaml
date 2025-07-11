@@ -17,13 +17,9 @@
 
     gpu_card_path: "/dev/dri/renderD128" # Device id from the vm
     gpu_group: "render" # According to jellyfin docs, is one of [video, input, render] depending on OS
+    media_disk_id: "c36cbb4b-35c2-4688-86bb-9faf55208a03"
 
   pre_tasks:
-    # Properly mounting the external drive
-    - name: Install NTFS support
-      become: true
-      ansible.builtin.package:
-        name: ntfs-3g
     - name: Create systemd mount unit for /mnt/media
       become: true
       ansible.builtin.template:
@@ -32,6 +28,7 @@
         owner: root
         group: root
         mode: '0644'
+      register: mount_template
     - name: Create systemd automount unit for /mnt/media
       become: true
       ansible.builtin.template:
@@ -40,15 +37,39 @@
         owner: root
         group: root
         mode: '0644'
+      register: automount_template
+    - name: Reload systemd and enable mount
+      become: true
+      when: mount_template.changed
+      ansible.builtin.systemd:
+        name: mnt-media.mount
+        enabled: true
+        state: reloaded
+        daemon_reload: true
     - name: Reload systemd and enable/start automount
       become: true
+      when: automount_template.changed
       ansible.builtin.systemd:
         name: mnt-media.automount
         enabled: true
-        state: started
+        state: restarted
         daemon_reload: true
 
     # Setup the GPU for passthrough
+    - name: Ensure non-free components are enabled in all apt source stanzas
+      become: true
+      ansible.builtin.replace:
+        path: /etc/apt/sources.list.d/debian.sources
+        regexp: '^(Components:\s*main)(?!.*non-free)'
+        replace: '\1 contrib non-free non-free-firmware'
+      register: sources_update
+
+    - name: Update apt cache
+      become: true
+      ansible.builtin.apt:
+        update_cache: true
+      when: sources_update.changed
+
     - name: Ensure intel GPU packages are installed
       become: true
       ansible.builtin.apt:

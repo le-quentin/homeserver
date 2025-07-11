@@ -1,10 +1,11 @@
 [Unit]
-Description=Mount media USB drive
-Requires=dev-disk-by\x2duuid-344EEF6D4EEF25F8.device
-After=dev-disk-by\x2duuid-344EEF6D4EEF25F8.device
+Description=Mount media USB
 
 [Mount]
-What=/dev/disk/by-uuid/344EEF6D4EEF25F8
+What=/dev/disk/by-uuid/{{ media_disk_id }}
 Where=/mnt/media
-Type=ntfs
-Options=noatime
+Type=ext4
+Options=noatime,defaults
+
+[Install]
+WantedBy=multi-user.target

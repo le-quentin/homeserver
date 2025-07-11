@@ -18,7 +18,7 @@ module "apps_mainhost" {
   bridge_lan_network_ip = "10.42.10.1"
 
   usb_mappings = [
-    { device_id = "0480:a009", usb3 = true }
+    { device_id = "0480:0907", usb3 = true } // Toshiba 4TB external SSD drive
   ]
 
   pci_mappings = [
