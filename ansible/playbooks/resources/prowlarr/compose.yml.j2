@@ -1,16 +1,15 @@
 ---
 services:
-  radarr:
-    image: lscr.io/linuxserver/radarr:5.26.2
-    container_name: radarr
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:2.0.1-develop
+    container_name: prowlarr
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Etc/UTC
     volumes:
-      - radarr-config:/config
+      - prowlarr-config:/config
       - /mnt/media/downloads:/downloads #optional
-      - /mnt/media/Vidéo:/video #optional
 volumes:
-  radarr-config:
+  prowlarr-config:
     external: true

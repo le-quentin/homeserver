@@ -9,7 +9,7 @@ services:
       - TZ=Etc/UTC
     volumes:
       - sonarr-config:/config
-      - {{ homelab_app_target_root_dir }}/downloads:/downloads #optional
+      - /mnt/media/downloads:/downloads #optional
       - /mnt/media/Vidéo/Séries:/shows #optional
 volumes:
   sonarr-config:

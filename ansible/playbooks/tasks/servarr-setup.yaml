@@ -1,0 +1,4 @@
+---
+- name: Ensure servarr network exists
+  community.docker.docker_network:
+    name: "servarr"

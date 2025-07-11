@@ -4,14 +4,19 @@ services:
     # image: lscr.io/linuxserver/lidarr:2.12.4
     image: blampe/lidarr:2.13.0-develop #quickfix image until the main image is fixed (metadata broken after MusicBrainz breaking change)
     container_name: lidarr
+    networks:
+      - servarr
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Paris
     volumes:
       - lidarr-config:/config
-      - {{ homelab_app_target_root_dir }}/downloads:/downloads #optional
+      - /mnt/media/downloads:/downloads #optional
       - /mnt/media/Musique:/music
 volumes:
   lidarr-config:
+    external: true
+networks:
+  servarr:
     external: true
