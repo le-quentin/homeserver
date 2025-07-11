@@ -1,0 +1,63 @@
+---
+- name: Restore Docker volume from tar.gz archive (wildcard match)
+  hosts: legacyhost
+  gather_facts: false
+  vars:
+    app: "home-assistant"
+    volume: "data"
+    volume_name: "{{ app }}-{{ volume }}"
+    archive_glob: "backup-{{ app }}*.tar.gz"
+    remote_backup_path: "/tmp/backup.tar.gz"
+    pwd: "{{ lookup('env', 'PWD') }}"
+
+  tasks:
+    - name: Ensure Docker volume exists
+      become: true
+      community.docker.docker_volume:
+        name: "{{ volume_name }}"
+        state: present
+    - name: Find matching archive locally on the controller
+      delegate_to: localhost
+      run_once: true
+      find:
+        paths: "{{ pwd }}"
+        patterns: "{{ archive_glob }}"
+        file_type: file
+      register: found_archives
+
+    - name: Fail if no matching archive is found
+      fail:
+        msg: "No archive found matching pattern {{ archive_glob }}"
+      when: found_archives.matched == 0
+
+    - name: Fail if multiple archives matched
+      fail:
+        msg: "Multiple archives matched '{{ archive_glob }}'. Please be more specific."
+      when: found_archives.matched > 1
+
+    - name: Copy archive to target host
+      copy:
+        src: "{{ found_archives.files[0].path }}"
+        dest: "{{ remote_backup_path }}"
+        mode: '0644'
+
+    - name: Restore archive to Docker volume using docker_container
+      become: true
+      community.docker.docker_container:
+        name: restore_{{ volume_name }}
+        image: alpine
+        command: >
+          sh -c "apk add --no-cache tar &&
+                 cd /data &&
+                 tar xzf /backup.tar.gz --strip-components=2"
+        auto_remove: true
+        restart_policy: "no"
+        mounts:
+          - type: volume
+            source: "{{ volume_name }}"
+            target: /data
+          - type: bind
+            source: "{{ remote_backup_path }}"
+            target: /backup.tar.gz
+            read_only: true
+        state: started

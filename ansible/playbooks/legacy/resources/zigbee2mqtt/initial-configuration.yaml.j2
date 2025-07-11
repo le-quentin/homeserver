@@ -1,5 +1,3 @@
-# Optional: Home Assistant integration (MQTT discovery) (default: false)
-homeassistant: true
 # Let new devices join our zigbee network
 permit_join: false
 # Docker Compose makes the MQTT-Server available using "mqtt" hostname
@@ -27,7 +25,6 @@ advanced:
 # Don't spam DB with attributes
 homeassistant:
   legacy_entity_attributes: false
-
 
 # Parts of the config in other files
 devices: devices.yaml
