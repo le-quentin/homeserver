@@ -5,12 +5,15 @@ services:
     container_name: qbittorrent
     networks:
       - servarr
+    ports:
+      - "43478:43478" # We need port forwarding to not get firewall limited for P2P
+      - "43478:43478/udp"
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Paris
       - WEBUI_PORT=8080
-      - TORRENTING_PORT=6881
+      - TORRENTING_PORT=43478
     volumes:
       - qbittorrent-config:/config
       - /mnt/media/downloads:/downloads #optional

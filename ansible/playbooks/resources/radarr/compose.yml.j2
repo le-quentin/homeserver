@@ -3,6 +3,8 @@ services:
   radarr:
     image: lscr.io/linuxserver/radarr:5.26.2
     container_name: radarr
+    networks:
+      - servarr
     environment:
       - PUID=1000
       - PGID=1000
@@ -13,4 +15,7 @@ services:
       - /mnt/media/Vidéo:/video #optional
 volumes:
   radarr-config:
+    external: true
+networks:
+  servarr:
     external: true

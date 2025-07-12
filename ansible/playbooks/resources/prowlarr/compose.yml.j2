@@ -3,6 +3,8 @@ services:
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:2.0.1-develop
     container_name: prowlarr
+    networks:
+      - servarr
     environment:
       - PUID=1000
       - PGID=1000
@@ -12,4 +14,7 @@ services:
       - /mnt/media/downloads:/downloads #optional
 volumes:
   prowlarr-config:
+    external: true
+networks:
+  servarr:
     external: true
