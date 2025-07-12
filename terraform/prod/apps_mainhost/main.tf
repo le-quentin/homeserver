@@ -31,7 +31,7 @@ module "apps_mainhost" {
 
   vm_params = {
     address   = var.vm_address
-    disk_size = 100
+    disk_size = 300
     dns       = "10.42.1.2"
     user = {
       ssh_key  = var.vm_ssh_key
