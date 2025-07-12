@@ -38,14 +38,6 @@
         group: root
         mode: '0644'
       register: automount_template
-    - name: Reload systemd and enable mount
-      become: true
-      when: mount_template.changed
-      ansible.builtin.systemd:
-        name: mnt-media.mount
-        enabled: true
-        state: reloaded
-        daemon_reload: true
     - name: Reload systemd and enable/start automount
       become: true
       when: automount_template.changed

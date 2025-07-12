@@ -16,3 +16,11 @@
   pre_tasks:
     - name: Servarr stack setup
       ansible.builtin.import_tasks: tasks/servarr-setup.yaml
+    - name: Make sure downloads folder exists
+      become: true
+      ansible.builtin.file:
+        path: /downloads
+        state: directory
+        owner: 1000
+        group: 1000
+        mode: "0744"

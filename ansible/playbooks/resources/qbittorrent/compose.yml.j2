@@ -16,7 +16,8 @@ services:
       - TORRENTING_PORT=43478
     volumes:
       - qbittorrent-config:/config
-      - /mnt/media/downloads:/downloads #optional
+      - /mnt/media/downloads:/downloads # Finished downloads on external drive
+      - /downloads:/ongoing-downloads # Downloading on local disk
     restart: unless-stopped
 volumes:
   qbittorrent-config:
