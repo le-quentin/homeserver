@@ -12,10 +12,10 @@ services:
     volumes:
       - radarr-config:/config
       - /mnt/media/downloads:/downloads
-      - /mnt/media/Vidéo/Films:/films
-      - /mnt/media/Vidéo/Nanars:/films
-      - /mnt/media/Vidéo/Sketchs:/spectacles
-      - /mnt/media/Vidéo/Concerts:/concerts
+      - /mnt/media/Vidéo/Films:/library/films
+      - /mnt/media/Vidéo/Nanars:/library/nanars
+      - /mnt/media/Vidéo/Sketchs:/library/spectacles
+      - /mnt/media/Vidéo/Concerts:/library/concerts
 volumes:
   radarr-config:
     external: true
