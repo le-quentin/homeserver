@@ -4,6 +4,8 @@ services:
     container_name: jellyfin
     restart: always
     # user: uid:gid
+    ports:
+      - "8096:8096" # SmartTV app is annoying with cache after redeploy, using ip:port for it...
     devices:
       - {{ gpu_card_path }}:{{ gpu_card_path }}
     group_add:
