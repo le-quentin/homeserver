@@ -3,6 +3,7 @@ set -euo pipefail
 
 export RESTIC_REPOSITORY="{{ homelab_app_backups_restic_repositories_root }}/{{ homelab_app_name }}/{{ item.volume }}"
 export RCLONE_CONFIG={{ homelab_app_backups_rclone_conf_target_dir }}
+export RESTIC_HOST="{{ homelab_app_name }}-{{ item.volume }}"
 CONTAINER="{{ homelab_app_name }}"
 
 echo "[restic] Stopping container $CONTAINER..."
@@ -27,6 +28,7 @@ docker run --rm \
   -v $RCLONE_CONFIG:/root/.config/rclone \
   -e RCLONE_CONFIG=/root/.config/rclone \
   -e RESTIC_REPOSITORY \
+  -e RESTIC_HOST \
   {{ homelab_restic_image | default('restic/restic:0.18.0') }} \
   backup --insecure-no-password /data
 
@@ -36,6 +38,7 @@ docker run --rm \
   -v $RCLONE_CONFIG:/root/.config/rclone \
   -e RCLONE_CONFIG=/root/.config/rclone \
   -e RESTIC_REPOSITORY \
+  -e RESTIC_HOST \
   {{ homelab_restic_image | default('restic/restic:0.18.0') }} \
   forget --insecure-no-password --keep-daily {{ item.retention_days | default(14) }} --prune
 
