@@ -11,7 +11,7 @@ services:
     volumes:
       - jellyfin-config:/config
       - jellyfin-cache:/cache
-      - /mnt/media:/media
+      - /mnt/media:/media:rw,rshared # rshared propagation makes sure the mount events are propagated, so that it may reconnect after disconnect
       # - type: bind
       #   source: /path/to/media
       #   target: /media

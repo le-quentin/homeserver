@@ -17,10 +17,6 @@ module "apps_mainhost" {
   bridge_lan_interface  = "vmbr10"
   bridge_lan_network_ip = "10.42.10.1"
 
-  usb_mappings = [
-    { device_id = "0480:0907", usb3 = true } // Toshiba 4TB external SSD drive
-  ]
-
   pci_mappings = [
     { hostpci_id = "hostpci0", device_id = "0000:00:02.0", primary_gpu = true }
   ]

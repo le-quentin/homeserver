@@ -37,6 +37,15 @@ update-grub
 
 Then reboot. Check ipv6 addresses are not shown anymore with `ip a`.
 
+## Few things that cannot easily be done with terraform
+
+- ssh into proxmox host and mount the media external disk under /mnt/toshibausb
+- add the disk uuid (c36cbb4b-35c2-4688-86bb-9faf55208a03 currently) to fstab:
+```
+UUID=c36cbb4b-35c2-4688-86bb-9faf55208a03 /mnt/toshibausb ext4 defaults,noatime 0 2
+```
+<BS>
+
 ## Provisioning
 
 i.e. in staging
