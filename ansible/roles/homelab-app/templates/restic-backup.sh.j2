@@ -3,6 +3,21 @@ set -euo pipefail
 
 export RESTIC_REPOSITORY="{{ homelab_app_backups_restic_repositories_root }}/{{ homelab_app_name }}/{{ item.volume }}"
 export RCLONE_CONFIG={{ homelab_app_backups_rclone_conf_target_dir }}
+CONTAINER="{{ homelab_app_name }}"
+
+echo "[restic] Stopping container $CONTAINER..."
+if docker ps -q -f name="^/${CONTAINER}$" | grep -q .; then
+  docker stop "$CONTAINER"
+else
+  echo "[restic] Warning: container $CONTAINER not running"
+fi
+
+# Define a cleanup function to always restart container
+cleanup() {
+  echo "[restic] Restarting container $CONTAINER..."
+  docker start "$CONTAINER" || echo "[restic] Failed to restart $CONTAINER"
+}
+trap cleanup EXIT
 
 echo "[restic] Starting backup of volume {{ item.volume }} for app {{ homelab_app_name }}"
 docker run --rm \
@@ -36,3 +51,5 @@ docker run --rm \
   --transfers 4 \
   --checkers 8 \
   --log-level INFO
+
+echo "[restic] Backup for {{ homelab_app_name }}/{{ item.volume }} completed."
