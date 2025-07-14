@@ -1,5 +1,10 @@
 services:
   {{ homelab_app_name }}:
+{% if homelab_app_cpus is defined %}
+    cpu_quota: {{ homelab_app_cpus * 100000 }}
+    cpu_period: 100000
+{% endif %}
+    cpu_shares: {{ homelab_app_cpu_shares }}
     restart: always
     networks:
       - {{ homelab_app_traefik_network }}
