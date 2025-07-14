@@ -66,3 +66,4 @@
   community.docker.docker_compose_v2:
     project_src: "{{ homelab_app_target_root_dir }}"
     state: present
+    recreate: always

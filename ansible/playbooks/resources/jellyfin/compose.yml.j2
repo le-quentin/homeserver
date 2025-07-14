@@ -12,8 +12,14 @@ services:
       - '{{ render_group_id }}'
     volumes:
       - jellyfin-config:/config
-      - jellyfin-cache:/cache
       - /mnt/media:/media:rw,rshared # rshared propagation makes sure the mount events are propagated, so that it may reconnect after disconnect
+      - /tmp/jellyfincache:/cache
+
+      # - type: tmpfs # Cache in ram for maximum speed
+      #   target: /cache
+      #   tmpfs:
+      #     size: 2g  # adjust based on RAM availability
+      
       # - type: bind
       #   source: /path/to/media
       #   target: /media

@@ -4,6 +4,7 @@
     - homelab-app
   vars:
     homelab_app_name: jellyfin
+    homelab_app_cpus: 3
     homelab_app_cpu_shares: 4096
     homelab_app_traefik_network: traefik
     homelab_app_apps_domain: "{{ homeserver_domain }}"
