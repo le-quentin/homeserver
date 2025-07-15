@@ -78,6 +78,8 @@ If there are errors, debug will be easier with the -v(erbose) option.
 
 ## TODO
 
+- [ ] Make restic backups safer : don't overwrite the distant repository if one exists, error instead
+- [ ] Cockpit ?
 - [x] Setup the Home-Assistant recorder, to control what's stored for how long
 - [ ] Use Packer to produce base linux image with Docker and initial setup
 - [ ] Logstash for log aggregation and Kibana for reading logs in web UI
