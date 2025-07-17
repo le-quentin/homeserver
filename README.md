@@ -78,6 +78,8 @@ If there are errors, debug will be easier with the -v(erbose) option.
 
 ## TODO
 
+- [ ] Run whole servarr stack through gluetun vpn
+- [ ] Avoid being firewalled in qbittorrent by handling port redirection to proton vpn (https://github.com/qdm12/gluetun/discussions/2686 ?)
 - [ ] Make restic backups safer : don't overwrite the distant repository if one exists, error instead
 - [ ] Cockpit ?
 - [x] Setup the Home-Assistant recorder, to control what's stored for how long

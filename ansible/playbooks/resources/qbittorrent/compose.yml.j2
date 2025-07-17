@@ -1,13 +1,27 @@
 ---
 services:
-  qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:5.1.2-libtorrentv1
-    container_name: qbittorrent
+  vpn-client:
+    image: qmcgaw/gluetun:v3.40.0
     networks:
       - servarr
     ports:
+      - "8080:8080"
       - "43478:43478" # We need port forwarding to not get firewall limited for P2P
       - "43478:43478/udp"
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY="{{ vpn_private_key }}"
+      - SERVER_COUNTRIES=Switzerland
+      - PORT_FORWARD_ONLY=on
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:5.1.2-libtorrentv1
+    container_name: qbittorrent
+    network_mode: "service:vpn-client"
     environment:
       - PUID=1000
       - PGID=1000
@@ -18,6 +32,7 @@ services:
       - qbittorrent-config:/config
       - /mnt/media/downloads:/downloads # Finished downloads on external drive
       - /downloads:/ongoing-downloads # Downloading on local disk
+      - {{ homelab_app_target_root_dir }}/wg0.conf:/etc/wireguard/wg0.conf:ro
     restart: unless-stopped
 volumes:
   qbittorrent-config:

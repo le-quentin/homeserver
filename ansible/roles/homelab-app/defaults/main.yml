@@ -16,3 +16,4 @@ homelab_app_backups_rclone_remote: "proton:/backups"
 homelab_app_backups_default_retention_days: 7
 homelab_app_backups_default_remote_retention_days: 180
 homelab_app_logs_root_dir: "/srv/log"
+homelab_app_vpn_enabled: false

@@ -6,15 +6,20 @@ services:
 {% endif %}
     cpu_shares: {{ homelab_app_cpu_shares }}
     restart: always
+    container_name: {{ homelab_app_name }}
+{% if homelab_app_vpn_enabled %}
+  # Using vpn client container, which will be connected to traefik network instead of main container, since main container is using its stack with network_mode 
+  vpn-client:
+{% endif %}
     networks:
       - {{ homelab_app_traefik_network }}
-    container_name: {{ homelab_app_name }}
     labels:
       traefik.enable: "true"
       traefik.docker.network: "{{ homelab_app_traefik_network }}"
       traefik.http.routers.{{ homelab_app_name }}.rule: "Host(`{{ homelab_app_full_dns_name }}`)"
       traefik.http.services.{{ homelab_app_name }}.loadbalancer.server.port: "{{ homelab_app_internal_port }}"  # internal port
       traefik.http.routers.{{ homelab_app_name }}.middlewares: "security-headers@file"
+      
 networks:
   {{ homelab_app_traefik_network }}:
     external: true

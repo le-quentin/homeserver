@@ -1,5 +1,5 @@
 - name: "Deploy qbittorrent"
-  hosts: servarr
+  hosts: torrent
   roles:
     - homelab-app
   vars:
@@ -14,6 +14,7 @@
     homelab_app_backups:
       - volume: config
         cron: "35 6 * * *"
+    homelab_app_vpn_enabled: true
   pre_tasks:
     - name: Servarr stack setup
       ansible.builtin.import_tasks: tasks/servarr-setup.yaml

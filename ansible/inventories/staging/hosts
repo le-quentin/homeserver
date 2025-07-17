@@ -16,6 +16,9 @@ mainhost
 [servarr]
 mainhost
 
+[torrent]
+mainhost
+
 [homeassistant]
 legacyhost
 
