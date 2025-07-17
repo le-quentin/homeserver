@@ -110,10 +110,14 @@ resource "proxmox_virtual_environment_vm" "vm" {
 
   }
 
+  scsi_hardware = "virtio-scsi-single"
+
   disk {
     datastore_id = var.disk_storage
     file_id      = var.images.debian
     interface    = "scsi0"
+    iothread     = true
+    ssd          = true
     size         = var.vm_params.disk_size
   }
 
@@ -130,6 +134,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
       size         = disk.value.size
       datastore_id = lookup(disk.value, "datastore_id", var.disk_storage)
       interface    = "scsi${disk.key + 1}"
+      iothread     = true
       file_format  = "raw"
     }
   }

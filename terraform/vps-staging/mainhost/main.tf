@@ -1,8 +1,8 @@
 module "vps_mainhost_staging" {
   source = "../../modules/vm"
 
-  vm_id = 5001
-  name = "vps-mainhost-staging"
+  vm_id       = 5001
+  name        = "vps-mainhost-staging"
   description = "Test vps deployments locally"
 
   //TODO use local datasource to communicate module outputs (https://developer.hashicorp.com/terraform/language/backend/local)

@@ -13,5 +13,5 @@ module "networking" {
 
 moved {
   from = module.networking.proxmox_virtual_environment_network_linux_bridge.bridge_lan
-  to = module.networking.proxmox_virtual_environment_network_linux_bridge.networking_lan
+  to   = module.networking.proxmox_virtual_environment_network_linux_bridge.networking_lan
 }
