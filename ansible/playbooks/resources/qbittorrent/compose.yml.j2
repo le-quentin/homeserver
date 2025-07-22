@@ -1,6 +1,7 @@
 ---
 services:
   vpn-client:
+    restart: unless-stopped
     image: qmcgaw/gluetun:v3.40.0
     networks:
       - servarr
@@ -19,6 +20,7 @@ services:
       - SERVER_COUNTRIES=Switzerland
       - PORT_FORWARD_ONLY=on
   qbittorrent:
+    restart: unless-stopped
     image: lscr.io/linuxserver/qbittorrent:5.1.2-libtorrentv1
     container_name: qbittorrent
     network_mode: "service:vpn-client"
@@ -33,7 +35,6 @@ services:
       - /mnt/media/downloads:/downloads # Finished downloads on external drive
       - /downloads:/ongoing-downloads # Downloading on local disk
       - {{ homelab_app_target_root_dir }}/wg0.conf:/etc/wireguard/wg0.conf:ro
-    restart: unless-stopped
 volumes:
   qbittorrent-config:
     external: true
