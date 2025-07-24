@@ -19,6 +19,7 @@ services:
       - WIREGUARD_PRIVATE_KEY="{{ vpn_private_key }}"
       - SERVER_COUNTRIES=Switzerland
       - PORT_FORWARD_ONLY=on
+      - FIREWALL_VPN_INPUT_PORTS=43478
   qbittorrent:
     restart: unless-stopped
     image: lscr.io/linuxserver/qbittorrent:5.1.2-libtorrentv1
