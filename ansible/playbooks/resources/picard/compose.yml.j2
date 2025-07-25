@@ -1,0 +1,9 @@
+services:
+  picard:
+    image: mikenye/picard:2.13.3
+    volumes:
+      - picard-config:/config:rw
+      - /mnt/media/Musique:/storage:rw
+volumes:
+  picard-config:
+    external: true
