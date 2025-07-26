@@ -1,0 +1,9 @@
+services:
+  navidrome:
+    image: deluan/navidrome:0.57.0
+    volumes:
+      - navidrome-data:/data
+      - /mnt/media/Musique:/music:ro
+volumes:
+  navidrome-data:
+    external: true
