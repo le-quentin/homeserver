@@ -1,19 +1,55 @@
 window.addEventListener('load', () => {
-  const groups = document.querySelectorAll('.services-group');
+  const groups = Array.from(document.querySelectorAll('.services-group'));
 
   groups.forEach((group) => {
-    const heading = group.querySelector('h2');
-    const title = heading?.textContent?.toLowerCase() || '';
+    const title = group.querySelector('h2')?.textContent?.toLowerCase() || '';
+    const isAdminRoot = title.includes('administration');
+    const isSubGroup = !['applications', 'administration'].includes(title);
 
-    const isAdmin = title.includes('monitor') || title.includes('admin') || title.includes('infra');
-    if (isAdmin && heading) {
-      heading.classList.add('admin-heading');
+    const serviceList = group.querySelector('.services-list');
+    if (!serviceList) return;
+
+    if (title.includes('applications')) {
+      group.classList.add('apps-root');
+    } else if (isAdminRoot) {
+      group.classList.add('admin-root');
+    } else {
+      group.classList.add('admin-subgroup');
     }
 
-    const cards = group.querySelectorAll('.service-card');
-    cards.forEach((card) => {
-      card.classList.add(isAdmin ? 'admin-app' : 'user-app');
+    // Style service cards
+    serviceList.querySelectorAll('.service-card').forEach((card) => {
+      card.classList.add(isAdminRoot ? 'admin-app' : 'user-app');
     });
   });
+
+  // Fix parent layout to vertical stack
+  const servicesContainer = document.querySelector('#services');
+  servicesContainer.classList.add('vertical-stack');
+
+  // Collapse logic
+  const adminRoot = document.querySelector('.admin-root');
+  const adminSubgroups = document.querySelectorAll('.admin-subgroup');
+
+  if (adminRoot && adminSubgroups.length > 0) {
+    // Wrap subgroups
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('admin-wrapper', 'collapsed');
+
+    adminSubgroups.forEach((g) => wrapper.appendChild(g));
+    adminRoot.insertAdjacentElement('afterend', wrapper);
+
+    // Add toggle button to top-right of heading
+    const heading = adminRoot.querySelector('h2');
+    const toggle = document.createElement('span');
+    toggle.className = 'collapse-toggle';
+    toggle.innerHTML = '▾'; // down arrow
+    heading.appendChild(toggle);
+
+    heading.addEventListener('click', () => {
+      wrapper.classList.toggle('collapsed');
+      toggle.innerHTML = wrapper.classList.contains('collapsed') ? '▾' : '▴'; // up/down
+    });
+  }
 });
 

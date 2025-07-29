@@ -1,58 +1,90 @@
-/* ✅ Make the services container stack groups vertically */
-#services {
-  display: block !important;  /* override homepage's flexbox */
+/* Fix layout: vertical stacking of groups */
+#services.vertical-stack {
+  display: block !important;
 }
 
-/* ✅ Each group stacks below the last */
-.services-group {
-  margin-bottom: 3rem;
-}
-
-/* ✅ Make cards inside each group a horizontal responsive grid */
-.services-list {
-  display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-}
-
-/* ✅ Headings */
-.services-group h2 {
+.apps-root h2 {
   font-size: 1.5rem;
-  font-weight: bold;
-  margin: 1rem 0 1rem;
-  color: white;
 }
 
-/* ✅ Admin group titles dimmed */
-.services-group h2.admin-heading {
-  color: #bbb;
+/* Group margins */
+.services-group {
+  margin-bottom: 2.5rem;
 }
 
-/* ✅ User app cards */
-.service-card.user-app {
-  background-color: rgba(255, 255, 255, 0.06);
+/* Applications layout */
+.apps-root .services-list {
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Subgroup layout: compact */
+.admin-subgroup {
+  margin-top: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.admin-subgroup h2 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #ccc;
+}
+
+.admin-subgroup .services-list {
+  display: grid;
+  gap: 1.2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Card styles */
+.user-app {
+  background-color: rgba(255, 255, 255, 0.07);
   border-radius: 0.5rem;
+  padding: 0.75rem;
   transition: background 0.2s ease, transform 0.2s ease;
 }
-.service-card.user-app:hover {
+.user-app:hover {
   background-color: rgba(255, 255, 255, 0.15);
   transform: translateY(-2px);
 }
 
-/* ✅ Admin app cards */
-.service-card.admin-app {
-  background-color: rgba(255, 255, 255, 0.02);
-  opacity: 0.75;
+.admin-app {
+  background-color: rgba(255, 255, 255, 0.03);
+  opacity: 0.8;
   border-radius: 0.5rem;
-  transition: background 0.2s ease, opacity 0.2s ease;
+  padding: 0.5rem;
+  transition: background 0.2s ease;
 }
-.service-card.admin-app:hover {
+.admin-app:hover {
   background-color: rgba(255, 255, 255, 0.08);
   opacity: 1;
 }
 
-/* Consistent height */
-.service-card {
-  min-height: 100px;
+/* Collapsed wrapper */
+.admin-wrapper.collapsed {
+  display: none;
+}
+
+/* Toggle icon inside h2 */
+.admin-root h2 {
+  margin-top: 5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.15rem;
+  color: #ccc;
+  cursor: pointer;
+}
+
+/* Arrow toggle */
+.collapse-toggle {
+  font-size: 1.25rem;
+  padding: 0 0.25rem;
+  user-select: none;
+}
+
+.admin-root h2:hover {
+  color: white;
 }
 
