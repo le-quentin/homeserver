@@ -1,0 +1,19 @@
+window.addEventListener('load', () => {
+  const groups = document.querySelectorAll('.services-group');
+
+  groups.forEach((group) => {
+    const heading = group.querySelector('h2');
+    const title = heading?.textContent?.toLowerCase() || '';
+
+    const isAdmin = title.includes('monitor') || title.includes('admin') || title.includes('infra');
+    if (isAdmin && heading) {
+      heading.classList.add('admin-heading');
+    }
+
+    const cards = group.querySelectorAll('.service-card');
+    cards.forEach((card) => {
+      card.classList.add(isAdmin ? 'admin-app' : 'user-app');
+    });
+  });
+});
+
