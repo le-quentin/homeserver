@@ -1,6 +1,8 @@
 services:
   navidrome:
     image: deluan/navidrome:0.57.0
+    environment:
+      - ND_ARTISTARTPRIORITY=folder.*,artist.*,album/artist.*,external
     volumes:
       - navidrome-data:/data
       - /mnt/media/Musique:/music:ro

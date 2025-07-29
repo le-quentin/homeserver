@@ -1,0 +1,10 @@
+services:
+    feishin:
+        container_name: feishin
+        image: 'ghcr.io/jeffvli/feishin:0.18.0'
+        environment:
+            - SERVER_NAME=navidrome # pre defined server name
+            - SERVER_LOCK=true # When true AND name/type/url are set, only username/password can be toggled
+            - SERVER_TYPE=navidrome # navidrome also works
+            - SERVER_URL=http://navidrome.home
+            - TZ=Europe/Paris
