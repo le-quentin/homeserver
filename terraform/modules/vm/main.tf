@@ -167,7 +167,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
 
   cpu {
     cores = var.vm_cpu_cores
-    type  = "x86-64-v2-AES" # recommended for modern CPUs
+    type  = "host" # no virtualisation, maximum performance (can't move VM accross hosts seamlessly, but don't care)
   }
 
   memory {
