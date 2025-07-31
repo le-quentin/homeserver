@@ -119,6 +119,7 @@ resource "proxmox_virtual_environment_vm" "vm" {
     iothread     = true
     ssd          = true
     size         = var.vm_params.disk_size
+    discard      = "on" # Very important, otherwise VM freed space is never freed on host and disk fills forever more
   }
 
   # disk {

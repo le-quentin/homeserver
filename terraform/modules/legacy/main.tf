@@ -84,6 +84,7 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
     file_id      = var.images.debian
     interface    = "scsi0"
     size         = var.legacy_homeserver_vm.disk_size
+    discard      = "on" # Very important, otherwise VM freed space is never freed on host and disk fills forever more
   }
 
   usb {
@@ -101,7 +102,7 @@ resource "proxmox_virtual_environment_vm" "legacy_homeserver_vm" {
 
   cpu {
     cores = var.vm_cpu_cores
-    type  = "x86-64-v2-AES" # recommended for modern CPUs
+    type  = "host" # recommended for modern CPUs
   }
 
   memory {

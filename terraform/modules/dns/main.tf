@@ -76,6 +76,7 @@ resource "proxmox_virtual_environment_vm" "dns_vm" {
     file_id      = var.images.debian
     interface    = "scsi0"
     size         = var.dns_vm.disk_size
+    discard      = "on" # Very important, otherwise VM freed space is never freed on host and disk fills forever more
   }
 
   network_device {
@@ -89,7 +90,7 @@ resource "proxmox_virtual_environment_vm" "dns_vm" {
 
   cpu {
     cores = var.vm_cpu_cores
-    type  = "x86-64-v2-AES" # recommended for modern CPUs
+    type  = "host"
   }
 
   memory {
