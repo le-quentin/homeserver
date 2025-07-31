@@ -14,3 +14,33 @@
             minute: "0"
             hour: "23"
             job: find /tmp -maxdepth 1 -atime +3 -print0 | xargs -0 -I {} /bin/rm -rf "{}"
+
+    - name: Setup daily trim for VMs that need it
+      when: vm_needs_trim
+      become: true
+      block:
+        - name: Create override directory for fstrim.timer
+          file:
+            path: /etc/systemd/system/fstrim.timer.d
+            state: directory
+            mode: '0755'
+        - name: Override fstrim timer to run daily
+          copy:
+            dest: /etc/systemd/system/fstrim.timer.d/override.conf
+            mode: "0644"
+            content: |
+              [Timer]
+              OnCalendar=
+              OnCalendar=daily
+          notify: Reload systemd
+        - name: Enable fstrim.timer
+          systemd:
+            name: fstrim.timer
+            enabled: true
+            state: started
+  handlers:
+    - name: Reload systemd
+      become: true
+      changed_when: true
+      ansible.builtin.systemd:
+        daemon_reload: true
