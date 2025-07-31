@@ -1,0 +1,31 @@
+---
+- name: Setup the tvbox (kodi)
+  hosts: tvbox
+  tasks:
+    - name: Setup the G60 Remote (make OK button work)
+      block:
+        - name: Deploy udev hwdb override
+          copy:
+            dest: /storage/.config/hwdb.d/70-local-keyboard.hwdb
+            mode: '0644'
+            content: |
+              # Ali Express G60S Pro Plus
+              evdev:input:b0003v1915p1001e0201*
+               KEYBOARD_KEY_c0041=enter
+          register: hwdb_file
+
+        - name: Rebuild hwdb if file changed
+          when: hwdb_file.changed
+          changed_when: true
+          command: systemd-hwdb update
+
+        - name: Trigger udev scan
+          when: hwdb_file.changed
+          changed_when: true
+          command: udevadm trigger -s input
+
+        - name: Restart kodi
+          when: hwdb_file.changed
+          systemd:
+            name: kodi
+            state: restarted
