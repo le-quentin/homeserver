@@ -1,14 +1,12 @@
 ---
 services:
   vpn-client:
-    restart: unless-stopped
     image: qmcgaw/gluetun:v3.40.0
+    restart: unless-stopped
     networks:
       - servarr
     ports:
-      - "8080:8080"
-      - "43478:43478" # We need port forwarding to not get firewall limited for P2P
-      - "43478:43478/udp"
+      - "50300:50300"
     cap_add:
       - NET_ADMIN
     devices:
@@ -19,28 +17,27 @@ services:
       - WIREGUARD_PRIVATE_KEY="{{ vpn_private_key }}"
       - SERVER_COUNTRIES=Switzerland
       - PORT_FORWARD_ONLY=on
-      - FIREWALL_VPN_INPUT_PORTS=43478
-  qbittorrent:
+      - FIREWALL_VPN_INPUT_PORTS=50300
+  slskd:
+    image: slskd/slskd:0.23.1
+    container_name: slskd
     restart: unless-stopped
-    image: lscr.io/linuxserver/qbittorrent:5.1.2-libtorrentv1
-    container_name: qbittorrent
     network_mode: "service:vpn-client"
     environment:
       - PUID=1000
       - PGID=1000
       - TZ=Europe/Paris
-      - WEBUI_PORT=8080
-      - TORRENTING_PORT=43478
+      - SLSKD_REMOTE_CONFIGURATION=true # Allow configuring from the Web UI
     volumes:
-      - qbittorrent-config:/config
-      - /mnt/media/downloads:/downloads # Finished downloads on external drive
-      - /downloads:/ongoing-downloads # Downloading on local disk
-      - {{ homelab_app_target_root_dir }}/wg0.conf:/etc/wireguard/wg0.conf:ro
+      - slskd-app-data:/app
+      - /mnt/media/Musique:/data
+      - /mnt/media/soulseek-downloads:/downloads
+      - /soulseek-downloads:/incomplete
     depends_on:
       vpn-client:
         condition: service_healthy
 volumes:
-  qbittorrent-config:
+  slskd-app-data:
     external: true
 networks:
   servarr:

@@ -1,0 +1,17 @@
+- name: "Deploy slskd (Soulseek web client)"
+  hosts: servarr
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: slskd
+    homelab_app_cpu_shares: 512
+    homelab_app_traefik_network: traefik
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 5030
+    homelab_app_compose_template: "resources/slskd/compose.yml.j2"
+    homelab_app_volume_names:
+      - app-data
+    homelab_app_backups:
+      - volume: app-data
+        cron: "55 6 * * *"
+    homelab_app_vpn_enabled: true
