@@ -19,6 +19,9 @@ mainhost
 [torrent]
 mainhost
 
+[slsk-batchdl]
+mainhost
+
 [homeassistant]
 legacyhost
 

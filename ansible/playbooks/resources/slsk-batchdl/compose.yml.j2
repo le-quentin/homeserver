@@ -1,0 +1,32 @@
+services:
+  vpn-client:
+    image: qmcgaw/gluetun:v3.40.0
+    restart: unless-stopped
+    ports:
+      - "48721:48721"
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - VPN_SERVICE_PROVIDER=protonvpn
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY="{{ vpn_private_key }}"
+      - SERVER_COUNTRIES=Switzerland
+      - PORT_FORWARD_ONLY=on
+      - FIREWALL_VPN_INPUT_PORTS=50300
+  sldl:
+    image: lequentindckr/slsk-batchdl:v2.4.7
+    container_name: slsk-batchdl
+    network_mode: "service:vpn-client"
+    environment:
+      - PUID=1000 
+      - PGID=1000
+      - TZ=Europe/Paris
+    volumes:
+      - ./config:/config
+      - ./data:/data
+    depends_on:
+      vpn-client:
+        condition: service_healthy
+
