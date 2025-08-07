@@ -15,3 +15,16 @@
       - volume: app-data
         cron: "55 6 * * *"
     homelab_app_vpn_enabled: true
+  post_tasks:
+    # Ensure download dirs have the correct owner
+    - name: "Fix {{ item }} permissions"
+      become: true
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        recurse: true
+        owner: 1000
+        group: 1000
+      loop:
+        - /soulseek-downloads
+        - /mnt/media/soulseek-downloads
