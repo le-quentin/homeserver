@@ -1,10 +1,10 @@
 ---
-# - name: General settings on a linux server
-#   ansible.builtin.import_playbook: "./linux_server.yaml"
-# - name: Install adguard
-#   ansible.builtin.import_playbook: "./adguard.yaml"
-# - name: Setup new machine
-#   ansible.builtin.import_playbook: "./new_install.yaml"
+- name: General settings on a linux server
+  ansible.builtin.import_playbook: "./linux_server.yaml"
+- name: Install adguard
+  ansible.builtin.import_playbook: "./adguard.yaml"
+- name: Setup new machine
+  ansible.builtin.import_playbook: "./apps_host.yaml"
 - name: Setup traefik
   ansible.builtin.import_playbook: "./traefik.yml"
 - name: Paperless

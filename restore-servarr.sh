@@ -2,7 +2,8 @@
 set -euo pipefail
 
 # Define apps
-apps=(radarr sonarr lidarr prowlarr qbittorrent)
+# apps=(radarr sonarr lidarr prowlarr qbittorrent)
+apps=(radarr sonarr lidarr prowlarr qbittorrent slskd picard navidrome wiki uptime-kuma paperless jellyfin)
 
 # Start SSH agent
 eval "$(ssh-agent -s)"

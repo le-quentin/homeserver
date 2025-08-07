@@ -1,0 +1,33 @@
+---
+- name: General settings on a linux server
+  ansible.builtin.import_playbook: "./linux_server.yaml"
+- name: Setup apps host
+  ansible.builtin.import_playbook: "./setup_apps_host.yaml"
+
+- name: Setup traefik
+  ansible.builtin.import_playbook: "./traefik.yml"
+
+- name: Paperless
+  ansible.builtin.import_playbook: "./paperless.yaml"
+- name: Wiki
+  ansible.builtin.import_playbook: "./wiki.yaml"
+- name: Uptime-Kuma
+  ansible.builtin.import_playbook: "./uptime-kuma.yaml"
+
+- name: servarr
+  ansible.builtin.import_playbook: "./servarr.yaml"
+- name: Jellyfin
+  ansible.builtin.import_playbook: "./jellyfin.yaml"
+- name: Navidrome
+  ansible.builtin.import_playbook: "./navidrome.yaml"
+- name: Feishin
+  ansible.builtin.import_playbook: "./feishin.yaml"
+- name: MusicBrainz Picard
+  ansible.builtin.import_playbook: "./picard.yaml"
+- name: slskd
+  ansible.builtin.import_playbook: "./slskd.yaml"
+- name: slsk-batchdl
+  ansible.builtin.import_playbook: "./slsk_batchdl.yaml"
+
+- name: Homepage
+  ansible.builtin.import_playbook: "./homepage.yaml"
