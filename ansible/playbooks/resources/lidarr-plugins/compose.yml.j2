@@ -1,10 +1,9 @@
 ---
 services:
-  lidarr:
+  lidarr-plugins:
     # image: lscr.io/linuxserver/lidarr:2.12.4
-    # image: blampe/lidarr:2.13.0-develop #quickfix image until the main image is fixed (metadata broken after MusicBrainz breaking change)
     image: blampe/lidarr:lidarr-plugins-2.13.1.4678 #quickfix image, but from the plugins branch
-    container_name: lidarr
+    container_name: lidarr-plugins
     networks:
       - servarr
     environment:
@@ -12,12 +11,11 @@ services:
       - PGID=1000
       - TZ=Europe/Paris
     volumes:
-      - lidarr-config:/config
+      - lidarr-plugins-config:/config
       - /mnt/media/downloads:/downloads #optional
-      - /mnt/media/soulseek-downloads:/soulseek-downloads #optional
       - /mnt/media/Musique/Albums:/music
 volumes:
-  lidarr-config:
+  lidarr-plugins-config:
     external: true
 networks:
   servarr:
