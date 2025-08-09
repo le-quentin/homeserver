@@ -19,7 +19,12 @@ services:
       - WIREGUARD_PRIVATE_KEY="{{ vpn_private_key }}"
       - SERVER_COUNTRIES=Switzerland
       - PORT_FORWARD_ONLY=on
-      - FIREWALL_VPN_INPUT_PORTS=43478
+      - VPN_PORT_FORWARDING=on
+      - VPN_PORT_FORWARDING_LISTENING_PORT=0
+      - VPN_PORT_FORWARDING_STATUS_FILE="/tmp/gluetun/forwarded_port"
+      - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c '/hooks/update_qbittorrent_port.sh {% raw %}{{PORTS}}{% endraw %}'
+    volumes:
+      - ./gluetun-hooks:/hooks:ro     # where the script lives
   qbittorrent:
     restart: unless-stopped
     image: lscr.io/linuxserver/qbittorrent:5.1.2-libtorrentv1

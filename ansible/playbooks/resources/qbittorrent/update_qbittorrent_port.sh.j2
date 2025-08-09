@@ -1,0 +1,33 @@
+#!/bin/sh
+# Usage: set-qb-port.sh <PORT>
+# Tries to log into qBittorrent and set the listen_port to the forwarded PORT.
+
+PORT="$1"
+QBIT_URL="http://localhost:8080" # vpn and qbittorrent share the same network stack, qbittorrent can't be reached by service name or dns
+QBIT_USER="{{ qbittorrent_user }}"
+QBIT_PASS="{{ qbittorrent_password }}"
+
+COOKIE="/tmp/qb_cookies.txt"
+
+echo "[hook] setting qB listen_port=$PORT via $QBIT_URL"
+
+i=0
+while [ $i -lt 30 ]; do
+  LOGIN_RESP=$(wget -qO- \
+    --save-cookies "$COOKIE" --keep-session-cookies \
+    --post-data "username=$QBIT_USER&password=$QBIT_PASS" \
+    "$QBIT_URL/api/v2/auth/login" || true)
+  echo "[hook] login resp: $LOGIN_RESP"
+  echo "$LOGIN_RESP" | grep -qi "ok" && break
+  i=$((i+1))
+  sleep 3
+done
+
+JSON_PAYLOAD='{"listen_port":'"$PORT"'}'
+RESP=$(wget -qO- \
+  --load-cookies "$COOKIE" \
+  --post-data "json=$JSON_PAYLOAD" \
+  "$QBIT_URL/api/v2/app/setPreferences" 2>/dev/null || true)
+echo "[hook] setPreferences resp: ${RESP:-<empty>}"
+
+rm -f "$COOKIE"
