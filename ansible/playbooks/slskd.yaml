@@ -27,4 +27,4 @@
         group: 1000
       loop:
         - /soulseek-downloads
-        - /mnt/media/soulseek-downloads
+        - /mnt/media/downloads
