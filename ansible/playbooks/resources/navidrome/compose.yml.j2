@@ -3,6 +3,8 @@ services:
     image: deluan/navidrome:0.57.0
     environment:
       - ND_ARTISTARTPRIORITY=folder.*,artist.*,album/artist.*,external
+      - ND_MUSICFOLDER=/music/library
+      - ND_SCANNER_PURGEMISSING=full # Purge missing tracks from DB on full scans only
     volumes:
       - navidrome-data:/data
       - /mnt/media/Musique:/music:ro
