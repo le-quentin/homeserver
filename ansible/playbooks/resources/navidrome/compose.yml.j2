@@ -4,6 +4,7 @@ services:
     environment:
       - ND_ARTISTARTPRIORITY=folder.*,artist.*,album/artist.*,external
       - ND_MUSICFOLDER=/music/library
+      - ND_SCANNER_SCHEDULE=10 10 * * * # Full library scan every day at 10:10
       - ND_SCANNER_PURGEMISSING=full # Purge missing tracks from DB on full scans only
     volumes:
       - navidrome-data:/data
