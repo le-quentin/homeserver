@@ -17,7 +17,7 @@ module "vps_mainhost_staging" {
   bridge_lan_interface  = "vmbr5001"
   bridge_lan_network_ip = "10.150.1.1"
 
-  vm_cpu_cores        = 2
+  vm_cpu_cores        = 1
   vm_dedicated_memory = 2048
   vm_floating_memory  = 2048
 
