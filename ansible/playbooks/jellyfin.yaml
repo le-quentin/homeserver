@@ -19,7 +19,6 @@
 
     gpu_card_path: "/dev/dri/renderD128" # Device id from the vm
     gpu_group: "render" # According to jellyfin docs, is one of [video, input, render] depending on OS
-    media_disk_id: "db2189d7-93f5-4ae0-9f99-43dc11ab736b"
 
   pre_tasks:
     - name: Ensure /mnt/media is mounted via fstab with UUID
