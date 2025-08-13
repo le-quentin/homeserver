@@ -17,12 +17,8 @@ module "apps_mainhost" {
   bridge_lan_interface  = "vmbr1010"
   bridge_lan_network_ip = "10.142.10.1"
 
-  usb_mappings = [
-    { device_id = "0480:a009", usb3 = true }
-  ]
-
   vm_cpu_cores        = 4
-  vm_dedicated_memory = 2048
+  vm_dedicated_memory = 4096
   vm_floating_memory  = 2048
 
   vm_params = {

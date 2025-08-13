@@ -53,50 +53,52 @@
           changed_when: false
           command: ls -lah /mnt/media
 
-    # Setup the GPU for passthrough
-    - name: Ensure non-free components are enabled in all apt source stanzas
-      become: true
-      ansible.builtin.replace:
-        path: /etc/apt/sources.list.d/debian.sources
-        regexp: '^(Components:\s*main)(?!.*non-free)'
-        replace: '\1 contrib non-free non-free-firmware'
-      register: sources_update
+        - name: "Setup the GPU for passthrough"
+          when: gpu_passthrough_enabled
+          block:
+            - name: Ensure non-free components are enabled in all apt source stanzas
+              become: true
+              ansible.builtin.replace:
+                path: /etc/apt/sources.list.d/debian.sources
+                regexp: '^(Components:\s*main)(?!.*non-free)'
+                replace: '\1 contrib non-free non-free-firmware'
+              register: sources_update
 
-    - name: Update apt cache
-      become: true
-      ansible.builtin.apt:
-        update_cache: true
-      when: sources_update.changed
+            - name: Update apt cache
+              become: true
+              ansible.builtin.apt:
+                update_cache: true
+              when: sources_update.changed
 
-    - name: Ensure intel GPU packages are installed
-      become: true
-      ansible.builtin.apt:
-        name:
-          - firmware-misc-nonfree
-          - intel-media-va-driver-non-free
-        state: present
-        update_cache: true
-      register: gpu_packages
-    - name: Add user to 'render' group
-      become: true
-      ansible.builtin.user:
-        name: "{{ ansible_user }}"
-        groups: render
-        append: true
-    - name: Reboot if firmware packages were newly installed
-      become: true
-      ansible.builtin.reboot:
-        msg: "Rebooting to activate Intel GPU firmware"
-        connect_timeout: 10
-        reboot_timeout: 300
-        test_command: uptime
-      when: gpu_packages is changed
-    - name: "Get id of the render group"
-      changed_when: false
-      shell: "set -o pipefail && getent group {{ gpu_group }} | cut -d: -f3"
-      args:
-        executable: /bin/bash
-      register: render_group
-    - name: "Set render_group_id"
-      ansible.builtin.set_fact:
-        render_group_id: "{{ render_group.stdout }}"
+            - name: Ensure intel GPU packages are installed
+              become: true
+              ansible.builtin.apt:
+                name:
+                  - firmware-misc-nonfree
+                  - intel-media-va-driver-non-free
+                state: present
+                update_cache: true
+              register: gpu_packages
+            - name: Add user to 'render' group
+              become: true
+              ansible.builtin.user:
+                name: "{{ ansible_user }}"
+                groups: render
+                append: true
+            - name: Reboot if firmware packages were newly installed
+              become: true
+              ansible.builtin.reboot:
+                msg: "Rebooting to activate Intel GPU firmware"
+                connect_timeout: 10
+                reboot_timeout: 300
+                test_command: uptime
+              when: gpu_packages is changed
+            - name: "Get id of the render group"
+              changed_when: false
+              shell: "set -o pipefail && getent group {{ gpu_group }} | cut -d: -f3"
+              args:
+                executable: /bin/bash
+              register: render_group
+            - name: "Set render_group_id"
+              ansible.builtin.set_fact:
+                render_group_id: "{{ render_group.stdout }}"

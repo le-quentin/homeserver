@@ -6,10 +6,12 @@ services:
     # user: uid:gid
     ports:
       - "8096:8096" # SmartTV app is annoying with cache after redeploy, using ip:port for it...
+{% if gpu_passthrough_enabled %}
     devices:
       - {{ gpu_card_path }}:{{ gpu_card_path }}
     group_add:
       - '{{ render_group_id }}'
+{% endif %}
     volumes:
       - jellyfin-config:/config
       - /mnt/media:/media:rw,rshared # rshared propagation makes sure the mount events are propagated, so that it may reconnect after disconnect

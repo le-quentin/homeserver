@@ -4,3 +4,4 @@ ansible_user: admin
 apps_root: "/srv/apps"
 ansible_python_interpreter: /usr/bin/python3
 media_disk_id: "db2189d7-93f5-4ae0-9f99-43dc11ab736b"
+gpu_passthrough_enabled: true
