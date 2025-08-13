@@ -3,7 +3,7 @@ services:
     image: ghcr.io/gethomepage/homepage:v1.3.2
     container_name: homepage
     environment:
-      HOMEPAGE_ALLOWED_HOSTS: homepage.home # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
+      HOMEPAGE_ALLOWED_HOSTS: homepage.{{ homeserver_domain }} # required, may need port. See gethomepage.dev/installation/#homepage_allowed_hosts
       # PUID: 1000 # optional, your user id
       # PGID: 1000 # optional, your group id
     volumes:

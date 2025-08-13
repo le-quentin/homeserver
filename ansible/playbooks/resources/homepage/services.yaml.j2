@@ -2,66 +2,68 @@
 # For configuration options and examples, please see:
 # https://gethomepage.dev/configs/services/
 
+{% set domain = homeserver_domain %}
+
 - Applications:
     - Home Assistant:
         icon: home-assistant
-        href: http://assistant.home/
+        href: http://assistant.{{ domain }}/
         description: Assistant domotique de la maison
     - Jellyfin:
         icon: jellyfin
-        href: http://jellyfin.home/
+        href: http://jellyfin.{{ domain }}/
         description: Streaming de films et séries
     - Feishin:
         icon: navidrome
-        href: http://feishin.home/
+        href: http://feishin.{{ domain }}/
         description: Streaming de musiques
     - Paperless:
         icon: paperless
-        href: http://paperless.home/
+        href: http://paperless.{{ domain }}/
         description: La paperasse
     - Wiki:
         icon: wikipedia
-        href: http://wiki.home/
+        href: http://wiki.{{ domain }}/
         description: Notes et documentation
 
 - Administration:
     - Gestion:
         - Zigbee2MQTT:
             icon: zigbee2mqtt
-            href: http://zigbee2mqtt.home/
+            href: http://zigbee2mqtt.{{ domain }}/
             description: Paramétrage du réseau domotique
         - Radarr:
             icon: radarr
-            href: http://radarr.home/
+            href: http://radarr.{{ domain }}/
             description: Bibliothèque de films
         - Sonarr:
             icon: sonarr
-            href: http://sonarr.home/
+            href: http://sonarr.{{ domain }}/
             description: Bibliothèque de séries
         - Lidarr:
             icon: lidarr
-            href: http://lidarr.home/
+            href: http://lidarr.{{ domain }}/
             description: Bibliothèque de musiques
         - MusicBrainz Picard:
             icon: musicbrainz
-            href: http://picard.home/
+            href: http://picard.{{ domain }}/
             description: Tagging des musiques
         - Prowlarr:
             icon: prowlarr
-            href: http://prowlarr.home/
+            href: http://prowlarr.{{ domain }}/
             description: Gestion des téléchargements
         - qBittorrent:
             icon: qbittorrent
-            href: http://qbittorrent.home/
+            href: http://qbittorrent.{{ domain }}/
             description: Client de téléchargement torrent
         - slskd:
             icon: slskd
-            href: http://slskd.home/
+            href: http://slskd.{{ domain }}/
             description: Client de téléchargement Soulseek
     - Monitoring:
         - Status page:
             icon: uptime-kuma
-            href: http://uptime-kuma.home/status/apps
+            href: http://uptime-kuma.{{ domain }}/status/apps
             description: Statut des applications
         - Beelink Proxmox admin:
             icon: proxmox
