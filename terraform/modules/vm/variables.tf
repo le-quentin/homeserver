@@ -39,7 +39,7 @@ variable "vm_dedicated_memory" {
 variable "vm_floating_memory" {
   type        = number
   description = "Set equal to dedicated to enable ballooning"
-  default     = 2048
+  default     = 0
 }
 
 variable "bridge_lan_interface" {

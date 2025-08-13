@@ -9,8 +9,8 @@ module "legacy" {
   vm_ids_offset = 1000
 
   vm_cpu_cores        = 4
-  vm_dedicated_memory = 6144
-  vm_floating_memory  = 6144
+  vm_dedicated_memory = 4096
+  # vm_floating_memory  = 6144
 
   zigbee_dongle_id = "1-4"
 

@@ -19,7 +19,7 @@ module "apps_mainhost" {
 
   vm_cpu_cores        = 4
   vm_dedicated_memory = 4096
-  vm_floating_memory  = 2048
+  # vm_floating_memory  = 0
 
   vm_params = {
     address   = var.vm_address

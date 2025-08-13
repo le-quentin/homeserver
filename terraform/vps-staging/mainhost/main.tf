@@ -19,7 +19,7 @@ module "vps_mainhost_staging" {
 
   vm_cpu_cores        = 1
   vm_dedicated_memory = 2048
-  vm_floating_memory  = 2048
+  # vm_floating_memory  = 2048
 
   vm_params = {
     address   = var.vm_address
