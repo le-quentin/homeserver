@@ -4,5 +4,5 @@ ansible_user: admin
 apps_root: "/srv/apps"
 ansible_python_interpreter: /usr/bin/python3
 ansible_ssh_extra_args: "-o StrictHostKeyChecking=no"
-media_disk_id: "f6bbb4cc-9fda-49f2-b757-7644be6273f0"
+media_disk_id: "2216ee7e-3416-4426-b8e0-0a56d930cc47"
 gpu_passthrough_enabled: false
