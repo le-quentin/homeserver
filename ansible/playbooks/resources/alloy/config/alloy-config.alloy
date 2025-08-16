@@ -1,0 +1,65 @@
+// Grafana Alloy configuration for collecting Docker logs and sending to Loki
+// Based on official documentation: https://grafana.com/docs/alloy/latest/monitor/monitor-docker-containers/
+
+// Discover Docker containers
+discovery.docker "homelab_apps" {
+  host = "unix:///var/run/docker.sock"
+  filter {
+  	name = "label"
+	values = [
+		"monitoring.logs.enabled=true",
+	]
+  }
+}
+
+// Collect logs from Docker containers
+loki.source.docker "default" {
+  host = "unix:///var/run/docker.sock"
+  targets = discovery.docker.homelab_apps.targets
+  labels = {"platform" = "docker", "job" = "alloy"}
+  forward_to = [loki.write.local.receiver]
+}
+
+// System logs discovery (for host system logs)
+local.file_match "system_logs" {
+  path_targets = [{
+    __address__ = "localhost",
+    __path__ = "/var/log/*log",
+  }]
+}
+
+// System logs scraping
+loki.source.file "system_scrape" {
+  targets = local.file_match.system_logs.targets
+  forward_to = [loki.process.system_logs.receiver]
+  tail_from_end = true
+}
+
+// Process system logs
+loki.process "system_logs" {
+  forward_to = [loki.write.local.receiver]
+
+  stage.labels {
+    values = {
+      filename = "__path__",
+      job = "alloy",
+      platform = "system",
+    }
+  }
+
+  stage.timestamp {
+    source = "time"
+    format = "RFC3339Nano"
+  }
+}
+
+// Write logs to Loki
+loki.write "local" {
+  endpoint {
+    url = "http://loki:3100/loki/api/v1/push"
+  }
+  external_labels = {
+    "job" = "alloy",
+    "instance" = "homelab",
+  }
+}

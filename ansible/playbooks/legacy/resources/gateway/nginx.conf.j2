@@ -137,7 +137,7 @@ http {
     }
 
     server {
-	server_name grafana.{{ homeserver_domain }};
+	server_name grafana.legacy.{{ homeserver_domain }};
 	listen 80;
 
 	set $target "http://grafana:3000";

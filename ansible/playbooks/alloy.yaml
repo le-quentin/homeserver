@@ -1,0 +1,29 @@
+- name: "Deploy Alloy"
+  hosts: monitoring
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: alloy
+    homelab_app_cpus: 1.0
+    homelab_app_traefik_network: traefik
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 12345
+    homelab_app_compose_template: "resources/alloy/compose.yml.j2"
+    homelab_app_volume_names:
+      - data
+    homelab_app_backups:
+      - volume: data
+        cron: "0 2 * * *"  # Daily backup at 2 AM
+  pre_tasks:
+    - name: Monitoring setup
+      ansible.builtin.import_tasks: tasks/monitoring-setup.yaml
+    - name: Ensure Alloy config directory exists
+      file:
+        path: "{{ homelab_app_target_root_dir }}/config"
+        state: directory
+        mode: "0755"
+    - name: Copy Alloy configuration
+      copy:
+        src: "resources/alloy/config/alloy-config.alloy"
+        dest: "{{ homelab_app_target_root_dir }}/config/alloy-config.alloy"
+        mode: "0644"

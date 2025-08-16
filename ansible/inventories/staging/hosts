@@ -22,11 +22,11 @@ mainhost
 [slsk-batchdl]
 mainhost
 
+[monitoring]
+mainhost
+
 [homeassistant]
 legacyhost
 
 [zigbee2mqtt]
-legacyhost
-
-[monitoring]
 legacyhost

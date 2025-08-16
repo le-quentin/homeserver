@@ -164,9 +164,9 @@ filtering:
       answer: {{ legacy_server_ip }}
     - domain: 'zigbee2mqtt.{{ homeserver_domain }}'
       answer: {{ legacy_server_ip }}
-    - domain: 'grafana.{{ homeserver_domain }}'
+    - domain: 'grafana.legacy.{{ homeserver_domain }}'
       answer: {{ legacy_server_ip }}
-    - domain: 'prometheus.{{ homeserver_domain }}'
+    - domain: 'prometheus.legacy.{{ homeserver_domain }}'
       answer: {{ legacy_server_ip }}
     - domain: 'assistant.staging.home'
       answer: 10.142.1.200
@@ -174,9 +174,9 @@ filtering:
       answer: 10.142.1.200
     - domain: 'zigbee2mqtt.staging.home'
       answer: 10.142.1.200
-    - domain: 'grafana.staging.home'
+    - domain: 'grafana.legacy.staging.home'
       answer: 10.142.1.200
-    - domain: 'prometheus.staging.home'
+    - domain: 'prometheus.legacy.staging.home'
       answer: 10.142.1.200
     - domain: 'vps-staging.home'
       answer: 10.150.1.10
