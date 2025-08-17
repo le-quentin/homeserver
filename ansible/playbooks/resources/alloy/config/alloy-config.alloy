@@ -12,12 +12,23 @@ discovery.docker "homelab_apps" {
   }
 }
 
-// Collect logs from Docker containers
 loki.source.docker "default" {
   host = "unix:///var/run/docker.sock"
   targets = discovery.docker.homelab_apps.targets
-  labels = {"platform" = "docker", "job" = "alloy"}
+  labels = {"platform" = "docker"}
+  relabel_rules = discovery.relabel.homelab_apps.rules
   forward_to = [loki.write.local.receiver]
+}
+
+
+discovery.relabel "homelab_apps" {
+  targets = []
+
+  rule {
+    source_labels = ["__meta_docker_container_name"]
+    regex = "/(.*)"
+    target_label = "app_name"
+  }
 }
 
 // System logs discovery (for host system logs)
