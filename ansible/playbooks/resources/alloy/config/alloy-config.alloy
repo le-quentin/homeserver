@@ -17,17 +17,88 @@ loki.source.docker "default" {
   targets = discovery.docker.homelab_apps.targets
   labels = {"platform" = "docker"}
   relabel_rules = discovery.relabel.homelab_apps.rules
-  forward_to = [loki.write.local.receiver]
+  forward_to = [loki.process.docker_logs.receiver]
 }
 
 
+loki.process "docker_logs" {
+  forward_to = [loki.write.local.receiver]
+
+  stage.replace {
+    expression = "(?i).*\\[(trace|tra|trc)\\].*"
+    replace    = "trace"
+  }
+
+  stage.replace {
+    expression = "(trace).*\\[(debug|dbg)\\].*"
+    replace    = "debug"
+  }
+
+  stage.replace {
+    expression = "(?i).*\\[(info|inf)\\].*"
+    replace    = "info"
+  }
+
+  stage.replace {
+    expression = "(?i).*\\[(warning|warn|wrn)\\].*"
+    replace    = "warning"
+  }
+
+  stage.replace {
+    expression = "(?i).*\\[(error|err)\\].*"
+    replace    = "error"
+  }
+
+  stage.replace {
+    expression = "(?i).*\\[(critical)\\].*"
+    replace    = "critical"
+  }
+
+  stage.replace {
+    expression = "(?i).*\\[(fatal|fat|ftl)\\].*"
+    replace    = "fatal"
+  }
+
+  stage.regex {
+    expression = "(?i)\\[(?P<parsed_level>info|warn|error|critical|fatal|debug|trace)\\]"
+  }
+
+  stage.template {
+    source   = "level_cleansed"
+    template = `{{ default .detected_level .parsed_level }}`
+  }
+
+  stage.template {
+    source   = "level_or_info"
+	// TODO - This doesn't really work because detected_level is "unknown" sometimes. To be fixed
+    template = `{{ default "info" .level_cleansed }}`
+  }
+
+  stage.labels {
+    values = {
+      detected_level = "native_level_or_default",
+    }
+  }
+
+}
+
 discovery.relabel "homelab_apps" {
-  targets = []
+  targets = discovery.docker.homelab_apps.targets
+
+  rule {
+    source_labels = ["__meta_docker_container_label_monitoring_logs_app_name"]
+    target_label = "app_name"
+  }
 
   rule {
     source_labels = ["__meta_docker_container_name"]
     regex = "/(.*)"
-    target_label = "app_name"
+    target_label = "container_name"
+  }
+
+  rule {
+    source_labels = ["__meta_docker_container_log_stream"]
+    target_label = "stream"
   }
 }
 
