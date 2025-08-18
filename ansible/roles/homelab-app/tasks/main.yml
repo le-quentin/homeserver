@@ -22,16 +22,24 @@
     dest: "{{ homelab_app_rendered_compose }}"
     mode: "0644"
 
+- name: Load rendered compose
+  slurp:
+    src: "{{ homelab_app_rendered_compose }}"
+  register: base_compose_raw
+
+- name: Parse base compose YAML
+  set_fact:
+    base_compose: "{{ base_compose_raw.content | b64decode | from_yaml }}"
+
+- name: Extract service names from compose file (excluding main service)
+  set_fact:
+    homelab_app_services: "{{ base_compose.services.keys() | list | reject('equalto', homelab_app_name) | list }}"
+
 - name: Render patch template
   template:
     src: "patch.yml.j2"
     dest: "{{ homelab_app_rendered_patch }}"
     mode: "0644"
-
-- name: Load rendered compose
-  slurp:
-    src: "{{ homelab_app_rendered_compose }}"
-  register: base_compose_raw
 
 - name: Load rendered patch
   slurp:
@@ -40,7 +48,6 @@
 
 - name: Parse YAMLs
   set_fact:
-    base_compose: "{{ base_compose_raw.content | b64decode | from_yaml }}"
     patch_data: "{{ patch_raw.content | b64decode | from_yaml }}"
 
 - name: Deep merge base and patch

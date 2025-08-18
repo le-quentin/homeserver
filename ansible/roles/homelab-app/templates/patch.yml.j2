@@ -23,6 +23,15 @@ services:
       monitoring.logs.enabled: "true"
 {% endif %}
       monitoring.logs.app_name: "{{ homelab_app_name }}"
+
+{% for service_name in homelab_app_services %}
+  {{ service_name }}:
+    labels:
+{% if homelab_app_monitoring_enabled | default(true) %}
+      monitoring.logs.enabled: "true"
+{% endif %}
+      monitoring.logs.app_name: "{{ homelab_app_name }}"
+{% endfor %}
       
 networks:
   {{ homelab_app_traefik_network }}:

@@ -87,7 +87,7 @@ discovery.relabel "homelab_apps" {
 
   rule {
     source_labels = ["__meta_docker_container_label_monitoring_logs_app_name"]
-    target_label = "app_name"
+    target_label = "app"
   }
 
   rule {
