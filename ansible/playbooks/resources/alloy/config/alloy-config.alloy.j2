@@ -1,17 +1,18 @@
-// Grafana Alloy configuration for collecting Docker logs and sending to Loki
+// Grafana Alloy configuration for collecting Docker logs and metrics
 // Based on official documentation: https://grafana.com/docs/alloy/latest/monitor/monitor-docker-containers/
 
 // Discover Docker containers
 discovery.docker "homelab_apps" {
   host = "unix:///var/run/docker.sock"
   filter {
-  	name = "label"
-	values = [
-		"monitoring.logs.enabled=true",
-	]
+    name = "label"
+    values = [
+      "monitoring.logs.enabled=true",
+    ]
   }
 }
 
+// Collect logs from Docker containers
 loki.source.docker "default" {
   host = "unix:///var/run/docker.sock"
   targets = discovery.docker.homelab_apps.targets
@@ -20,7 +21,7 @@ loki.source.docker "default" {
   forward_to = [loki.process.docker_logs.receiver]
 }
 
-
+// Process Docker logs
 loki.process "docker_logs" {
   forward_to = [loki.write.local.receiver]
 
@@ -65,13 +66,13 @@ loki.process "docker_logs" {
 
   stage.template {
     source   = "level_cleansed"
-    template = `{{ default .detected_level .parsed_level }}`
+    template = `{% raw %}{{ default .detected_level .parsed_level }}{% endraw %}`
   }
 
   stage.template {
     source   = "level_or_info"
-	// TODO - This doesn't really work because detected_level is "unknown" sometimes. To be fixed
-    template = `{{ default "info" .level_cleansed }}`
+    // TODO - This doesn't really work because detected_level is "unknown" sometimes. To be fixed
+    template = `{% raw %}{{ default "info" .level_cleansed }}{% endraw %}`
   }
 
   stage.labels {
@@ -79,9 +80,9 @@ loki.process "docker_logs" {
       detected_level = "native_level_or_default",
     }
   }
-
 }
 
+// Relabel rules for Docker containers
 discovery.relabel "homelab_apps" {
   targets = discovery.docker.homelab_apps.targets
 
@@ -99,6 +100,68 @@ discovery.relabel "homelab_apps" {
   rule {
     source_labels = ["__meta_docker_container_log_stream"]
     target_label = "stream"
+  }
+}
+
+// export node metrics
+prometheus.exporter.unix "node_metrics" {
+}
+
+discovery.relabel "node_metrics" {
+	targets = prometheus.exporter.unix.node_metrics.targets
+
+	rule {
+		action       = "replace"
+		target_label = "job"
+		replacement  = "integrations/unix"
+	}
+
+	rule {
+		action       = "replace"
+		target_label = "__hostname__"
+		replacement  = "{{ inventory_hostname }}"
+	}
+
+	rule {
+		action        = "replace"
+		source_labels = ["__address__"]
+		target_label  = "__port__"
+		regex         = ".*:(.*)"
+		replacement   = "$1"
+	}
+
+	rule {
+		action        = "replace"
+		source_labels = ["__hostname__", "__port__"]
+		separator     = ":"
+		target_label  = "instance"
+	}
+}
+
+// Scrape node metrics
+prometheus.scrape "node_metrics" {
+  targets = discovery.relabel.node_metrics.output
+  forward_to = [prometheus.remote_write.docker_metrics.receiver]
+  scrape_interval = "15s"
+}
+
+// cAdvisor exporter for container metrics
+prometheus.exporter.cadvisor "docker_metrics" {
+  docker_host = "unix:///var/run/docker.sock"
+  storage_duration = "5m"
+}
+
+// Scrape cAdvisor metrics
+prometheus.scrape "docker_metrics" {
+  targets = prometheus.exporter.cadvisor.docker_metrics.targets
+  forward_to = [prometheus.remote_write.docker_metrics.receiver]
+  scrape_interval = "15s"
+}
+
+// Write metrics to Prometheus
+prometheus.remote_write "docker_metrics" {
+  endpoint {
+    url = "http://prometheus:9090/api/v1/write"
   }
 }
 

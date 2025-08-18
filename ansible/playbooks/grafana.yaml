@@ -12,10 +12,13 @@
     homelab_app_volume_names:
       - data
       - loki-data
+      - prometheus-data
     homelab_app_backups:
       - volume: data
         cron: "0 2 * * *"  # Daily backup at 2 AM
       - volume: loki-data
+        cron: "0 2 * * *"  # Daily backup at 2 AM
+      - volume: prometheus-data
         cron: "0 2 * * *"  # Daily backup at 2 AM
   pre_tasks:
     - name: Monitoring setup
@@ -40,8 +43,18 @@
         src: "resources/grafana/config/loki-config.yaml"
         dest: "{{ homelab_app_target_root_dir }}/config/loki-config.yaml"
         mode: "0644"
+    - name: Copy Prometheus configuration
+      copy:
+        src: "resources/grafana/config/prometheus.yml"
+        dest: "{{ homelab_app_target_root_dir }}/config/prometheus.yml"
+        mode: "0644"
     - name: Copy datasource provisioning
       copy:
         src: "resources/grafana/config/provisioning/datasources/loki.yaml"
         dest: "{{ homelab_app_target_root_dir }}/config/provisioning/datasources/loki.yaml"
+        mode: "0644"
+    - name: Copy Prometheus datasource provisioning
+      copy:
+        src: "resources/grafana/config/provisioning/datasources/prometheus.yaml"
+        dest: "{{ homelab_app_target_root_dir }}/config/provisioning/datasources/prometheus.yaml"
         mode: "0644"

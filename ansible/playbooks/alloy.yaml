@@ -22,8 +22,8 @@
         path: "{{ homelab_app_target_root_dir }}/config"
         state: directory
         mode: "0755"
-    - name: Copy Alloy configuration
-      copy:
-        src: "resources/alloy/config/alloy-config.alloy"
+    - name: Render Alloy configuration template
+      template:
+        src: "resources/alloy/config/alloy-config.alloy.j2"
         dest: "{{ homelab_app_target_root_dir }}/config/alloy-config.alloy"
         mode: "0644"
