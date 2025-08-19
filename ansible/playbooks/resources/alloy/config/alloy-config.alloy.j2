@@ -103,44 +103,9 @@ discovery.relabel "homelab_apps" {
   }
 }
 
-// export node metrics
-prometheus.exporter.unix "node_metrics" {
-}
-
-discovery.relabel "node_metrics" {
-	targets = prometheus.exporter.unix.node_metrics.targets
-
-	rule {
-		action       = "replace"
-		target_label = "job"
-		replacement  = "integrations/unix"
-	}
-
-	rule {
-		action       = "replace"
-		target_label = "__hostname__"
-		replacement  = "{{ inventory_hostname }}"
-	}
-
-	rule {
-		action        = "replace"
-		source_labels = ["__address__"]
-		target_label  = "__port__"
-		regex         = ".*:(.*)"
-		replacement   = "$1"
-	}
-
-	rule {
-		action        = "replace"
-		source_labels = ["__hostname__", "__port__"]
-		separator     = ":"
-		target_label  = "instance"
-	}
-}
-
 // Scrape node metrics
-prometheus.scrape "node_metrics" {
-  targets = discovery.relabel.node_metrics.output
+prometheus.scrape "node_exporter" {
+  targets = [{"__address__" = "host.docker.internal:9100", "instance" = "vm_mainhost"}] // Should really be "prod" or "staging" in instance, the hostname should convery the host info
   forward_to = [prometheus.remote_write.docker_metrics.receiver]
   scrape_interval = "15s"
 }

@@ -58,3 +58,6 @@
         src: "resources/grafana/config/provisioning/datasources/prometheus.yaml"
         dest: "{{ homelab_app_target_root_dir }}/config/provisioning/datasources/prometheus.yaml"
         mode: "0644"
+    - name: Run the node-exporter role (expose hardware metrics in prometheus)
+      ansible.builtin.include_role:
+        name: prometheus.prometheus.node_exporter
