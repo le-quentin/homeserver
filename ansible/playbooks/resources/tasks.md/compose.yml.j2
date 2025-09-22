@@ -1,0 +1,16 @@
+version: "3"
+services:
+  tasks:
+    image: baldissaramatheus/tasks.md:3.0.9
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - tasks-data:/tasks
+      - tasks-config:/config
+    restart: unless-stopped
+volumes:
+  tasks-data:
+    external: true
+  tasks-config:
+    external: true
