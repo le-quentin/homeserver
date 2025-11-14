@@ -24,6 +24,7 @@ services:
       PAPERLESS_REDIS: redis://paperless-broker:6379
       PAPERLESS_URL: {{ homelab_app_url }}
       PAPERLESS_BIND_ADDR: 0.0.0.0
+      PAPERLESS_FILENAME_FORMAT: {% raw %}"{{ correspondent }}/{{ title }} ({{ doc_pk }})"{% endraw %}
 
 volumes:
   paperless-data:
