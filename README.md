@@ -25,7 +25,9 @@ git-crypt unlock
 
 Install ProxmoxVE on the host.
 
-SSH into it and disable ipv6 (reduce attack surface):
+### Disabling IPv6 (reduce attack surface)
+
+SSH into it and edit grub:
 ```sh
 vi /etc/default/grub
 ```
@@ -37,14 +39,22 @@ update-grub
 
 Then reboot. Check ipv6 addresses are not shown anymore with `ip a`.
 
-## Few things that cannot easily be done with terraform
+### Scheduled reboots
 
-- ssh into proxmox host and mount the media external disk under /mnt/toshibausb
+Experience shown that after many months of continuously running, some stuff might start breaking. It's easier to just schedule reboots, monthly should be enough, i.e. add this to `crontab -e`:
+
+```sh
+# reboot monthly on 1st Monday at 3 AM
+0 3 1-7 * 1 /sbin/reboot
+```
+
+### External disk mounting (hard to do with terraform)
+
+- mount the media external disk under /mnt/toshibausb
 - add the disk uuid (c36cbb4b-35c2-4688-86bb-9faf55208a03 currently) to fstab:
 ```
 UUID=c36cbb4b-35c2-4688-86bb-9faf55208a03 /mnt/toshibausb ext4 defaults,noatime 0 2
 ```
-<BS>
 
 ## Provisioning
 
@@ -78,9 +88,9 @@ If there are errors, debug will be easier with the -v(erbose) option.
 
 ## TODO
 
-- [ ] Check what happens on vpn disconnect inside qbittorrent sidecar container (is IP leaking https://ipleak.net/#bittorrent ?)
+- [x] Check what happens on vpn disconnect inside qbittorrent sidecar container (is IP leaking https://ipleak.net/#bittorrent ?)
 - [ ] Run whole servarr stack through gluetun vpn
-- [ ] Avoid being firewalled in qbittorrent by handling port redirection to proton vpn (https://github.com/qdm12/gluetun/discussions/2686 ?)
+- [x] Avoid being firewalled in qbittorrent by handling port redirection to proton vpn (https://github.com/qdm12/gluetun/discussions/2686 ?)
 - [ ] Make restic backups safer : don't overwrite the distant repository if one exists, error instead
 - [ ] Cockpit ?
 - [x] Setup the Home-Assistant recorder, to control what's stored for how long
