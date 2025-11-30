@@ -11,16 +11,26 @@ This is the IaC repository for said homeserver, currently using:
 - [gitleaks](https://github.com/gitleaks/gitleaks) to detect secrets possibly slipping through the net
 
 Requirements:
-- Install OpenTofu (1.8.2+)
-- Install Ansible (2.16.2+) 
 - Install git-crypt
 - Make sure you have the GPG key in your keyring (passwords are encrypted via git-crypt)
+- Install [mise](https://mise.jdx.dev/installing-mise.html) for dependencies management
 
 Unlock the repository's secrets with:
 
 ```sh
 git-crypt unlock
 ```
+
+Install tools with mise:
+```sh
+mise install
+```
+
+Install Ansible with pip:
+```sh
+pip install -r requirements.txt
+```
+
 ## Initial setup
 
 Install ProxmoxVE on the host.

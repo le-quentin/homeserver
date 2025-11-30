@@ -1,4 +1,5 @@
 ./venv
+.ansible
 *.swp
 *.log
 **/.vagrant/**
