@@ -43,16 +43,28 @@ docker run --rm \
   forget --insecure-no-password --keep-daily {{ item.retention_days | default(14) }} --prune
 
 echo "[restic] Syncing backup repo to remote via rclone"
-docker run --rm \
+if ! docker run --rm \
   -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY:ro" \
   -v $RCLONE_CONFIG:/config/rclone \
-  {{ homelab_rclone_image | default('rclone/rclone:sha-4fd5a3d') }} \
+  {{ homelab_rclone_image | default('rclone/rclone:sha-f72b32b') }} \
   --config /config/rclone/rclone.conf \
   sync "$RESTIC_REPOSITORY" "{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}" \
   --copy-links \
   --fast-list \
   --transfers 4 \
   --checkers 8 \
-  --log-level INFO
+  --retries {{ homelab_app_backups_rclone_retries | default(3) }} \
+  --max-duration {{ homelab_app_backups_rclone_max_duration | default('1h') }} \
+  --log-level INFO; then
+  echo "[restic] ERROR: rclone sync failed for {{ homelab_app_name }}/{{ item.volume }}"
+{% if homelab_app_backups_webhook_url is defined and homelab_app_backups_webhook_url %}
+  echo "[restic] Sending failure notification to webhook..."
+  curl -X POST "{{ homelab_app_backups_webhook_url }}" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\":\"Backup failed for {{ homelab_app_name }}/{{ item.volume }}: rclone sync failed\",\"app\":\"{{ homelab_app_name }}\",\"volume\":\"{{ item.volume }}\"}" \
+    --max-time 10 || echo "[restic] Failed to send webhook notification"
+{% endif %}
+  exit 1
+fi
 
 echo "[restic] Backup for {{ homelab_app_name }}/{{ item.volume }} completed."

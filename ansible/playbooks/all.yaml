@@ -3,19 +3,5 @@
   ansible.builtin.import_playbook: "./linux_server.yaml"
 - name: Install adguard
   ansible.builtin.import_playbook: "./adguard.yaml"
-- name: Setup new machine
+- name: Install apps
   ansible.builtin.import_playbook: "./apps_host.yaml"
-- name: Setup traefik
-  ansible.builtin.import_playbook: "./traefik.yml"
-- name: Paperless
-  ansible.builtin.import_playbook: "./paperless.yaml"
-- name: Jellyfin
-  ansible.builtin.import_playbook: "./jellyfin.yaml"
-- name: servarr
-  ansible.builtin.import_playbook: "./servarr.yaml"
-- name: Wiki
-  ansible.builtin.import_playbook: "./wiki.yaml"
-- name: Uptime-Kuma
-  ansible.builtin.import_playbook: "./uptime-kuma.yaml"
-- name: Homepage
-  ansible.builtin.import_playbook: "./homepage.yaml"
