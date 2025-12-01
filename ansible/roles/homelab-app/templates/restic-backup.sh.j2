@@ -21,6 +21,7 @@ cleanup() {
 trap cleanup EXIT
 
 echo "[restic] Starting backup of volume {{ item.volume }} for app {{ homelab_app_name }}"
+# TODO - Use a password to protect the data that might get push to the cloud instead of --insecure-no-password
 docker run --rm \
   -v {{ homelab_app_name }}-{{ item.volume }}:/data:ro \
   -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY" \
@@ -30,7 +31,6 @@ docker run --rm \
   -e RESTIC_REPOSITORY \
   -e RESTIC_HOST \
   {{ homelab_restic_image | default('restic/restic:0.18.0') }} \
-  # TODO - Use a password to protect the data that might get push to the cloud
   backup --insecure-no-password /data
 
 echo "[restic] Applying retention for {{ item.retention_days | default(14) }}d"
@@ -60,9 +60,9 @@ if ! docker run --rm \
   echo "[restic] ERROR: rclone sync failed for {{ homelab_app_name }}/{{ item.volume }}"
 {% if homelab_app_backups_webhook_url is defined and homelab_app_backups_webhook_url %}
   echo "[restic] Sending failure notification to webhook..."
+  # TODO - this message should be variabilised
   curl -X POST "{{ homelab_app_backups_webhook_url }}" \
     -H "Content-Type: application/json" \
-    # TODO - this message should be variabilised
     -d "{\"content\":\"<@314453725647208449> Backup failed for {{ homelab_app_name }}/{{ item.volume }}: rclone sync failed\",\"app\":\"{{ homelab_app_name }}\",\"volume\":\"{{ item.volume }}\"}" \
     --max-time 10 || echo "[restic] Failed to send webhook notification"
 {% endif %}
