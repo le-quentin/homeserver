@@ -61,7 +61,8 @@ if ! docker run --rm \
   echo "[restic] Sending failure notification to webhook..."
   curl -X POST "{{ homelab_app_backups_webhook_url }}" \
     -H "Content-Type: application/json" \
-    -d "{\"content\":\"Backup failed for {{ homelab_app_name }}/{{ item.volume }}: rclone sync failed\",\"app\":\"{{ homelab_app_name }}\",\"volume\":\"{{ item.volume }}\"}" \
+    # TODO - this message should be variabilised
+    -d "{\"content\":\"<@314453725647208449> Backup failed for {{ homelab_app_name }}/{{ item.volume }}: rclone sync failed\",\"app\":\"{{ homelab_app_name }}\",\"volume\":\"{{ item.volume }}\"}" \
     --max-time 10 || echo "[restic] Failed to send webhook notification"
 {% endif %}
   exit 1

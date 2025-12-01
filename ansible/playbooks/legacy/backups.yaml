@@ -55,13 +55,13 @@
         minute: "0"
         hour: "6"
         job: "sudo docker compose -f {{ docker_volume_backup_root }}/compose.yaml up --force-recreate"
-    - name: Setup the remote backups cron (pushing to Proton)
+    - name: Setup the remote backups cron (pushing to Cloudflare R2)
       ansible.builtin.cron:
         name: "remote backups"
         user: "{{ ansible_user }}"
         minute: "0"
         hour: "7"
-        job: "/usr/local/bin/rclone copy {{ backups_dir }}/ proton:{{ remote_backups_path }}"
+        job: "/usr/local/bin/rclone copy {{ backups_dir }}/ r2:{{ remote_backups_path }}"
         state: "{{ remote_backups_enabled | ternary('present', 'absent') }}"
     # Delete backup files older than 7 days
     # Not a good solution because it doesn't ensure the files were uploaded, which could get bad in case of

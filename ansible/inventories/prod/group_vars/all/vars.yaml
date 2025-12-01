@@ -6,6 +6,7 @@ database_ip: 10.42.10.21
 legacy_server_ip: 10.42.1.200
 mainhost_ip: 10.42.10.10
 
-homelab_app_backups_rclone_remote: proton:/backups/homelab
+homelab_app_backups_rclone_remote: r2:/homelab-backups
+# Legacy settings
 remote_backups_enabled: true
-remote_backups_path: backups/homeserver
+remote_backups_path: homelab-backups
