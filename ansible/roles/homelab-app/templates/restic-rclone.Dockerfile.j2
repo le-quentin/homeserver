@@ -1,0 +1,5 @@
+FROM {{ homelab_restic_image }}
+
+RUN apk add --no-cache rclone
+
+ENTRYPOINT ["restic"]

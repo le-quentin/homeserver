@@ -1,3 +1,31 @@
+- name: Ensure restic build dir exists
+  become: true
+  file:
+    path: "{{ homelab_app_backups_restic_build_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+
+- name: Create restic+rclone Dockerfile
+  become: true
+  template:
+    src: restic-rclone.Dockerfile.j2
+    dest: "{{ homelab_app_backups_restic_build_dir }}/Dockerfile"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0644"
+
+- name: Build restic+rclone Docker image
+  become: true
+  community.docker.docker_image:
+    name: homelab-restic-rclone
+    tag: latest
+    source: build
+    build:
+      path: "{{ homelab_app_backups_restic_build_dir }}"
+    force_source: true
+
 - name: Ensure rclone conf dir exists
   become: true
   file:
@@ -6,21 +34,32 @@
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: "0744"
+
 - name: Copy rclone conf
   template:
     src: "{{ homelab_app_backups_rclone_conf }}"
     dest: "{{ homelab_app_backups_rclone_conf_target_dir }}/rclone.conf"
     mode: "0644"
+
+- name: Ensure restic cache dir exists
+  become: true
+  file:
+    path: "{{ homelab_app_backups_restic_cache_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
 - name: Ensure Restic repository is initialized
   become: true
   docker_container:
     name: "restic-init-{{ homelab_app_name }}-{{ item.volume }}"
-    image: "{{ homelab_restic_image | default('restic/restic:0.18.0') }}"
+    image: "homelab-restic-rclone:latest"
     entrypoint: sh
-    command: -c 'restic snapshots -r /repo --insecure-no-password || restic init -r /repo --insecure-no-password'
+    command: -c 'restic snapshots -r "rclone:{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}" --insecure-no-password || restic init -r "rclone:{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}" --insecure-no-password'
     auto_remove: true
     volumes:
-      - "{{ homelab_app_backups_restic_repositories_root }}/{{ homelab_app_name }}/{{ item.volume }}:/repo"
+      - "{{ homelab_app_backups_rclone_conf_target_dir }}:/root/.config/rclone:ro"
+      - "{{ homelab_app_backups_restic_cache_dir }}:/root/.cache/restic"
       - /etc/localtime:/etc/localtime:ro
   with_items: "{{ homelab_app_backups }}"
   loop_control:

@@ -1,34 +1,21 @@
 #!/bin/bash
 set -euo pipefail
 
-export RESTIC_REPOSITORY="{{ homelab_app_backups_restic_repositories_root }}/{{ homelab_app_name }}/{{ item.volume }}"
-export RCLONE_CONFIG={{ homelab_app_backups_rclone_conf_target_dir }}
+export RESTIC_REPOSITORY="rclone:{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}"
+export RESTIC_CACHE_DIR="{{ homelab_app_backups_restic_cache_dir }}"
+export RCLONE_CONFIG_DIR="{{ homelab_app_backups_rclone_conf_target_dir }}"
 RESTORE_VOLUME="{{ homelab_app_name }}-{{ item.volume }}"
 TMP_RESTORE_VOLUME="${RESTORE_VOLUME}-restore"
 
 echo "[restic] Starting restore of volume '$RESTORE_VOLUME' for app '{{ homelab_app_name }}'"
 
-echo "[restic] Syncing remote restic repository with local one"
-docker run --rm \
-  -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY" \
-  -v "$RCLONE_CONFIG:/config/rclone" \
-  {{ homelab_rclone_image | default('rclone/rclone:sha-4fd5a3d') }} \
-  --config /config/rclone/rclone.conf \
-  sync "{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}" "$RESTIC_REPOSITORY" \
-  --copy-links \
-  --fast-list \
-  --transfers 4 \
-  --checkers 8 \
-  --log-level INFO
-
-# Check for snapshots
 echo "[restic] Checking for available snapshots..."
 if ! docker run --rm \
-  -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY" \
-  -v "$RCLONE_CONFIG:/root/.config/rclone" \
-  -e RCLONE_CONFIG=/root/.config/rclone \
+  -v "$RCLONE_CONFIG_DIR:/root/.config/rclone:ro" \
+  -v "$RESTIC_CACHE_DIR:/root/.cache/restic" \
+  -v /etc/localtime:/etc/localtime:ro \
   -e RESTIC_REPOSITORY \
-  {{ homelab_restic_image | default('restic/restic:0.18.0') }} \
+  homelab-restic-rclone:latest \
   snapshots --insecure-no-password --json | grep -q '"short_id"'; then
   echo "[restic] ❌ No snapshots found in $RESTIC_REPOSITORY"
   exit 1
@@ -41,13 +28,12 @@ docker volume create "$TMP_RESTORE_VOLUME" >/dev/null
 # Perform restore
 echo "[restic] Restoring latest snapshot to temporary volume..."
 docker run --rm \
-  -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY" \
   -v "$TMP_RESTORE_VOLUME:/restore" \
+  -v "$RCLONE_CONFIG_DIR:/root/.config/rclone:ro" \
+  -v "$RESTIC_CACHE_DIR:/root/.cache/restic" \
   -v /etc/localtime:/etc/localtime:ro \
-  -v "$RCLONE_CONFIG:/root/.config/rclone" \
-  -e RCLONE_CONFIG=/root/.config/rclone \
   -e RESTIC_REPOSITORY \
-  {{ homelab_restic_image | default('restic/restic:0.18.0') }} \
+  homelab-restic-rclone:latest \
   restore latest --insecure-no-password --target /restore
 
 # Safely replace original volume

@@ -1,8 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-export RESTIC_REPOSITORY="{{ homelab_app_backups_restic_repositories_root }}/{{ homelab_app_name }}/{{ item.volume }}"
-export RCLONE_CONFIG={{ homelab_app_backups_rclone_conf_target_dir }}
+export RESTIC_REPOSITORY="rclone:{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}"
+export RESTIC_CACHE_DIR="{{ homelab_app_backups_restic_cache_dir }}"
+export RCLONE_CONFIG_DIR="{{ homelab_app_backups_rclone_conf_target_dir }}"
 export RESTIC_HOST="{{ homelab_app_name }}-{{ item.volume }}"
 CONTAINER="{{ homelab_app_name }}"
 
@@ -22,48 +23,39 @@ trap cleanup EXIT
 
 echo "[restic] Starting backup of volume {{ item.volume }} for app {{ homelab_app_name }}"
 # TODO - Use a password to protect the data that might get push to the cloud instead of --insecure-no-password
-docker run --rm \
-  -v {{ homelab_app_name }}-{{ item.volume }}:/data:ro \
-  -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY" \
-  -v /etc/localtime:/etc/localtime:ro \
-  -v $RCLONE_CONFIG:/root/.config/rclone \
-  -e RCLONE_CONFIG=/root/.config/rclone \
-  -e RESTIC_REPOSITORY \
-  -e RESTIC_HOST \
-  {{ homelab_restic_image | default('restic/restic:0.18.0') }} \
-  backup --insecure-no-password /data
-
-echo "[restic] Applying retention for {{ item.retention_days | default(14) }}d"
-docker run --rm \
-  -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY" \
-  -v $RCLONE_CONFIG:/root/.config/rclone \
-  -e RCLONE_CONFIG=/root/.config/rclone \
-  -e RESTIC_REPOSITORY \
-  -e RESTIC_HOST \
-  {{ homelab_restic_image | default('restic/restic:0.18.0') }} \
-  forget --insecure-no-password --keep-daily {{ item.retention_days | default(14) }} --prune
-
-echo "[restic] Syncing backup repo to remote via rclone"
 if ! docker run --rm \
-  -v "$RESTIC_REPOSITORY:$RESTIC_REPOSITORY:ro" \
-  -v $RCLONE_CONFIG:/config/rclone \
-  {{ homelab_rclone_image | default('rclone/rclone:sha-f72b32b') }} \
-  --config /config/rclone/rclone.conf \
-  sync "$RESTIC_REPOSITORY" "{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}" \
-  --copy-links \
-  --fast-list \
-  --transfers 4 \
-  --checkers 8 \
-  --retries {{ homelab_app_backups_rclone_retries | default(3) }} \
-  --max-duration {{ homelab_app_backups_rclone_max_duration | default('1h') }} \
-  --log-level INFO; then
-  echo "[restic] ERROR: rclone sync failed for {{ homelab_app_name }}/{{ item.volume }}"
+  -v {{ homelab_app_name }}-{{ item.volume }}:/data:ro \
+  -v "$RCLONE_CONFIG_DIR:/root/.config/rclone:ro" \
+  -v "$RESTIC_CACHE_DIR:/root/.cache/restic" \
+  -v /etc/localtime:/etc/localtime:ro \
+  -e RESTIC_REPOSITORY \
+  -e RESTIC_HOST \
+  homelab-restic-rclone:latest \
+  backup --insecure-no-password /data; then
+  echo "[restic] ERROR: backup failed for {{ homelab_app_name }}/{{ item.volume }}"
 {% if homelab_app_backups_webhook_url is defined and homelab_app_backups_webhook_url %}
-  echo "[restic] Sending failure notification to webhook..."
-  # TODO - this message should be variabilised
   curl -X POST "{{ homelab_app_backups_webhook_url }}" \
     -H "Content-Type: application/json" \
-    -d "{\"content\":\"<@314453725647208449> Backup failed for {{ homelab_app_name }}/{{ item.volume }}: rclone sync failed\",\"app\":\"{{ homelab_app_name }}\",\"volume\":\"{{ item.volume }}\"}" \
+    -d "{\"content\":\"<@314453725647208449> Backup failed for {{ homelab_app_name }}/{{ item.volume }}: restic backup failed\"}" \
+    --max-time 10 || echo "[restic] Failed to send webhook notification"
+{% endif %}
+  exit 1
+fi
+
+echo "[restic] Applying retention for {{ item.retention_days | default(14) }}d"
+if ! docker run --rm \
+  -v "$RCLONE_CONFIG_DIR:/root/.config/rclone:ro" \
+  -v "$RESTIC_CACHE_DIR:/root/.cache/restic" \
+  -v /etc/localtime:/etc/localtime:ro \
+  -e RESTIC_REPOSITORY \
+  -e RESTIC_HOST \
+  homelab-restic-rclone:latest \
+  forget --insecure-no-password --keep-daily {{ item.retention_days | default(14) }} --prune; then
+  echo "[restic] ERROR: retention policy failed for {{ homelab_app_name }}/{{ item.volume }}"
+{% if homelab_app_backups_webhook_url is defined and homelab_app_backups_webhook_url %}
+  curl -X POST "{{ homelab_app_backups_webhook_url }}" \
+    -H "Content-Type: application/json" \
+    -d "{\"content\":\"<@314453725647208449> Backup failed for {{ homelab_app_name }}/{{ item.volume }}: restic retention policy failed\"}" \
     --max-time 10 || echo "[restic] Failed to send webhook notification"
 {% endif %}
   exit 1
