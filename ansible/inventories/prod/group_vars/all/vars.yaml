@@ -3,10 +3,6 @@ homeserver_domain: home
 dns_ip: 10.42.1.2
 gateway_ip: "{{ ansible_host }}"
 database_ip: 10.42.10.21
-legacy_server_ip: 10.42.1.200
 mainhost_ip: 10.42.10.10
 
 homelab_app_backups_rclone_remote: r2:/homelab-backups
-# Legacy settings
-remote_backups_enabled: true
-remote_backups_path: homelab-backups

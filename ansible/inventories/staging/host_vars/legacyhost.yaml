@@ -1,6 +1,0 @@
----
-ansible_host: 10.142.1.200
-ansible_user: legacy_user
-home_dir: /home/{{ hostvars.legacyhost.ansible_user }}
-ansible_files_root: /home/{{ hostvars.legacyhost.ansible_user }}/ansible-files
-ansible_python_interpreter: /usr/bin/python3

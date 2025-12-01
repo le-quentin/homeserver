@@ -1,0 +1,3 @@
+- name: Ensure home-assistant network exists
+  community.docker.docker_network:
+    name: "home-assistant"

@@ -1,0 +1,58 @@
+- name: Deploy z2m (Zigbee2MQTT)
+  hosts: z2m
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: z2m
+    homelab_app_traefik_network: traefik
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 8080
+    homelab_app_compose_template: "resources/z2m/compose.yml.j2"
+    homelab_app_volume_names:
+      - data
+      - mqtt-data
+    homelab_app_backups:
+      - volume: data
+        cron: "35 5 * * *"
+      - volume: mqtt-data
+        cron: "45 5 * * *"
+  pre_tasks:
+    - name: Home-Assistant stack setup
+      ansible.builtin.import_tasks: tasks/home-assistant-setup.yaml
+    - name: Check if the z2m volume exists
+      community.docker.docker_volume_info:
+        name: z2m-data
+      register: volume
+  post_tasks:
+    - name: If this is a fresh install, initialise the configuration file
+      when: not volume.exists
+      block:
+        - name: Interpret z2m initial configuration template
+          ansible.builtin.template:
+            src: ./resources/z2m/initial-configuration.yml.j2
+            dest: "{{ apps_root }}/z2m/initial-configuration.yml"
+            mode: "0644"
+        - name: Use ephemeral container to mount the volume
+          community.docker.docker_container:
+            name: initialise-z2m-config
+            labels:
+              homeserver.container-category: ephemeral
+            image: alpine # A tiny container that stays up and do nothing
+            state: started
+            recreate: true
+            tty: true # So that it stays up
+            volumes:
+              - z2m-data:/data
+        - name: Copy the initial configuration file to the volume
+          community.docker.docker_container_copy_into:
+            container: initialise-z2m-config
+            path: "{{ apps_root }}/z2m/initial-configuration.yml"
+            container_path: /data/configuration.yaml
+        - name: Stop and remove the ephemeral container
+          community.docker.docker_container:
+            name: initialise-z2m-config
+            state: absent
+        - name: Restart z2m
+          community.docker.docker_compose_v2:
+            project_src: "{{ apps_root }}/z2m"
+            recreate: always # so that changes in config are applied

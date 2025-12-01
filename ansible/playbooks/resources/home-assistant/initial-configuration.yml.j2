@@ -11,16 +11,19 @@ scene: !include scenes.yaml
 
 # Root URL for nginx access
 homeassistant:
-  internal_url: http://assistant.{{ homeserver_domain }}
+  internal_url: http://home-assistant.{{ homeserver_domain }}
 
 logger:
   default: info
 
 recorder:
-  db_url: "postgresql://{{ db.user }}:{{ db.password }}@{{ database_ip }}/{{ db.name }}"
-  purge_keep_days: 56
+  purge_keep_days: 7
   auto_purge: true
-  auto_repack: false
+  auto_repack: true
+  exclude:
+    domains:
+      - lock #child lock states for outlets
+      - select #outage memory and indicator mode for outlets
   # Maybe someday do something like this if DB gets too huge
   # include:
   #   domains:
@@ -40,7 +43,7 @@ recorder:
 http:
   use_x_forwarded_for: true     # To ensure HA understands that client requests come via reverse proxy
   trusted_proxies:
-    - {{ k3s_cluster_cidr }}   # Access via kubernetes cluster: this is the pods ip range (and as far as the container is conconcerned, the pod is making the request)
+    - 172.16.0.0/12             # All docker containers can reach (this is the ip range for all docker networks) => TODO give a static ip address to reverse proxy
     - 127.0.0.1                 # Add the localhost IPv4 address
     - ::1                       # Add the localhost IPv6 address
 

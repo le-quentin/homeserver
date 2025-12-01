@@ -80,9 +80,7 @@ tofu apply
 cd ../dns
 tofu init
 tofu apply
-cd ../legacy
-tofu init
-tofu apply
+...
 ```
 
 ## Deployment

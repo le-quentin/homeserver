@@ -7,6 +7,11 @@
 - name: Setup traefik
   ansible.builtin.import_playbook: "./traefik.yml"
 
+- name: Home Assistant
+  ansible.builtin.import_playbook: "./home-assistant.yaml"
+- name: Zigbee2MQTT
+  ansible.builtin.import_playbook: "./z2m.yaml"
+
 - name: Paperless
   ansible.builtin.import_playbook: "./paperless.yaml"
 - name: Wiki

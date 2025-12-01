@@ -21,8 +21,12 @@ module "apps_mainhost" {
     { hostpci_id = "hostpci0", device_id = "0000:00:02.0", primary_gpu = true }
   ]
 
+  usb_mappings = [
+    { device_id = "1-4", usb3 = false }
+  ]
+
   vm_cpu_cores        = 4
-  vm_dedicated_memory = 12288
+  vm_dedicated_memory = 16384
   # vm_floating_memory  = 0
 
   vm_params = {

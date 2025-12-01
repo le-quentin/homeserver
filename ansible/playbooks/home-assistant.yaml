@@ -1,0 +1,74 @@
+- name: Deploy home-assistant
+  hosts: home-assistant
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: home-assistant
+    homelab_app_traefik_network: traefik
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 8123
+    homelab_app_compose_template: "resources/home-assistant/compose.yml.j2"
+    homelab_app_volume_names:
+      - data
+    homelab_app_backups:
+      - volume: data
+        cron: "55 5 * * *"
+  pre_tasks:
+    - name: Home-Assistant stack setup
+      ansible.builtin.import_tasks: tasks/home-assistant-setup.yaml
+    - name: Check if the home-assistant volume exists
+      community.docker.docker_volume_info:
+        name: home-assistant-data
+      register: volume
+  post_tasks:
+    - name: If this is a fresh install, initialise the configuration file
+      when: not volume.exists
+      block:
+        - name: Interpret home-assistant initial configuration template
+          ansible.builtin.template:
+            src: ./resources/home-assistant/initial-configuration.yml.j2
+            dest: "{{ apps_root }}/home-assistant/initial-configuration.yml"
+            mode: "0644"
+        - name: Use ephemeral container to mount the volume
+          community.docker.docker_container:
+            name: initialise-home-assistant-config
+            labels:
+              homeserver.container-category: ephemeral
+            image: alpine # A tiny container that stays up and do nothing
+            state: started
+            recreate: true
+            tty: true # So that it stays up
+            volumes:
+              - home-assistant-data:/data
+        - name: Copy the initial configuration file to the volume
+          community.docker.docker_container_copy_into:
+            container: initialise-home-assistant-config
+            path: "{{ apps_root }}/home-assistant/initial-configuration.yml"
+            container_path: /data/configuration.yaml
+        - name: Generate empty file to copy to the container
+          ansible.builtin.file:
+            path: "{{ apps_root }}/home-assistant/empty"
+            state: touch
+            mode: "0644"
+        - name: Copy empty file for default config files that are needed by HA
+          community.docker.docker_container_copy_into:
+            container: initialise-home-assistant-config
+            path: "{{ apps_root }}/home-assistant/empty"
+            container_path: /data/{{ item }}
+          loop:
+            - "automations.yaml"
+            - "scripts.yaml"
+            - "scenes.yaml"
+        - name: Stop and remove the ephemeral container
+          become: true
+          community.docker.docker_container:
+            name: initialise-home-assistant-config
+            state: absent
+        - name: Stop and remove the ephemeral container
+          community.docker.docker_container:
+            name: initialise-home-assistant-config
+            state: absent
+        - name: Restart home-assistant
+          community.docker.docker_compose_v2:
+            project_src: "{{ apps_root }}/home-assistant"
+            recreate: always # so that changes in config are applied

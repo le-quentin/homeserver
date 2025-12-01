@@ -68,7 +68,7 @@ variable "disk_storage" {
 
 variable "usb_mappings" {
   type        = list(any)
-  description = "Id and options of usb devices (in the \"<bus>-<device>\" format) to passthrough to the VM"
+  description = "Id and options of usb devices (in the \"<bus>-<device>\" format) to passthrough to the VM. Can specifiy a usb3 boolean (false by default)"
   default     = []
 }
 

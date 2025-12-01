@@ -4,6 +4,12 @@ dnshost
 [traefik]
 mainhost
 
+[home-assistant]
+mainhost
+
+[z2m]
+mainhost
+
 [uptime-kuma]
 mainhost
 
@@ -21,15 +27,6 @@ mainhost
 
 [slsk-batchdl]
 mainhost
-
-[homeassistant]
-legacyhost
-
-[zigbee2mqtt]
-legacyhost
-
-[monitoring]
-legacyhost
 
 [tvbox]
 tvbox

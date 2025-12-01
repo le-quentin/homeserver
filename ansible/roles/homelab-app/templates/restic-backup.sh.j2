@@ -30,6 +30,7 @@ docker run --rm \
   -e RESTIC_REPOSITORY \
   -e RESTIC_HOST \
   {{ homelab_restic_image | default('restic/restic:0.18.0') }} \
+  # TODO - Use a password to protect the data that might get push to the cloud
   backup --insecure-no-password /data
 
 echo "[restic] Applying retention for {{ item.retention_days | default(14) }}d"

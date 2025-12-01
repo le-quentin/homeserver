@@ -4,6 +4,12 @@ dnshost
 [traefik]
 mainhost
 
+[home-assistant]
+mainhost
+
+[z2m]
+mainhost
+
 [uptime-kuma]
 mainhost
 
@@ -24,9 +30,3 @@ mainhost
 
 [monitoring]
 mainhost
-
-[homeassistant]
-legacyhost
-
-[zigbee2mqtt]
-legacyhost
