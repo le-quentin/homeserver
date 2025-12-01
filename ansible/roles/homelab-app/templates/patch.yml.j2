@@ -24,7 +24,7 @@ services:
 {% endif %}
       monitoring.logs.app_name: "{{ homelab_app_name }}"
 
-{% for service_name in homelab_app_services %}
+{% for service_name in homelab_app_services if service_name != "vpn-client" %}
   {{ service_name }}:
     labels:
 {% if homelab_app_monitoring_enabled | default(true) %}
