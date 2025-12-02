@@ -50,20 +50,21 @@
     group: "{{ ansible_user }}"
     mode: "0755"
 - name: Ensure Restic repository is initialized
-  become: true
-  docker_container:
-    name: "restic-init-{{ homelab_app_name }}-{{ item.volume }}"
-    image: "homelab-restic-rclone:latest"
-    entrypoint: sh
-    command: -c 'restic snapshots -r "rclone:{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}" --insecure-no-password || restic init -r "rclone:{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}" --insecure-no-password'
-    auto_remove: true
-    volumes:
-      - "{{ homelab_app_backups_rclone_conf_target_dir }}:/root/.config/rclone:ro"
-      - "{{ homelab_app_backups_restic_cache_dir }}:/root/.cache/restic"
-      - /etc/localtime:/etc/localtime:ro
-  with_items: "{{ homelab_app_backups }}"
+  command:
+    cmd: >
+      docker run --rm
+      --entrypoint sh
+      -v {{ homelab_app_backups_rclone_conf_target_dir }}:/root/.config/rclone:ro
+      -v {{ homelab_app_backups_restic_cache_dir }}:/root/.cache/restic
+      -v /etc/localtime:/etc/localtime:ro
+      -e RESTIC_PASSWORD={{ homelab_app_backups_restic_password | quote }}
+      homelab-restic-rclone:latest
+      -c 'restic snapshots -r "rclone:{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}" || restic init -r "rclone:{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}"'
+  register: restic_init_result
+  loop: "{{ homelab_app_backups }}"
   loop_control:
     label: "{{ item.volume }}"
+  changed_when: "'created restic repository' in restic_init_result.stdout or 'created restic repository' in restic_init_result.stderr"
 
 - name: "Ensure restic backup scripts directory exists"
   file:

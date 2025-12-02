@@ -2,6 +2,7 @@
 set -euo pipefail
 
 export RESTIC_REPOSITORY="rclone:{{ homelab_app_backups_rclone_remote }}/{{ homelab_app_name }}/{{ item.volume }}"
+export RESTIC_PASSWORD='{{ homelab_app_backups_restic_password }}'
 export RESTIC_CACHE_DIR="{{ homelab_app_backups_restic_cache_dir }}"
 export RCLONE_CONFIG_DIR="{{ homelab_app_backups_rclone_conf_target_dir }}"
 export RESTIC_HOST="{{ homelab_app_name }}-{{ item.volume }}"
@@ -22,16 +23,16 @@ cleanup() {
 trap cleanup EXIT
 
 echo "[restic] Starting backup of volume {{ item.volume }} for app {{ homelab_app_name }}"
-# TODO - Use a password to protect the data that might get push to the cloud instead of --insecure-no-password
 if ! docker run --rm \
   -v {{ homelab_app_name }}-{{ item.volume }}:/data:ro \
   -v "$RCLONE_CONFIG_DIR:/root/.config/rclone:ro" \
   -v "$RESTIC_CACHE_DIR:/root/.cache/restic" \
   -v /etc/localtime:/etc/localtime:ro \
   -e RESTIC_REPOSITORY \
+  -e RESTIC_PASSWORD \
   -e RESTIC_HOST \
   homelab-restic-rclone:latest \
-  backup --insecure-no-password /data; then
+  backup /data; then
   echo "[restic] ERROR: backup failed for {{ homelab_app_name }}/{{ item.volume }}"
 {% if homelab_app_backups_webhook_url is defined and homelab_app_backups_webhook_url %}
   curl -X POST "{{ homelab_app_backups_webhook_url }}" \
@@ -48,9 +49,10 @@ if ! docker run --rm \
   -v "$RESTIC_CACHE_DIR:/root/.cache/restic" \
   -v /etc/localtime:/etc/localtime:ro \
   -e RESTIC_REPOSITORY \
+  -e RESTIC_PASSWORD \
   -e RESTIC_HOST \
   homelab-restic-rclone:latest \
-  forget --insecure-no-password --keep-daily {{ item.retention_days | default(14) }} --prune; then
+  forget --keep-daily {{ item.retention_days | default(14) }} --prune; then
   echo "[restic] ERROR: retention policy failed for {{ homelab_app_name }}/{{ item.volume }}"
 {% if homelab_app_backups_webhook_url is defined and homelab_app_backups_webhook_url %}
   curl -X POST "{{ homelab_app_backups_webhook_url }}" \
