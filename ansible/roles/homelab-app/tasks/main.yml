@@ -24,6 +24,7 @@
     src: "{{ homelab_app_compose_template }}"
     dest: "{{ homelab_app_rendered_compose }}"
     mode: "0644"
+  notify: Restart app
 
 - name: Load rendered compose
   slurp:
@@ -43,6 +44,7 @@
     src: "patch.yml.j2"
     dest: "{{ homelab_app_rendered_patch }}"
     mode: "0644"
+  notify: Restart app
 
 - name: Load rendered patch
   slurp:
@@ -66,14 +68,16 @@
     content: "{{ final_compose | to_nice_yaml(indent=2) }}"
     owner: "{{ ansible_user }}"
     mode: "0644"
+  notify: Restart app
 
 - name: Make sure the data volumes exists
   community.docker.docker_volume:
     name: "{{ homelab_app_name }}-{{ item }}"
   loop: "{{ homelab_app_volume_names }}"
 
-- name: Bring up the app with compose
-  community.docker.docker_compose_v2:
-    project_src: "{{ homelab_app_target_root_dir }}"
-    state: present
-    recreate: always
+- name: Trigger recreate if forced
+  debug:
+    msg: "Force recreate requested"
+  when: homelab_app_force_recreate
+  notify: Restart app
+  changed_when: true
