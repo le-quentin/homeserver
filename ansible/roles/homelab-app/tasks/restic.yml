@@ -70,7 +70,10 @@
   file:
     path: "{{ homelab_app_target_root_dir }}"
     state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
     mode: "0755"
+  changed_when: false # This is not ideal, but it's reporting change everytime, I don't know why, and if the directory didn't exist, change will necessarily be reported by next steps so it's not that critical
 
 - name: "Create restic backup script for {{ item.volume }}"
   template:
