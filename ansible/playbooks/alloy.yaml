@@ -5,7 +5,6 @@
   vars:
     homelab_app_name: alloy
     homelab_app_cpus: 1.0
-    homelab_app_traefik_network: traefik
     homelab_app_apps_domain: "{{ homeserver_domain }}"
     homelab_app_internal_port: 12345
     homelab_app_compose_template: "resources/alloy/compose.yml.j2"
@@ -21,9 +20,12 @@
       file:
         path: "{{ homelab_app_target_root_dir }}/config"
         state: directory
-        mode: "0755"
+        owner: "{{ ansible_user }}"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_dir_mode }}"
     - name: Render Alloy configuration template
       template:
         src: "resources/alloy/config/alloy-config.alloy.j2"
         dest: "{{ homelab_app_target_root_dir }}/config/alloy-config.alloy"
-        mode: "0644"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"

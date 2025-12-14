@@ -16,21 +16,24 @@
     path: "{{ homelab_app_target_root_dir }}"
     state: directory
     owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: "0744"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_dir_mode }}"
   changed_when: false # This is not ideal, but it's reporting change everytime, I don't know why, and if the directory didn't exist, change will necessarily be reported by next steps so it's not that critical
 
 - name: Ensure logs dir exists
   file:
     path: "{{ homelab_app_logs_root_dir }}"
     state: directory
-    mode: "0744"
+    owner: "{{ ansible_user }}"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_dir_mode }}"
 
 - name: Render base compose template
   template:
     src: "{{ homelab_app_compose_template }}"
     dest: "{{ homelab_app_rendered_compose }}"
-    mode: "0644"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_file_mode }}"
   notify: Restart app
 
 - name: Load rendered compose
@@ -50,7 +53,8 @@
   template:
     src: "patch.yml.j2"
     dest: "{{ homelab_app_rendered_patch }}"
-    mode: "0644"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_file_mode }}"
   notify: Restart app
 
 - name: Load rendered patch
@@ -74,7 +78,8 @@
     dest: "{{ homelab_app_target_root_dir }}/compose.yml"
     content: "{{ final_compose | to_nice_yaml(indent=2) }}"
     owner: "{{ ansible_user }}"
-    mode: "0644"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_file_mode }}"
   notify: Restart app
 
 - name: Make sure the data volumes exists

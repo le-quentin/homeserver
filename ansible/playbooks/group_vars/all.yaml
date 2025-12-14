@@ -8,3 +8,12 @@ ansible_architecture_alt: "{{ alt_arch_names[ansible_architecture] | default(ans
 
 lan_cidr: 192.168.50.0/24
 traefik_network: traefik
+
+# Global defaults for file/directory modes and ownership (for playbooks)
+default_admin_group: admin
+default_admin_dir_mode: "0774"
+default_admin_file_mode: "0664"
+default_admin_script_mode: "0774"
+
+# Override homelab-app role defaults
+homelab_app_admin_group: admin

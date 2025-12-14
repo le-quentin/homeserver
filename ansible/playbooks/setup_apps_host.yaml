@@ -10,21 +10,21 @@
         path: /srv
         state: directory
         owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
-        mode: "0744"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_dir_mode }}"
     - name: Ensure root apps directory exists
       become: true
       file:
         path: /srv/apps
         state: directory
         owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
-        mode: "0744"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_dir_mode }}"
     - name: Ensure backups directory exists
       become: true
       file:
         path: /backups
         state: directory
         owner: "{{ ansible_user }}"
-        group: "{{ ansible_user }}"
-        mode: "0744"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_dir_mode }}"

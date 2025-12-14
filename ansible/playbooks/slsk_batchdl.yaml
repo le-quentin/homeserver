@@ -6,22 +6,24 @@
       ansible.builtin.file:
         path: /srv/tools/slsk-batchdl/config
         state: directory
-        owner: 1000
-        group: 1000
-        mode: "0744"
+        owner: "{{ ansible_user }}"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_dir_mode }}"
     - name: "render config template"
       become: true
       ansible.builtin.template:
         src: "resources/slsk-batchdl/sldl.conf.j2"
         dest: "/srv/tools/slsk-batchdl/config/sldl.conf"
-        mode: "0644"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
       notify: Restart docker
     - name: "render compose template"
       become: true
       ansible.builtin.template:
         src: "resources/slsk-batchdl/compose.yml.j2"
         dest: "/srv/tools/slsk-batchdl/compose.yml"
-        mode: "0644"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
       notify: Restart docker
   handlers:
     - name: Restart docker

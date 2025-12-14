@@ -4,7 +4,6 @@
     - homelab-app
   vars:
     homelab_app_name: home-assistant
-    homelab_app_traefik_network: traefik
     homelab_app_apps_domain: "{{ homeserver_domain }}"
     homelab_app_internal_port: 8123
     homelab_app_compose_template: "resources/home-assistant/compose.yml.j2"
@@ -28,7 +27,9 @@
           ansible.builtin.template:
             src: ./resources/home-assistant/initial-configuration.yml.j2
             dest: "{{ apps_root }}/home-assistant/initial-configuration.yml"
-            mode: "0644"
+            owner: "{{ ansible_user }}"
+            group: "{{ default_admin_group }}"
+            mode: "{{ default_admin_file_mode }}"
         - name: Use ephemeral container to mount the volume
           community.docker.docker_container:
             name: initialise-home-assistant-config
@@ -49,7 +50,9 @@
           ansible.builtin.file:
             path: "{{ apps_root }}/home-assistant/empty"
             state: touch
-            mode: "0644"
+            owner: "{{ ansible_user }}"
+            group: "{{ default_admin_group }}"
+            mode: "{{ default_admin_file_mode }}"
         - name: Copy empty file for default config files that are needed by HA
           community.docker.docker_container_copy_into:
             container: initialise-home-assistant-config

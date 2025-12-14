@@ -6,7 +6,6 @@
     homelab_app_name: jellyfin
     homelab_app_cpus: 3
     homelab_app_cpu_shares: 4096
-    homelab_app_traefik_network: traefik
     homelab_app_apps_domain: "{{ homeserver_domain }}"
     homelab_app_internal_port: 8096
     homelab_app_compose_template: "resources/jellyfin/compose.yml.j2"
@@ -28,9 +27,9 @@
           file:
             path: /mnt/media
             state: directory
-            mode: "0744"
             owner: "{{ ansible_user }}"
-            group: "{{ ansible_user }}"
+            group: "{{ default_admin_group }}"
+            mode: "{{ default_admin_dir_mode }}"
         - name: Ensure correct fstab entry is present
           become: true
           lineinfile:

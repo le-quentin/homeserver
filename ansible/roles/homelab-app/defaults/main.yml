@@ -1,4 +1,9 @@
 ---
+homelab_app_admin_group: "{{ ansible_user }}"
+homelab_app_dir_mode: "0774"
+homelab_app_file_mode: "0664"
+homelab_app_script_mode: "0774"
+
 homelab_app_target_root_dir: "/srv/apps/{{ homelab_app_name }}"
 homelab_app_rendered_compose: "{{ homelab_app_target_root_dir }}/base-compose.yml"
 homelab_app_rendered_patch: "{{ homelab_app_target_root_dir }}/patch.yml"

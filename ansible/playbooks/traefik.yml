@@ -10,7 +10,9 @@
       file:
         path: "{{ traefik_dir }}"
         state: directory
-        mode: "0744"
+        owner: "{{ ansible_user }}"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_dir_mode }}"
     - name: Create public network if not exists
       community.docker.docker_network:
         name: "{{ traefik_network }}"
@@ -21,17 +23,22 @@
       ansible.builtin.copy:
         src: ./resources/traefik/config.yml
         dest: "{{ traefik_dir }}/traefik.yml"
-        mode: "0644"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
       notify: Restart traefik
     - name: Render dynamic config template
       ansible.builtin.template:
         src: ./resources/traefik/dynamic-config.yml.j2
         dest: "{{ traefik_dir }}/dynamic.yml"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
       notify: Restart traefik
     - name: Render compose template
       ansible.builtin.template:
         src: resources/traefik/compose.yml.j2
         dest: "{{ traefik_dir }}/compose.yml"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
       notify: Restart traefik
     - name: Start traefik
       community.docker.docker_compose_v2:

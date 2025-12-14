@@ -4,7 +4,6 @@
     - homelab-app
   vars:
     homelab_app_name: paperless
-    homelab_app_traefik_network: traefik
     homelab_app_apps_domain: "{{ homeserver_domain }}"
     homelab_app_internal_port: 8000
     homelab_app_compose_template: "resources/paperless/compose.yml.j2"

@@ -4,8 +4,8 @@
     path: "{{ homelab_app_backups_restic_build_dir }}"
     state: directory
     owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: "0755"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_dir_mode }}"
 
 - name: Create restic+rclone Dockerfile
   become: true
@@ -13,8 +13,8 @@
     src: restic-rclone.Dockerfile.j2
     dest: "{{ homelab_app_backups_restic_build_dir }}/Dockerfile"
     owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: "0644"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_file_mode }}"
 
 - name: Build restic+rclone Docker image
   become: true
@@ -32,14 +32,15 @@
     path: "{{ homelab_app_backups_rclone_conf_target_dir }}"
     state: directory
     owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: "0744"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_dir_mode }}"
 
 - name: Copy rclone conf
   template:
     src: "{{ homelab_app_backups_rclone_conf }}"
     dest: "{{ homelab_app_backups_rclone_conf_target_dir }}/rclone.conf"
-    mode: "0644"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_file_mode }}"
 
 - name: Ensure restic cache dir exists
   become: true
@@ -47,8 +48,8 @@
     path: "{{ homelab_app_backups_restic_cache_dir }}"
     state: directory
     owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: "0755"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_dir_mode }}"
 - name: Ensure Restic repository is initialized
   command:
     cmd: >
@@ -71,15 +72,16 @@
     path: "{{ homelab_app_target_root_dir }}"
     state: directory
     owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
-    mode: "0755"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_dir_mode }}"
   changed_when: false # This is not ideal, but it's reporting change everytime, I don't know why, and if the directory didn't exist, change will necessarily be reported by next steps so it's not that critical
 
 - name: "Create restic backup script for {{ item.volume }}"
   template:
     src: restic-backup.sh.j2
     dest: "{{ homelab_app_target_root_dir }}/backup-{{ item.volume }}.sh"
-    mode: "0750"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_script_mode }}"
   loop: "{{ homelab_app_backups }}"
   loop_control:
     label: "{{ item.volume }}"
@@ -87,7 +89,8 @@
   template:
     src: restic-restore.sh.j2
     dest: "{{ homelab_app_target_root_dir }}/restore-{{ item.volume }}.sh"
-    mode: "0750"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_script_mode }}"
   loop: "{{ homelab_app_backups }}"
   loop_control:
     label: "{{ item.volume }}"

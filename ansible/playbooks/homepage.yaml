@@ -9,7 +9,9 @@
       ansible.builtin.template:
         src: "resources/homepage/{{ item }}.j2"
         dest: "{{ homelab_app_target_root_dir }}/config/{{ item }}"
-        mode: "0644"
+        owner: "{{ ansible_user }}"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
       loop:
         - settings.yaml
         - services.yaml
@@ -20,7 +22,6 @@
       notify: Restart homepage
   vars:
     homelab_app_name: homepage
-    homelab_app_traefik_network: traefik
     homelab_app_apps_domain: "{{ homeserver_domain }}"
     homelab_app_internal_port: 3000
     homelab_app_compose_template: "resources/homepage/compose.yml.j2"

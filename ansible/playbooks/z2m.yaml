@@ -4,7 +4,6 @@
     - homelab-app
   vars:
     homelab_app_name: z2m
-    homelab_app_traefik_network: traefik
     homelab_app_apps_domain: "{{ homeserver_domain }}"
     homelab_app_internal_port: 8080
     homelab_app_compose_template: "resources/z2m/compose.yml.j2"
@@ -31,7 +30,9 @@
           ansible.builtin.template:
             src: ./resources/z2m/initial-configuration.yml.j2
             dest: "{{ apps_root }}/z2m/initial-configuration.yml"
-            mode: "0644"
+            owner: "{{ ansible_user }}"
+            group: "{{ default_admin_group }}"
+            mode: "{{ default_admin_file_mode }}"
         - name: Use ephemeral container to mount the volume
           community.docker.docker_container:
             name: initialise-z2m-config
