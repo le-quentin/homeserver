@@ -30,3 +30,8 @@ mainhost
 
 [tvbox]
 tvbox
+
+[cockpit]
+dnshost
+mainhost
+

@@ -1,0 +1,27 @@
+---
+- name: Install Cockpit web console
+  hosts: cockpit
+  become: true
+  vars:
+    cockpit_packages: default
+    cockpit_enabled: true
+    cockpit_started: true
+    cockpit_port: 9090
+    cockpit_manage_firewall: false
+    cockpit_user: "{{ default_cockpit_user }}"
+    cockpit_user_groups: "{{ default_cockpit_user_groups }}"
+    cockpit_password: "{{ default_cockpit_password }}"
+
+  pre_tasks:
+    - name: Create Cockpit admin user
+      user:
+        name: "{{ cockpit_user }}"
+        comment: "Cockpit Web Console Admin"
+        groups: "{{ cockpit_user_groups }}"
+        append: true
+        create_home: true
+        shell: /bin/bash
+        password: "{{ cockpit_password | password_hash('sha512') }}"
+
+  roles:
+    - linux-system-roles.cockpit

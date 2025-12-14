@@ -1,6 +1,8 @@
 ---
 - name: General settings on a linux server
   ansible.builtin.import_playbook: "./linux_server.yaml"
+- name: Install cockpit for WebUI linux admin
+  ansible.builtin.import_playbook: "./cockpit.yaml"
 - name: Install adguard
   ansible.builtin.import_playbook: "./adguard.yaml"
 - name: Install apps

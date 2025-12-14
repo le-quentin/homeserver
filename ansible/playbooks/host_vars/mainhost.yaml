@@ -1,1 +1,2 @@
 vm_needs_trim: true
+default_cockpit_user_groups: sudo,docker,admin
