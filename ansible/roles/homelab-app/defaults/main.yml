@@ -9,7 +9,6 @@ homelab_app_traefik_network: traefik
 homelab_app_volume_names: []
 homelab_app_backups_enabled: true
 homelab_app_backups_restic_repositories_root: "/srv/backups/restic/"
-homelab_app_backups_target_dir: /backups
 homelab_app_backups_rclone_conf: "./resources/backups/rclone.conf"
 homelab_app_backups_rclone_conf_target_dir: "/srv/rclone"
 homelab_app_backups_restic_build_dir: "/srv/restic"

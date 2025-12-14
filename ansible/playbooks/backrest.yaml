@@ -1,0 +1,23 @@
+- name: "Deploy Backrest (web UI for Restic)"
+  hosts: backrest
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: backrest
+    homelab_app_cpus: 1
+    homelab_app_cpu_shares: 512
+    homelab_app_traefik_network: traefik
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 9898
+    homelab_app_compose_template: "resources/backrest/compose.yml.j2"
+    # TODO - before open sourcing, this is tedious and redundant, make it better
+    # Maybe with a unique map defining volumes with their backups
+    homelab_app_volume_names:
+      - data
+      - config
+      - cache
+    homelab_app_backups:
+      - volume: data
+        cron: "40 5 * * *"
+      - volume: config
+        cron: "40 5 * * *"
