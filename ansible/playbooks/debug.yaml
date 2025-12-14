@@ -3,6 +3,12 @@
   hosts: all
   become: false
   tasks:
+    - name: Host
+      ansible.builtin.debug:
+        msg: "{{ ansible_host }}"
+    - name: Hostname from inventory
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}"
     - name: User
       ansible.builtin.debug:
         msg: "{{ ansible_user_id }}"

@@ -2,6 +2,10 @@
 - name: General settings on a linux server
   hosts: all
   tasks:
+    - name: Set a hostname
+      become: true
+      ansible.builtin.hostname:
+        name: "{{ inventory_hostname }}"
     - name: Setup a /tmp cleanup cron
       block:
         - name: Install cron
