@@ -21,6 +21,8 @@ module "dns" {
 
   main_dns = true
 
+  firewall_enabled = false
+
   dns_vm = {
     address      = var.dns_vm_address
     cidr_address = "${var.dns_vm_address}/${var.dns_vm_cidr_suffix}"

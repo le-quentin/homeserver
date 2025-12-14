@@ -61,3 +61,10 @@ variable "main_dns" {
   description = "Should this be used as the primary Proxmox DNS"
   default     = false
 }
+
+variable "firewall_enabled" {
+  type = bool
+  default = true
+}
+
+

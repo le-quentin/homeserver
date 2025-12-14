@@ -110,7 +110,7 @@ resource "proxmox_virtual_environment_firewall_options" "dns_vm_firewall_options
   node_name = proxmox_virtual_environment_vm.dns_vm.node_name
   vm_id     = proxmox_virtual_environment_vm.dns_vm.vm_id
 
-  enabled       = true
+  enabled       = var.firewall_enabled
   input_policy  = "DROP"
   output_policy = "ACCEPT"
 }

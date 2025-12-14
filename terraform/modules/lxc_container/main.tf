@@ -64,7 +64,7 @@ resource "proxmox_virtual_environment_container" "lxc" {
   network_interface {
     name     = "eth0"
     bridge   = var.bridge_lan_interface
-    firewall = true
+    firewall = var.firewall_enabled
   }
 
   disk {

@@ -29,6 +29,8 @@ module "apps_mainhost" {
   vm_dedicated_memory = 16384
   # vm_floating_memory  = 0
 
+  firewall_enabled = false
+
   vm_params = {
     address   = var.vm_address
     disk_size = 300

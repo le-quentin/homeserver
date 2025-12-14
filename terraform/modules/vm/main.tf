@@ -191,7 +191,8 @@ resource "proxmox_virtual_environment_firewall_options" "vm_params_firewall_opti
   node_name = proxmox_virtual_environment_vm.vm.node_name
   vm_id     = proxmox_virtual_environment_vm.vm.vm_id
 
-  enabled       = false # Disabled for now, to not make k3s setup more complex than it already is
+  enabled       = var.firewall_enabled
+
   input_policy  = "DROP"
   output_policy = "ACCEPT"
 }

@@ -84,3 +84,9 @@ variable "pci_mappings" {
   default     = []
 }
 
+variable "firewall_enabled" {
+  type = bool
+  default = true
+}
+
+

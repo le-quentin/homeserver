@@ -79,3 +79,10 @@ variable "nesting" {
   description = "Is nesting feature enabled ? (dangerous++)"
   default     = false
 }
+
+variable "firewall_enabled" {
+  type = bool
+  default = true
+}
+
+
