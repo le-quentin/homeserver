@@ -4,3 +4,7 @@ collections:
     version: 0.27.0
   - name: community.docker
     version: 5.0.1
+
+roles:
+  - name: linux-system-roles.cockpit
+    version: 1.7.2
