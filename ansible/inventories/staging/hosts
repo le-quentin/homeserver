@@ -28,8 +28,5 @@ mainhost
 [slsk-batchdl]
 mainhost
 
-[backrest]
-mainhost
-
 [monitoring]
 mainhost
