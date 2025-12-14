@@ -1,0 +1,60 @@
+# SPDX-License-Identifier: MIT-0
+---
+- name: Confirm removal of {{ homelab_app_name }}
+  pause:
+    prompt: |
+      WARNING: You are about to remove all resources for '{{ homelab_app_name }}'.
+      This will get rid of all related local resources (*not* the distant backup repository).
+
+      This is a non revertable operation and you might lose data if it's not properly backed up yet.
+
+      Are you sure?
+
+      Type 'yes' to confirm
+  register: confirm_removal
+
+- name: Verify confirmation
+  fail:
+    msg: "Removal cancelled - confirmation not received"
+  when: confirm_removal.user_input | lower != 'yes'
+
+- name: Check if compose file exists
+  stat:
+    path: "{{ homelab_app_target_root_dir }}/compose.yml"
+  register: compose_file
+
+- name: Stop and remove Docker containers
+  community.docker.docker_compose_v2:
+    project_src: "{{ homelab_app_target_root_dir }}"
+    state: absent
+  when: compose_file.stat.exists
+
+- name: Remove Docker volumes
+  community.docker.docker_volume:
+    name: "{{ homelab_app_name }}-{{ item }}"
+    state: absent
+  loop: "{{ homelab_app_volume_names }}"
+  when: homelab_app_volume_names is defined and homelab_app_volume_names | length > 0
+
+- name: Remove backup cron jobs
+  become: true
+  cron:
+    name: "restic backup: {{ homelab_app_name }}/backup-{{ item.volume }}"
+    state: absent
+    user: "{{ ansible_user }}"
+  loop: "{{ homelab_app_backups }}"
+  loop_control:
+    label: "{{ item.volume }}"
+  when: homelab_app_backups is defined
+
+- name: Remove application directory
+  file:
+    path: "{{ homelab_app_target_root_dir }}"
+    state: absent
+
+- name: Display completion message
+  debug:
+    msg: |
+      Successfully removed {{ homelab_app_name }}.
+      Note: Remote backup repositories on {{ homelab_app_backups_rclone_remote | default('remote') }} were preserved.
+      Shared resources (restic image, rclone config, restic cache) were not removed as they may be used by other apps.

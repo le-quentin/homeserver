@@ -1,5 +1,12 @@
 # SPDX-License-Identifier: MIT-0
 ---
+- name: Remove app
+  tags: [remove, never]
+  include_tasks:
+    file: remove.yml
+    apply:
+      tags: [remove, never]
+
 - name: Initialize restic repositories
   include_tasks: restic.yml
   when: homelab_app_backups is defined
