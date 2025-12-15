@@ -1,3 +1,18 @@
+- name: Set logs root dir
+  set_fact:
+    backups_logs_dir: "{{ homelab_app_logs_root_dir }}/backups"
+- name: Set logs filepaths
+  set_fact:
+    backups_logs_stdout_filepath: "{{ backups_logs_dir }}/restic-backup.out.log"
+    backups_logs_stderr_filepath: "{{ backups_logs_dir }}/restic-backup.err.log"
+- name: Ensure logs dir exists
+  file:
+    path: "{{ backups_logs_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ homelab_app_admin_group }}"
+    mode: "{{ homelab_app_dir_mode }}"
+
 - name: Ensure restic build dir exists
   become: true
   file:
@@ -100,7 +115,7 @@
   become: true
   cron:
     name: "restic backup: {{ homelab_app_name }}/backup-{{ item.volume }}"
-    job: "{{ homelab_app_target_root_dir }}/backup-{{ item.volume }}.sh >> {{ homelab_app_logs_root_dir }}/restic-backup.log 2>&1"
+    job: "{{ homelab_app_target_root_dir }}/backup-{{ item.volume }}.sh >> {{ backups_logs_stdout_filepath }} 2>> {{ backups_logs_stderr_filepath }}"
     user: "{{ ansible_user }}"
     # user: root
     minute: "{{ item.cron.split(' ')[0] }}"

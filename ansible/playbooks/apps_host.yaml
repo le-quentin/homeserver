@@ -18,6 +18,8 @@
   ansible.builtin.import_playbook: "./paperless.yaml"
 - name: Wiki
   ansible.builtin.import_playbook: "./wiki.yaml"
+- name: Tasks.md
+  ansible.builtin.import_playbook: "./tasks-md.yaml"
 - name: Uptime-Kuma
   ansible.builtin.import_playbook: "./uptime-kuma.yaml"
 

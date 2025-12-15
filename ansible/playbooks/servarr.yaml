@@ -3,6 +3,8 @@
   ansible.builtin.import_playbook: "./radarr.yaml"
 - name: Install sonarr
   ansible.builtin.import_playbook: "./sonarr.yaml"
+- name: Install bazarr
+  ansible.builtin.import_playbook: "./bazarr.yaml"
 - name: Install lidarr
   ansible.builtin.import_playbook: "./lidarr.yaml"
 - name: Install prowlarr

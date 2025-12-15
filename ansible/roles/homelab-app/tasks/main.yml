@@ -8,8 +8,12 @@
       tags: [remove, never]
 
 - name: Initialize restic repositories
-  include_tasks: restic.yml
+  tags: [backups]
   when: homelab_app_backups is defined
+  include_tasks:
+    file: restic.yml
+    apply:
+      tags: [backups]
 
 - name: Ensure app config dir exists
   file:
@@ -19,14 +23,6 @@
     group: "{{ homelab_app_admin_group }}"
     mode: "{{ homelab_app_dir_mode }}"
   changed_when: false # This is not ideal, but it's reporting change everytime, I don't know why, and if the directory didn't exist, change will necessarily be reported by next steps so it's not that critical
-
-- name: Ensure logs dir exists
-  file:
-    path: "{{ homelab_app_logs_root_dir }}"
-    state: directory
-    owner: "{{ ansible_user }}"
-    group: "{{ homelab_app_admin_group }}"
-    mode: "{{ homelab_app_dir_mode }}"
 
 - name: Render base compose template
   template:

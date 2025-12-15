@@ -8,7 +8,6 @@ services:
     volumes:
       - tasks-data:/tasks
       - tasks-config:/config
-    restart: unless-stopped
 volumes:
   tasks-data:
     external: true
