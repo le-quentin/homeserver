@@ -5,8 +5,15 @@
 - resources:
     cpu: true
     memory: true
-    disk: /
+    refresh: 1000 # optional, in ms
 
-- search:
-    provider: duckduckgo
-    target: _blank
+- resources:
+    label: System
+    disk: /
+- resources:
+    label: Media
+    disk: /mnt/media
+
+- resources:
+    network: true
+    uptime: true

@@ -8,4 +8,5 @@ services:
       # PGID: 1000 # optional, your group id
     volumes:
       - {{ homelab_app_target_root_dir }}/config:/app/config # Make sure your local config directory exists
+      - /mnt/media:/mnt/media:ro # To show stats
       - /var/run/docker.sock:/var/run/docker.sock:ro # optional, for docker integrations
