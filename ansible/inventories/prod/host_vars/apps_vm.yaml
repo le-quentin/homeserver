@@ -1,6 +1,7 @@
 ---
 ansible_host: 10.42.10.10
 ansible_user: admin
+home_dir: /home/{{ hostvars.dns_vm.ansible_user }}
 apps_root: "/srv/apps"
 ansible_python_interpreter: /usr/bin/python3
 media_disk_id: "db2189d7-93f5-4ae0-9f99-43dc11ab736b"
