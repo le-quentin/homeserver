@@ -1,0 +1,35 @@
+#!/bin/bash
+# Send backup summary to Discord webhook
+
+WEBHOOK_URL="{{ backups_stats_discord_webhook_url }}"
+    : "/srv/script"
+SUMMARY_SCRIPT="{{ scripts_directory }}/backup-summary.sh"
+
+if [ -z "$WEBHOOK_URL" ]; then
+  echo "Error: Discord webhook URL not configured"
+  exit 1
+fi
+
+if [ ! -f "$SUMMARY_SCRIPT" ]; then
+  echo "Error: Summary script not found: $SUMMARY_SCRIPT"
+  exit 1
+fi
+
+# Generate summary
+SUMMARY=$("$SUMMARY_SCRIPT")
+
+# Escape for JSON and limit length (Discord has 2000 char limit for content)
+SUMMARY_ESCAPED=$(echo "$SUMMARY" | head -c 1900 | jq -Rs . | tr -d '"')
+
+# Send to Discord
+curl -X POST "$WEBHOOK_URL" \
+  -H "Content-Type: application/json" \
+  -d "{\"content\": \"**Backup Summary**\n\`\`\`\n$SUMMARY_ESCAPED\n\`\`\`\"}" \
+  --max-time 10
+
+if [ $? -eq 0 ]; then
+  echo "Summary sent to Discord successfully"
+else
+  echo "Failed to send summary to Discord"
+  exit 1
+fi

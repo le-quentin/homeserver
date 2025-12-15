@@ -1,0 +1,129 @@
+#!/bin/bash
+# Backup Summary - Shows stats for all restic repositories
+# This script reads cached stats from backup runs
+
+STATS_DIR="{{ homelab_app_restic_stats_directory }}"
+
+if [ -z "$STATS_DIR" ] || [ ! -d "$STATS_DIR" ]; then
+  echo "Error: Stats directory not configured or doesn't exist: $STATS_DIR"
+  exit 1
+fi
+
+# Arrays to store data
+declare -a APPS
+declare -a VOLUMES
+declare -a LOCAL_SIZES
+declare -a R2_SIZES
+
+TOTAL_LOCAL=0
+TOTAL_R2=0
+INDEX=0
+
+# Collect data from stats files and local volumes
+for stats_file in "$STATS_DIR"/*/*-stats.json; do
+  [ ! -f "$stats_file" ] && continue
+
+  # Extract app and volume from path
+  app=$(basename $(dirname "$stats_file"))
+  volume=$(basename "$stats_file" | sed 's/-stats\.json$//')
+  volume_name="${app}-${volume}"
+
+  # Store app/volume names
+  APPS[$INDEX]="$app"
+  VOLUMES[$INDEX]="$volume"
+
+  # Get local volume size
+  VOLUME_PATH=$(docker volume inspect "$volume_name" --format '{{ '{{' }} .Mountpoint {{ '}}' }}' 2>/dev/null)
+  if [ -n "$VOLUME_PATH" ]; then
+    LOCAL_SIZE=$(sudo du -sb "$VOLUME_PATH" 2>/dev/null | cut -f1)
+    LOCAL_SIZES[$INDEX]=$LOCAL_SIZE
+    TOTAL_LOCAL=$((TOTAL_LOCAL + LOCAL_SIZE))
+  else
+    LOCAL_SIZES[$INDEX]=0
+  fi
+
+  # Get R2 size from cached stats
+  R2_SIZE=$(jq -r '.total_size // 0' "$stats_file" 2>/dev/null)
+  if [ -n "$R2_SIZE" ] && [ "$R2_SIZE" -gt 0 ]; then
+    R2_SIZES[$INDEX]=$R2_SIZE
+    TOTAL_R2=$((TOTAL_R2 + R2_SIZE))
+  else
+    R2_SIZES[$INDEX]=0
+  fi
+
+  INDEX=$((INDEX + 1))
+done
+
+# Sort indices by R2_SIZE descending
+declare -a SORTED_INDICES
+for i in $(seq 0 $((INDEX - 1))); do
+  SORTED_INDICES[$i]=$i
+done
+
+# Bubble sort by R2_SIZE (descending)
+for ((i=0; i<INDEX-1; i++)); do
+  for ((j=0; j<INDEX-i-1; j++)); do
+    idx1=${SORTED_INDICES[$j]}
+    idx2=${SORTED_INDICES[$((j+1))]}
+    if [ "${R2_SIZES[$idx1]}" -lt "${R2_SIZES[$idx2]}" ]; then
+      # Swap
+      tmp=${SORTED_INDICES[$j]}
+      SORTED_INDICES[$j]=${SORTED_INDICES[$((j+1))]}
+      SORTED_INDICES[$((j+1))]=$tmp
+    fi
+  done
+done
+
+# Display results
+echo "=== Backup Storage Summary ==="
+echo "Generated: $(date '+%Y-%m-%d %H:%M:%S')"
+echo ""
+printf "%-20s %15s %15s %10s %10s\n" "App/Volume" "Local Size" "R2 Size" "Ratio" "% of R2"
+echo "=============================================================================="
+
+for idx in $(seq 0 $((INDEX - 1))); do
+  i=${SORTED_INDICES[$idx]}
+  app="${APPS[$i]}"
+  volume="${VOLUMES[$i]}"
+  LOCAL_SIZE=${LOCAL_SIZES[$i]}
+  R2_SIZE=${R2_SIZES[$i]}
+
+  # Format sizes
+  if [ "$LOCAL_SIZE" -gt 0 ]; then
+    LOCAL_HUMAN=$(numfmt --to=si --suffix=B $LOCAL_SIZE)
+  else
+    LOCAL_HUMAN="N/A"
+  fi
+
+  if [ "$R2_SIZE" -gt 0 ]; then
+    R2_HUMAN=$(numfmt --to=si --suffix=B $R2_SIZE)
+
+    # Calculate ratios
+    if [ "$LOCAL_SIZE" -gt 0 ]; then
+      RATIO=$(awk "BEGIN {printf \"%.1f%%\", ($R2_SIZE/$LOCAL_SIZE)*100}")
+    else
+      RATIO="N/A"
+    fi
+
+    PERCENT=$(awk "BEGIN {printf \"%.1f%%\", ($R2_SIZE/$TOTAL_R2)*100}")
+  else
+    R2_HUMAN="No data"
+    RATIO="N/A"
+    PERCENT="N/A"
+  fi
+
+  printf "%-20s %15s %15s %10s %10s\n" "$app/$volume" "$LOCAL_HUMAN" "$R2_HUMAN" "$RATIO" "$PERCENT"
+done
+
+echo "=============================================================================="
+TOTAL_LOCAL_HUMAN=$(numfmt --to=si --suffix=B $TOTAL_LOCAL)
+TOTAL_R2_HUMAN=$(numfmt --to=si --suffix=B $TOTAL_R2)
+if [ "$TOTAL_LOCAL" -gt 0 ]; then
+  TOTAL_RATIO=$(awk "BEGIN {printf \"%.1f%%\", ($TOTAL_R2/$TOTAL_LOCAL)*100}")
+else
+  TOTAL_RATIO="N/A"
+fi
+
+printf "%-20s %15s %15s %10s %10s\n" "TOTAL" "$TOTAL_LOCAL_HUMAN" "$TOTAL_R2_HUMAN" "$TOTAL_RATIO" "100.0%"
+echo ""
+echo "Note: R2 sizes are from last successful backup. Run backups to update."

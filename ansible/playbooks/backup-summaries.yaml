@@ -1,0 +1,65 @@
+---
+- name: Setup backup summary scripts
+  hosts: apps_vm
+  vars:
+    scripts_directory: "/srv/script"
+    logs_directory: "/srv/var/log/backup-summary"
+    backup_summary_cron:
+      minute: "0"
+      hour: "9"
+      day: "*"
+      month: "*"
+      weekday: "*"
+  tasks:
+    - name: Ensure logs dir exists
+      file:
+        path: "{{ logs_directory }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_dir_mode }}"
+    - name: Ensure dependencies are installed
+      become: true
+      ansible.builtin.package:
+        name: jq
+        state: present
+
+    - name: Deploy backup summary script
+      template:
+        src: resources/backup-summaries/backup-summary.sh.j2
+        dest: "{{ scripts_directory }}/backup-summary.sh"
+        owner: "{{ ansible_user }}"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_script_mode }}"
+
+    - name: Setup backup summary Discord webhook script
+      block:
+        - name: check if the webhook var is set
+          ansible.builtin.set_fact:
+            backups_discord_webhook_var_set: "{{ backups_stats_discord_webhook_url is defined and backups_stats_discord_webhook_url | length > 0 }}"
+        - name: deploy the script when webhook var is set
+          when: backups_discord_webhook_var_set
+          template:
+            src: resources/backup-summaries/backup-summary-discord.sh.j2
+            dest: "{{ scripts_directory }}/backup-summary-discord.sh"
+            owner: "{{ ansible_user }}"
+            group: "{{ default_admin_group }}"
+            mode: "{{ default_admin_script_mode }}"
+        - name: delete the script when var is not set
+          when: not backups_discord_webhook_var_set
+          file:
+            path: "{{ scripts_directory }}/backup-summary-discord.sh"
+            state: absent
+
+    - name: Setup daily cron job to publish backup summary to Discord
+      cron:
+        name: "Publish backup summary to Discord"
+        job: "{{ scripts_directory }}/backup-summary-discord.sh >> {{ logs_directory }}/backup-summary.log 2>&1"
+        user: "{{ ansible_user }}"
+        minute: "{{ backup_summary_cron['minute'] }}"
+        hour: "{{ backup_summary_cron['hour'] }}"
+        day: "{{ backup_summary_cron['day'] }}"
+        month: "{{ backup_summary_cron['month'] }}"
+        weekday: "{{ backup_summary_cron['weekday'] }}"
+
+        state: "{{ 'present' if (backups_stats_discord_webhook_url is defined and backups_stats_discord_webhook_url | length > 0) else 'absent' }}"

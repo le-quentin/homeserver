@@ -63,4 +63,17 @@ if ! docker run --rm \
   exit 1
 fi
 
+{% if homelab_app_restic_stats_directory %}
+echo "[restic] Collecting repository statistics..."
+mkdir -p "{{ homelab_app_restic_stats_directory }}/{{ homelab_app_name }}"
+docker run --rm \
+  -v "$RCLONE_CONFIG_DIR:/root/.config/rclone:ro" \
+  -v "$RESTIC_CACHE_DIR:/root/.cache/restic" \
+  -v /etc/localtime:/etc/localtime:ro \
+  -e RESTIC_REPOSITORY \
+  -e RESTIC_PASSWORD \
+  homelab-restic-rclone:latest \
+  stats --mode raw-data --json > "{{ homelab_app_restic_stats_directory }}/{{ homelab_app_name }}/{{ item.volume }}-stats.json"
+{% endif %}
+
 echo "[restic] Backup for {{ homelab_app_name }}/{{ item.volume }} completed."

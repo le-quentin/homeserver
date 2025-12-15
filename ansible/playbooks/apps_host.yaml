@@ -3,6 +3,8 @@
   ansible.builtin.import_playbook: "./linux_server.yaml"
 - name: Setup apps host
   ansible.builtin.import_playbook: "./setup_apps_host.yaml"
+- name: "Setup the backup summaries"
+  ansible.builtin.import_playbook: "./backup-summaries.yaml"
 
 - name: Setup traefik
   ansible.builtin.import_playbook: "./traefik.yml"

@@ -17,3 +17,4 @@ default_admin_script_mode: "0774"
 
 # Override homelab-app role defaults
 homelab_app_admin_group: admin
+homelab_app_restic_stats_directory: /srv/var/backup-stats

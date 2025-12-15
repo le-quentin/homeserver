@@ -4,27 +4,18 @@
   tasks:
     - name: Install docker
       ansible.builtin.include_tasks: ./tasks/install-docker.yaml
-    - name: Ensure root /srv directory exists
+    - name: Ensure /srv dirs exist
       become: true
       file:
-        path: /srv
+        path: "{{ item }}"
         state: directory
         owner: "{{ ansible_user }}"
         group: "{{ default_admin_group }}"
         mode: "{{ default_admin_dir_mode }}"
-    - name: Ensure root apps directory exists
-      become: true
-      file:
-        path: /srv/apps
-        state: directory
-        owner: "{{ ansible_user }}"
-        group: "{{ default_admin_group }}"
-        mode: "{{ default_admin_dir_mode }}"
-    - name: Ensure backups directory exists
-      become: true
-      file:
-        path: /backups
-        state: directory
-        owner: "{{ ansible_user }}"
-        group: "{{ default_admin_group }}"
-        mode: "{{ default_admin_dir_mode }}"
+      loop:
+        - /srv
+        - /srv/apps
+        - /srv/script
+        - /srv/var
+        - /srv/var/log
+        - "{{ homelab_app_restic_stats_directory }}"

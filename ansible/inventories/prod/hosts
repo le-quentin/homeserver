@@ -28,8 +28,9 @@ apps_vm
 [slsk-batchdl]
 apps_vm
 
-[tvbox]
-tvbox
+# Now managed with a direct LibreELEC install
+# [tvbox]
+# tvbox
 
 [cockpit]
 dns_vm
