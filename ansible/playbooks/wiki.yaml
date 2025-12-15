@@ -1,5 +1,5 @@
 - name: Deploy Gollum (git based wiki)
-  hosts: mainhost
+  hosts: apps_vm
   roles:
     - homelab-app
   vars:

@@ -1,5 +1,5 @@
 - name: "Restore an app data using restic"
-  hosts: mainhost
+  hosts: apps_vm
   # gather_facts: false
   tasks:
     - name: "Restore {{ app }}"

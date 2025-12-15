@@ -1,24 +1,24 @@
 [backupservs]
-mainhost
+apps_vm
 
 [gatewayservs]
-mainhost
+apps_vm
 
 [homeassistantservs]
-mainhost
+apps_vm
 
 [mauticservs]
-mainhost
+apps_vm
 
 [monitoringservs]
-mainhost
+apps_vm
 
 [portainerservs]
-mainhost
+apps_vm
 
 [cocobotservs]
-mainhost
+apps_vm
 
 [duckdnsservs]
-mainhost
+apps_vm
 

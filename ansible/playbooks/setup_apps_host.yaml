@@ -1,6 +1,6 @@
 ---
 - name: Setup a new apps host
-  hosts: mainhost
+  hosts: apps_vm
   tasks:
     - name: Install docker
       ansible.builtin.include_tasks: ./tasks/install-docker.yaml

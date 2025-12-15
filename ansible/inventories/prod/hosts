@@ -1,37 +1,37 @@
 [adguard]
-dnshost
+dns_vm
 
 [traefik]
-mainhost
+apps_vm
 
 [home-assistant]
-mainhost
+apps_vm
 
 [z2m]
-mainhost
+apps_vm
 
 [uptime-kuma]
-mainhost
+apps_vm
 
 [paperless]
-mainhost
+apps_vm
 
 [jellyfin]
-mainhost
+apps_vm
 
 [servarr]
-mainhost
+apps_vm
 
 [torrent]
-mainhost
+apps_vm
 
 [slsk-batchdl]
-mainhost
+apps_vm
 
 [tvbox]
 tvbox
 
 [cockpit]
-dnshost
-mainhost
+dns_vm
+apps_vm
 

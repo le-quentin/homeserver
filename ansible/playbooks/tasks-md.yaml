@@ -1,5 +1,5 @@
 - name: Deploy Tasks.md
-  hosts: mainhost
+  hosts: apps_vm
   roles:
     - homelab-app
   vars:

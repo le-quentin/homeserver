@@ -105,7 +105,7 @@ discovery.relabel "homelab_apps" {
 
 // Scrape node metrics
 prometheus.scrape "node_exporter" {
-  targets = [{"__address__" = "host.docker.internal:9100", "instance" = "vm_mainhost"}] // Should really be "prod" or "staging" in instance, the hostname should convery the host info
+  targets = [{"__address__" = "host.docker.internal:9100", "instance" = "apps_vm"}] // Should really be "prod" or "staging" in instance, the hostname should convery the host info
   forward_to = [prometheus.remote_write.docker_metrics.receiver]
   scrape_interval = "15s"
 }

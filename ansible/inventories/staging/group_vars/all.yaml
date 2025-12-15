@@ -2,6 +2,6 @@
 homeserver_domain: staging.home
 dns_ip: 10.142.1.2
 gateway_ip: "{{ ansible_host }}"
-mainhost_ip: 10.142.10.10
+apps_vm_ip: 10.142.10.10
 
 homelab_app_backups_rclone_remote: r2:/homelab-backups-staging

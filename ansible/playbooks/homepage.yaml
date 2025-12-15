@@ -1,5 +1,5 @@
 - name: Deploy homepage
-  hosts: mainhost
+  hosts: apps_vm
   roles:
     - homelab-app
   pre_tasks:

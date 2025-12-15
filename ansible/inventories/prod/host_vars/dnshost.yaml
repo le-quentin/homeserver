@@ -1,6 +1,0 @@
----
-ansible_host: 10.42.1.2
-ansible_user: adguard_user
-home_dir: /home/{{ hostvars.dnshost.ansible_user }}
-ansible_files_root: /home/{{ hostvars.dnshost.ansible_user }}/ansible-files
-ansible_python_interpreter: /usr/bin/python3

@@ -5,7 +5,7 @@
     - name: Set a hostname
       become: true
       ansible.builtin.hostname:
-        name: "{{ inventory_hostname }}"
+        name: "{{ inventory_hostname | replace('_', '-') }}"
     - name: Setup a /tmp cleanup cron
       block:
         - name: Install cron
