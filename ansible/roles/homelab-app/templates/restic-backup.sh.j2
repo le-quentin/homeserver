@@ -43,7 +43,7 @@ if ! docker run --rm \
   exit 1
 fi
 
-echo "[restic] Applying retention for {{ item.retention_days | default(14) }}d"
+echo "[restic] Applying retention policy (daily={{ item.retention_daily | default(homelab_app_backups_retention_daily) }}, weekly={{ item.retention_weekly | default(homelab_app_backups_retention_weekly) }}, monthly={{ item.retention_monthly | default(homelab_app_backups_retention_monthly) }}, yearly={{ item.retention_yearly | default(homelab_app_backups_retention_yearly) }})"
 if ! docker run --rm \
   -v "$RCLONE_CONFIG_DIR:/root/.config/rclone:ro" \
   -v "$RESTIC_CACHE_DIR:/root/.cache/restic" \
@@ -52,7 +52,11 @@ if ! docker run --rm \
   -e RESTIC_PASSWORD \
   -e RESTIC_HOST \
   homelab-restic-rclone:latest \
-  forget --keep-daily {{ item.retention_days | default(14) }} --prune; then
+  forget --keep-daily {{ item.retention_daily | default(homelab_app_backups_retention_daily) }} \
+    --keep-weekly {{ item.retention_weekly | default(homelab_app_backups_retention_weekly) }} \
+    --keep-monthly {{ item.retention_monthly | default(homelab_app_backups_retention_monthly) }} \
+    --keep-yearly {{ item.retention_yearly | default(homelab_app_backups_retention_yearly) }} \
+    --prune; then
   echo "[restic] ERROR: retention policy failed for {{ homelab_app_name }}/{{ item.volume }}"
 {% if homelab_app_backups_webhook_url is defined and homelab_app_backups_webhook_url %}
   curl -X POST "{{ homelab_app_backups_webhook_url }}" \

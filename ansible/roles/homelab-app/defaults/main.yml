@@ -23,3 +23,7 @@ homelab_app_vpn_enabled: false
 homelab_app_monitoring_enabled: true
 homelab_app_force_recreate: false
 homelab_app_restic_stats_directory: ""
+homelab_app_backups_retention_daily: 7
+homelab_app_backups_retention_weekly: 4
+homelab_app_backups_retention_monthly: 3
+homelab_app_backups_retention_yearly: 1
