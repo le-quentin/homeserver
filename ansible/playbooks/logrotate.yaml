@@ -1,0 +1,31 @@
+---
+- name: Setup logrotate for homelab logs
+  hosts: apps_vm
+  vars:
+    logs_root_dir: "/srv/var/log"
+
+  tasks:
+    - name: Ensure logrotate is installed
+      become: true
+      ansible.builtin.package:
+        name: logrotate
+        state: present
+
+    - name: Configure logrotate for homelab logs
+      become: true
+      copy:
+        dest: /etc/logrotate.d/homelab
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          {{ logs_root_dir }}/**/*.log {
+              monthly
+              size 100M
+              compress
+              delaycompress
+              missingok
+              notifempty
+              create 0664 {{ ansible_user }} {{ default_admin_group }}
+              sharedscripts
+          }

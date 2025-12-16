@@ -1,6 +1,8 @@
 ---
 - name: General settings on a linux server
   ansible.builtin.import_playbook: "./linux_server.yaml"
+- name: Setup logrotate on apps-vm
+  ansible.builtin.import_playbook: "./logrotate.yaml"
 - name: Install cockpit for WebUI linux admin
   ansible.builtin.import_playbook: "./cockpit.yaml"
 - name: Install adguard
