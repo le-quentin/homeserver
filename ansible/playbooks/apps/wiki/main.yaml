@@ -1,0 +1,13 @@
+- name: Deploy Gollum (git based wiki)
+  hosts: apps_vm
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: wiki
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 4567
+    homelab_app_volume_names:
+      - repo
+    homelab_app_backups:
+      - volume: repo
+        cron: "35 6 * * *"

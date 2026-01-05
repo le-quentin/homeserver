@@ -1,0 +1,70 @@
+- name: "Deploy Grafana with Loki"
+  hosts: monitoring
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: grafana
+    homelab_app_cpus: 2.0
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 3000
+    homelab_app_volume_names:
+      - data
+      - loki-data
+      - prometheus-data
+    homelab_app_backups:
+      - volume: data
+        cron: "0 2 * * *"  # Daily backup at 2 AM
+      - volume: loki-data
+        cron: "0 2 * * *"  # Daily backup at 2 AM
+      - volume: prometheus-data
+        cron: "0 2 * * *"  # Daily backup at 2 AM
+  pre_tasks:
+    - name: Monitoring setup
+      ansible.builtin.import_tasks: "{{ playbooks_root }}/tasks/monitoring-setup.yaml"
+    - name: Ensure Grafana config directory exists
+      file:
+        path: "{{ homelab_app_target_root_dir }}/config"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_dir_mode }}"
+    - name: Ensure Grafana provisioning directory exists
+      file:
+        path: "{{ homelab_app_target_root_dir }}/config/provisioning/datasources"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_dir_mode }}"
+    - name: Copy Grafana configuration
+      copy:
+        src: "./config/grafana.ini"
+        dest: "{{ homelab_app_target_root_dir }}/config/grafana.ini"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
+    - name: Copy Loki configuration
+      copy:
+        src: "./config/loki-config.yaml"
+        dest: "{{ homelab_app_target_root_dir }}/config/loki-config.yaml"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
+    - name: Copy Prometheus configuration
+      copy:
+        src: "./config/prometheus.yml"
+        dest: "{{ homelab_app_target_root_dir }}/config/prometheus.yml"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
+    - name: Copy datasource provisioning
+      copy:
+        src: "./config/provisioning/datasources/loki.yaml"
+        dest: "{{ homelab_app_target_root_dir }}/config/provisioning/datasources/loki.yaml"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
+    - name: Copy Prometheus datasource provisioning
+      copy:
+        src: "./config/provisioning/datasources/prometheus.yaml"
+        dest: "{{ homelab_app_target_root_dir }}/config/provisioning/datasources/prometheus.yaml"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
+    - name: Run the node-exporter role (expose hardware metrics in prometheus)
+      ansible.builtin.include_role:
+        name: prometheus.prometheus.node_exporter

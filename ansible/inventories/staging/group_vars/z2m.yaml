@@ -1,4 +1,5 @@
 ---
+zigbee_dongle_enabled: false
 zigbee_device_path: "/dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_4caca3099edbed11989bef2d62c613ac-if00-port0"
 zigbee_port_path: "/dev/serial/by-id/usb-ITead_Sonoff_Zigbee_3.0_USB_Dongle_Plus_4caca3099edbed11989bef2d62c613ac-if00-port0"
 zigbee2mqtt_frontend_url: "http://zigbee2mqtt.staging.home"

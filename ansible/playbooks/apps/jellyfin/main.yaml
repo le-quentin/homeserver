@@ -1,0 +1,102 @@
+- name: "Deploy jellyfin"
+  hosts: jellyfin
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: jellyfin
+    homelab_app_cpus: 3
+    homelab_app_cpu_shares: 4096
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 8096
+    homelab_app_volume_names:
+      - config
+      - cache
+    homelab_app_backups:
+      - volume: config
+        cron: "0 6 * * *"
+
+    gpu_card_path: "/dev/dri/renderD128" # Device id from the vm
+    gpu_group: "render" # According to jellyfin docs, is one of [video, input, render] depending on OS
+
+  pre_tasks:
+    - name: Ensure /mnt/media is mounted via fstab with UUID
+      block:
+        - name: Ensure /mnt/media exists
+          become: true
+          file:
+            path: /mnt/media
+            state: directory
+            owner: "{{ ansible_user }}"
+            group: "{{ default_admin_group }}"
+            mode: "{{ default_admin_dir_mode }}"
+        - name: Ensure correct fstab entry is present
+          become: true
+          lineinfile:
+            path: /etc/fstab
+            line: "UUID={{ media_disk_id }} /mnt/media ext4 noatime,x-systemd.automount,x-systemd.device-timeout=10,nofail 0 2"
+            regexp: '^UUID=.* /mnt/media '
+          register: fstab_update
+        - name: Reload systemd if fstab was modified
+          become: true
+          when: fstab_update.changed
+          changed_when: fstab_update.changed
+          ansible.builtin.systemd:
+            daemon_reload: true
+        - name: Check if /mnt/media is already mounted
+          stat:
+            path: /mnt/media
+          register: media_mountpoint
+
+        - name: Ensure /mnt/media is mounted (triggers automount)
+          changed_when: false
+          command: ls -lah /mnt/media
+
+        - name: "Setup the GPU for passthrough"
+          when: gpu_passthrough_enabled
+          block:
+            - name: Ensure non-free components are enabled in all apt source stanzas
+              become: true
+              ansible.builtin.replace:
+                path: /etc/apt/sources.list.d/debian.sources
+                regexp: '^(Components:\s*main)(?!.*non-free)'
+                replace: '\1 contrib non-free non-free-firmware'
+              register: sources_update
+
+            - name: Update apt cache
+              become: true
+              ansible.builtin.apt:
+                update_cache: true
+              when: sources_update.changed
+
+            - name: Ensure intel GPU packages are installed
+              become: true
+              ansible.builtin.apt:
+                name:
+                  - firmware-misc-nonfree
+                  - intel-media-va-driver-non-free
+                state: present
+                update_cache: true
+              register: gpu_packages
+            - name: Add user to 'render' group
+              become: true
+              ansible.builtin.user:
+                name: "{{ ansible_user }}"
+                groups: render
+                append: true
+            - name: Reboot if firmware packages were newly installed
+              become: true
+              ansible.builtin.reboot:
+                msg: "Rebooting to activate Intel GPU firmware"
+                connect_timeout: 10
+                reboot_timeout: 300
+                test_command: uptime
+              when: gpu_packages is changed
+            - name: "Get id of the render group"
+              changed_when: false
+              shell: "set -o pipefail && getent group {{ gpu_group }} | cut -d: -f3"
+              args:
+                executable: /bin/bash
+              register: render_group
+            - name: "Set render_group_id"
+              ansible.builtin.set_fact:
+                render_group_id: "{{ render_group.stdout }}"

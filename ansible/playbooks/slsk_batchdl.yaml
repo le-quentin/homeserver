@@ -12,7 +12,7 @@
     - name: "render config template"
       become: true
       ansible.builtin.template:
-        src: "resources/slsk-batchdl/sldl.conf.j2"
+        src: "{{ apps_root }}/slskd/batchdl/sldl.conf.j2"
         dest: "/srv/tools/slsk-batchdl/config/sldl.conf"
         group: "{{ default_admin_group }}"
         mode: "{{ default_admin_file_mode }}"
@@ -20,7 +20,7 @@
     - name: "render compose template"
       become: true
       ansible.builtin.template:
-        src: "resources/slsk-batchdl/compose.yml.j2"
+        src: "{{ apps_root }}/slskd/batchdl/compose.yml.j2"
         dest: "/srv/tools/slsk-batchdl/compose.yml"
         group: "{{ default_admin_group }}"
         mode: "{{ default_admin_file_mode }}"

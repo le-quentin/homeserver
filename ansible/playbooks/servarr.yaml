@@ -1,13 +1,13 @@
 ---
 - name: Install radarr
-  ansible.builtin.import_playbook: "./radarr.yaml"
+  ansible.builtin.import_playbook: "./apps/radarr/main.yaml"
 - name: Install sonarr
-  ansible.builtin.import_playbook: "./sonarr.yaml"
+  ansible.builtin.import_playbook: "./apps/sonarr/main.yaml"
 - name: Install bazarr
-  ansible.builtin.import_playbook: "./bazarr.yaml"
+  ansible.builtin.import_playbook: "./apps/bazarr/main.yaml"
 - name: Install lidarr
-  ansible.builtin.import_playbook: "./lidarr.yaml"
+  ansible.builtin.import_playbook: "./apps/lidarr/main.yaml"
 - name: Install prowlarr
-  ansible.builtin.import_playbook: "./prowlarr.yaml"
+  ansible.builtin.import_playbook: "./apps/prowlarr/main.yaml"
 - name: Install qbittorrent
-  ansible.builtin.import_playbook: "./qbittorrent.yaml"
+  ansible.builtin.import_playbook: "./apps/qbittorrent/main.yaml"

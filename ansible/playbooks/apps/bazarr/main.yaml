@@ -1,0 +1,17 @@
+- name: "Deploy bazarr"
+  hosts: servarr
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: bazarr
+    homelab_app_cpu_shares: 512
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 6767
+    homelab_app_volume_names:
+      - config
+    homelab_app_backups:
+      - volume: config
+        cron: "50 6 * * *"
+  pre_tasks:
+    - name: Servarr stack setup
+      ansible.builtin.import_tasks: "{{ playbooks_root }}/tasks/servarr-setup.yaml"

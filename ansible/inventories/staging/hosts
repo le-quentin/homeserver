@@ -30,3 +30,8 @@ apps_vm
 
 [monitoring]
 apps_vm
+
+[cockpit]
+dns_vm
+apps_vm
+

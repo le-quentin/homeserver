@@ -1,0 +1,14 @@
+- name: "Deploy picard (music tagging utility)"
+  hosts: servarr
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: picard
+    homelab_app_cpu_shares: 512
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 5800
+    homelab_app_volume_names:
+      - config
+    homelab_app_backups:
+      - volume: config
+        cron: "50 6 * * *"

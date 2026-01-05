@@ -1,0 +1,16 @@
+#!/bin/bash
+# Wrapper to run ansible-playbook with common vars from playbooks/group_vars and playbooks/host_vars
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Build extra-vars arguments
+EXTRA_VARS=()
+
+# Load common group_vars
+if [ -f "${SCRIPT_DIR}/playbooks/group_vars/all.yaml" ]; then
+  EXTRA_VARS+=("-e" "@${SCRIPT_DIR}/playbooks/group_vars/all.yaml")
+fi
+
+# Run ansible-playbook with common vars + any user-provided args
+ansible-playbook "${EXTRA_VARS[@]}" "$@"

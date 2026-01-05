@@ -1,0 +1,10 @@
+- name: "Deploy feishin (web client for Navidrome)"
+  hosts: jellyfin
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: feishin
+    homelab_app_cpus: 2
+    homelab_app_cpu_shares: 2048
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 9180

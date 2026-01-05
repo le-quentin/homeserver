@@ -21,14 +21,14 @@
 
     - name: Copy static config
       ansible.builtin.copy:
-        src: ./resources/traefik/config.yml
+        src: "{{ playbooks_root }}/resources/traefik/config.yml"
         dest: "{{ traefik_dir }}/traefik.yml"
         group: "{{ default_admin_group }}"
         mode: "{{ default_admin_file_mode }}"
       notify: Restart traefik
     - name: Render dynamic config template
       ansible.builtin.template:
-        src: ./resources/traefik/dynamic-config.yml.j2
+        src: "{{ playbooks_root }}/resources/traefik/dynamic-config.yml.j2"
         dest: "{{ traefik_dir }}/dynamic.yml"
         group: "{{ default_admin_group }}"
         mode: "{{ default_admin_file_mode }}"

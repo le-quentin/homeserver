@@ -89,7 +89,7 @@ Then, install the dependencies and run the overall playbook, i.e. in staging:
 ```sh
 cd ansible
 ansible-galaxy install -r requirements.yaml
-ansible-playbook -i inventories/staging playbooks/all.yaml
+./run-playbook -i inventories/staging playbooks/all.yaml
 ```
 
 If there are errors, debug will be easier with the -v(erbose) option.
@@ -99,10 +99,11 @@ If there are errors, debug will be easier with the -v(erbose) option.
 - [x] Check what happens on vpn disconnect inside qbittorrent sidecar container (is IP leaking https://ipleak.net/#bittorrent ?)
 - [ ] Run whole servarr stack through gluetun vpn
 - [x] Avoid being firewalled in qbittorrent by handling port redirection to proton vpn (https://github.com/qdm12/gluetun/discussions/2686 ?)
-- [ ] Make restic backups safer : don't overwrite the distant repository if one exists, error instead
-- [ ] Cockpit ?
+- [x] Make restic backups safer : don't overwrite the distant repository if one exists, error instead
+- [x] Cockpit ?
 - [x] Setup the Home-Assistant recorder, to control what's stored for how long
-- [ ] Use Packer to produce base linux image with Docker and initial setup
+- [ ] Use Packer to produce base linux image with Docker and initial setup => save a lot of time on deploy from scratch
+- [ ] Host a docker registry somewhere? Would save some more time on deploys from scratch
 - [ ] Logstash for log aggregation and Kibana for reading logs in web UI
 - And many more things I'll list soon
 

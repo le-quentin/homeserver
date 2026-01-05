@@ -12,6 +12,7 @@ homelab_app_url: "http://{{ homelab_app_full_dns_name }}"
 homelab_app_cpu_shares: 1024
 homelab_app_traefik_network: traefik
 homelab_app_volume_names: []
+homelab_app_compose_template: "./compose.yml.j2"
 homelab_app_backups_rclone_conf: "./resources/backups/rclone.conf"
 homelab_app_backups_rclone_conf_target_dir: "/srv/rclone"
 homelab_app_backups_restic_build_dir: "/srv/restic"

@@ -1,4 +1,7 @@
 ---
+project_root: /home/quentin/perso/homeserver/ansible
+playbooks_root: "{{ project_root }}/playbooks"
+apps_root: "{{ playbooks_root }}/apps"
 # The linux commands to get hardware architecture info don't give the most common labels for those architectures
 # For some repos, we have to use these common labels instead.
 alt_arch_names:
@@ -17,4 +20,5 @@ default_admin_script_mode: "0774"
 
 # Override homelab-app role defaults
 homelab_app_admin_group: admin
+homelab_app_backups_rclone_conf: "{{ playbooks_root }}/resources/backups/rclone.conf"
 homelab_app_restic_stats_directory: /srv/var/backup-stats

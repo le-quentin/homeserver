@@ -1,0 +1,18 @@
+- name: "Deploy paperless-ngx"
+  hosts: paperless
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: paperless
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 8000
+    homelab_app_volume_names:
+      - data
+      - media
+    homelab_app_backups:
+      - volume: data
+        cron: "0 6 * * *"
+      - volume: media
+        cron: "10 6 * * sun"
+        # remote_retention_days: 30
+        # retention_days: 14

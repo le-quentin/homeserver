@@ -10,33 +10,37 @@
   ansible.builtin.import_playbook: "./traefik.yml"
 
 - name: Home Assistant
-  ansible.builtin.import_playbook: "./home-assistant.yaml"
+  ansible.builtin.import_playbook: "./apps/home-assistant/main.yaml"
 - name: Zigbee2MQTT
-  ansible.builtin.import_playbook: "./z2m.yaml"
+  ansible.builtin.import_playbook: "./apps/z2m/main.yaml"
 
 - name: Paperless
-  ansible.builtin.import_playbook: "./paperless.yaml"
+  ansible.builtin.import_playbook: "./apps/paperless/main.yaml"
 - name: Wiki
-  ansible.builtin.import_playbook: "./wiki.yaml"
+  ansible.builtin.import_playbook: "./apps/wiki/main.yaml"
 - name: Tasks.md
-  ansible.builtin.import_playbook: "./tasks-md.yaml"
+  ansible.builtin.import_playbook: "./apps/tasks-md/main.yaml"
+
 - name: Uptime-Kuma
-  ansible.builtin.import_playbook: "./uptime-kuma.yaml"
+  ansible.builtin.import_playbook: "./apps/uptime-kuma/main.yaml"
+- name: Dockge
+  ansible.builtin.import_playbook: "./apps/dockge/main.yaml"
+
 
 - name: servarr
   ansible.builtin.import_playbook: "./servarr.yaml"
 - name: Jellyfin
-  ansible.builtin.import_playbook: "./jellyfin.yaml"
+  ansible.builtin.import_playbook: "./apps/jellyfin/main.yaml"
 - name: Navidrome
-  ansible.builtin.import_playbook: "./navidrome.yaml"
+  ansible.builtin.import_playbook: "./apps/navidrome/main.yaml"
 - name: Feishin
-  ansible.builtin.import_playbook: "./feishin.yaml"
+  ansible.builtin.import_playbook: "./apps/feishin/main.yaml"
 - name: MusicBrainz Picard
-  ansible.builtin.import_playbook: "./picard.yaml"
+  ansible.builtin.import_playbook: "./apps/picard/main.yaml"
 - name: slskd
-  ansible.builtin.import_playbook: "./slskd.yaml"
+  ansible.builtin.import_playbook: "./apps/slskd/main.yaml"
 - name: slsk-batchdl
   ansible.builtin.import_playbook: "./slsk_batchdl.yaml"
 
 - name: Homepage
-  ansible.builtin.import_playbook: "./homepage.yaml"
+  ansible.builtin.import_playbook: "./apps/homepage/main.yaml"

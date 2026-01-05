@@ -1,0 +1,16 @@
+- name: Deploy Tasks.md
+  hosts: apps_vm
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: tasks
+    homelab_app_apps_domain: "{{ homeserver_domain }}"
+    homelab_app_internal_port: 8080
+    homelab_app_volume_names:
+      - data
+      - config
+    homelab_app_backups:
+      - volume: data
+        cron: "5 6 * * *"
+      - volume: config
+        cron: "10 6 * * *"

@@ -7,7 +7,7 @@
     - name: Copy systemd-resolved conf file over (turning off TCP 53 listen to free it for AdGuard)
       become: true
       ansible.builtin.copy:
-        src: "./resources/adguard/systemd-resolved.conf"
+        src: "{{ playbooks_root }}/resources/adguard/systemd-resolved.conf"
         dest: "/etc/systemd/resolved.conf"
         mode: "0644"
       notify: Restart systemd-resolved
@@ -35,13 +35,13 @@
       block:
         - name: Interpret docker compose template
           ansible.builtin.template:
-            src: ./resources/adguard/compose.yaml.j2
+            src: "{{ playbooks_root }}/resources/adguard/compose.yaml.j2"
             dest: "{{ ansible_files_root }}/adguard/compose.yaml"
             mode: "0644"
         - name: Interpret AdGuard configuration file
           become: true
           ansible.builtin.template:
-            src: ./resources/adguard/config.yaml.j2
+            src: "{{ playbooks_root }}/resources/adguard/config.yaml.j2"
             dest: "{{ home_dir }}/conf/AdGuardHome.yaml"
             mode: "0644"
             backup: true
