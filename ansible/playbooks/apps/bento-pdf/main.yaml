@@ -1,0 +1,7 @@
+- name: Deploy BentoPDF
+  hosts: apps_vm
+  roles:
+    - homelab-app
+  vars:
+    homelab_app_name: bento-pdf
+    homelab_app_internal_port: 8080

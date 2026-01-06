@@ -19,6 +19,7 @@ default_admin_file_mode: "0664"
 default_admin_script_mode: "0774"
 
 # Override homelab-app role defaults
+homelab_app_apps_domain: "{{ homeserver_domain }}"
 homelab_app_admin_group: admin
 homelab_app_backups_rclone_conf: "{{ playbooks_root }}/resources/backups/rclone.conf"
 homelab_app_restic_stats_directory: /srv/var/backup-stats
