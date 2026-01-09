@@ -1,15 +1,22 @@
-- name: Get list of all containers
-  community.docker.docker_host_info:
-    containers: true
-  register: docker_info
+- name: Find all compose files
+  find:
+    paths: /srv/apps
+    patterns: "compose.yml"
+    recurse: true
+  register: compose_files
 
-- name: Get detailed info for each container
-  community.docker.docker_container_info:
-    name: "{{ item.Names | first }}"
-  loop: "{{ docker_info.containers }}"
-  register: containers_details
+- name: Read compose files
+  slurp:
+    path: "{{ item.path }}"
+  loop: "{{ compose_files.files }}"
+  register: compose_contents
 
-- name: Filter containers mounting /mnt/media*
+- name: Initialize empty list
   set_fact:
-    media_containers: "{{ containers_details.results |
-      community.general.json_query('[?container.Mounts[?starts_with(Source, `/mnt/media`)]].container.Name') }}"
+    media_apps: []
+
+- name: Check each compose file for /mnt/media
+  set_fact:
+    media_apps: "{{ media_apps + [item.item.path | dirname] }}"
+  loop: "{{ compose_contents.results }}"
+  when: "'/mnt/media' in (item.content | b64decode)"

@@ -1,18 +1,18 @@
 ---
-- name: Start containers mounting /mnt/media*
+- name: Start compose apps mounting /mnt/media*
   hosts: apps_vm
   tasks:
-    - name: List containers mounting /mnt/media*
+    - name: List compose apps mounting /mnt/media*
       ansible.builtin.include_tasks: ./tasks/list_containers_mounting_media.yaml
 
-    - name: Display containers to be started
+    - name: Display apps to be started
       debug:
-        msg: "Starting containers: {{ media_containers }}"
-      when: media_containers | length > 0
+        msg: "Starting apps: {{ media_apps }}"
+      when: media_apps | length > 0
 
-    - name: Start media-dependent containers
-      community.docker.docker_container:
-        name: "{{ item }}"
-        state: started
-      loop: "{{ media_containers }}"
-      when: media_containers | length > 0
+    - name: Start media-dependent apps
+      community.docker.docker_compose_v2:
+        project_src: "{{ item }}"
+        state: present
+      loop: "{{ media_apps }}"
+      when: media_apps | length > 0
