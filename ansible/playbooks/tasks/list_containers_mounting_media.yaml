@@ -1,0 +1,15 @@
+- name: Get list of all containers
+  community.docker.docker_host_info:
+    containers: true
+  register: docker_info
+
+- name: Get detailed info for each container
+  community.docker.docker_container_info:
+    name: "{{ item.Names | first }}"
+  loop: "{{ docker_info.containers }}"
+  register: containers_details
+
+- name: Filter containers mounting /mnt/media*
+  set_fact:
+    media_containers: "{{ containers_details.results |
+      community.general.json_query('[?container.Mounts[?starts_with(Source, `/mnt/media`)]].container.Name') }}"

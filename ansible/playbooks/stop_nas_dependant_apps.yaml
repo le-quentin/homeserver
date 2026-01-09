@@ -1,0 +1,18 @@
+---
+- name: Stop containers mounting /mnt/media*
+  hosts: apps_vm
+  tasks:
+    - name: List containers mounting /mnt/media*
+      ansible.builtin.include_tasks: ./tasks/list_containers_mounting_media.yaml
+
+    - name: Display containers to be stopped
+      debug:
+        msg: "Stopping containers: {{ media_containers }}"
+      when: media_containers | length > 0
+
+    - name: Stop media-dependent containers
+      community.docker.docker_container:
+        name: "{{ item }}"
+        state: stopped
+      loop: "{{ media_containers }}"
+      when: media_containers | length > 0
