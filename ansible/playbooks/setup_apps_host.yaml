@@ -19,3 +19,16 @@
         - /srv/var
         - /srv/var/log
         - "{{ homelab_app_restic_stats_directory }}"
+    - name: Ensure nfs-common is installed
+      become: true
+      ansible.builtin.package:
+        name: nfs-common
+        state: present
+    - name: Mount media NFS volume
+      become: true
+      ansible.posix.mount:
+        src: "{{ nas_address }}:{{ media_dir_path}}"
+        path: /mnt/media
+        opts: rw,async,hard,intr,timeo=600,retrans=2,nofail,rsize=262144,wsize=262144,_netdev,nofail
+        state: mounted
+        fstype: nfs

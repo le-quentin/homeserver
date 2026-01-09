@@ -3,5 +3,6 @@ homeserver_domain: staging.home
 dns_ip: 10.142.1.2
 gateway_ip: "{{ ansible_host }}"
 apps_vm_ip: 10.142.10.10
+media_dir_path: /staging-homeserver-media
 
 homelab_app_backups_rclone_remote: r2:/homelab-backups-staging
