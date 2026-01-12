@@ -1,6 +1,7 @@
 services:
   navidrome:
     image: deluan/navidrome:0.57.0
+    user: 1000:1000
     environment:
       - ND_ARTISTARTPRIORITY=folder.*,artist.*,album/artist.*,external
       - ND_MUSICFOLDER=/music/library
