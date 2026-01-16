@@ -4,6 +4,6 @@ dns_ip: 10.42.1.2
 gateway_ip: "{{ ansible_host }}"
 database_ip: 10.42.10.21
 apps_vm_ip: 10.42.10.10
-media_dir_path: /homeserver-media
+media_dir_path: /export/homeserver-media
 
 homelab_app_backups_rclone_remote: r2:/homelab-backups
