@@ -29,6 +29,6 @@
       ansible.posix.mount:
         src: "{{ nas_address }}:{{ media_dir_path }}"
         path: /mnt/media
-        opts: nfsvers=3,rw,async,noac,hard,intr,timeo=600,retrans=5,rsize=1048576,wsize=1048576,_netdev,nofail
+        opts: nfsvers=3,rw,async,hard,intr,timeo=600,retrans=5,rsize=1048576,wsize=1048576,_netdev,nofail
         state: mounted
         fstype: nfs
