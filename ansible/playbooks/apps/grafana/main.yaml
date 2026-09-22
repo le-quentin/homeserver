@@ -20,7 +20,7 @@
         cron: "0 2 * * *"  # Daily backup at 2 AM
   pre_tasks:
     - name: Monitoring setup
-      ansible.builtin.import_tasks: "{{ playbooks_root }}/tasks/monitoring-setup.yaml"
+      ansible.builtin.include_tasks: "{{ playbooks_root }}/tasks/monitoring-setup.yaml"
     - name: Ensure Grafana config directory exists
       file:
         path: "{{ homelab_app_target_root_dir }}/config"

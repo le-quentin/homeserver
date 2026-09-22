@@ -14,4 +14,4 @@
         cron: "55 6 * * *"
   pre_tasks:
     - name: Servarr stack setup
-      ansible.builtin.import_tasks: "{{ playbooks_root }}/tasks/servarr-setup.yaml"
+      ansible.builtin.include_tasks: "{{ playbooks_root }}/tasks/servarr-setup.yaml"

@@ -13,7 +13,7 @@
         cron: "55 5 * * *"
   pre_tasks:
     - name: Home-Assistant stack setup
-      ansible.builtin.import_tasks: "{{ playbooks_root }}/tasks/home-assistant-setup.yaml"
+      ansible.builtin.include_tasks: "{{ playbooks_root }}/tasks/home-assistant-setup.yaml"
     - name: Check if the home-assistant volume exists
       community.docker.docker_volume_info:
         name: home-assistant-data

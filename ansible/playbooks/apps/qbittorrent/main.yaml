@@ -15,7 +15,7 @@
     homelab_app_vpn_enabled: true
   pre_tasks:
     - name: Servarr stack setup
-      ansible.builtin.import_tasks: "{{ playbooks_root }}/tasks/servarr-setup.yaml"
+      ansible.builtin.include_tasks: "{{ playbooks_root }}/tasks/servarr-setup.yaml"
     - name: Make sure downloads folder exists
       become: true
       ansible.builtin.file:

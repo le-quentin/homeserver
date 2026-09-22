@@ -16,7 +16,7 @@
         cron: "45 5 * * *"
   pre_tasks:
     - name: Home-Assistant stack setup
-      ansible.builtin.import_tasks: "{{ playbooks_root }}/tasks/home-assistant-setup.yaml"
+      ansible.builtin.include_tasks: "{{ playbooks_root }}/tasks/home-assistant-setup.yaml"
     - name: Check if the z2m volume exists
       community.docker.docker_volume_info:
         name: z2m-data
