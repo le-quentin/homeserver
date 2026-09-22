@@ -25,6 +25,8 @@ services:
       - VPN_PORT_FORWARDING_UP_COMMAND=/bin/sh -c '/hooks/update_qbittorrent_port.sh {% raw %}{{PORTS}}{% endraw %}'
     volumes:
       - ./gluetun-hooks:/hooks:ro     # where the script lives
+    healthcheck:
+      disable: true # Don't let Traefik gate WebUI routing on VPN tunnel status; qbittorrent's own firewall/kill-switch already blocks traffic when the tunnel is down
   qbittorrent:
     restart: unless-stopped
     image: lscr.io/linuxserver/qbittorrent:5.1.2-libtorrentv1
@@ -43,7 +45,7 @@ services:
       - {{ homelab_app_target_root_dir }}/wg0.conf:/etc/wireguard/wg0.conf:ro
     depends_on:
       vpn-client:
-        condition: service_healthy
+        condition: service_started
 volumes:
   qbittorrent-config:
     external: true
