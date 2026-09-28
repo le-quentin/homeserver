@@ -1,0 +1,27 @@
+- name: "Deploy DuckDNS (dynamic DNS updater)"
+  hosts: duckdns
+  tasks:
+    - name: "ensure config dir exists"
+      become: true
+      ansible.builtin.file:
+        path: /srv/apps/duckdns
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_dir_mode }}"
+    - name: "render compose template"
+      become: true
+      ansible.builtin.template:
+        src: "{{ playbooks_root }}/apps/duckdns/compose.yml.j2"
+        dest: /srv/apps/duckdns/compose.yml
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
+      notify: Restart docker
+  vars:
+    duckdns_subdomains: bonnetis
+  handlers:
+    - name: Restart docker
+      community.docker.docker_compose_v2:
+        project_src: /srv/apps/duckdns
+        state: present
+        recreate: always

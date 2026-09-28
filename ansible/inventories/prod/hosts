@@ -28,6 +28,9 @@ apps_vm
 [slsk-batchdl]
 apps_vm
 
+[duckdns]
+apps_vm
+
 # Now managed with a direct LibreELEC install
 # [tvbox]
 # tvbox

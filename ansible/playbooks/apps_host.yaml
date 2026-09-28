@@ -5,6 +5,8 @@
   ansible.builtin.import_playbook: "./setup_apps_host.yaml"
 - name: "Setup the backup summaries"
   ansible.builtin.import_playbook: "./backup-summaries.yaml"
+- name: Duckdns
+  ansible.builtin.import_playbook: "./apps/duckdns/main.yaml"
 
 - name: Setup traefik
   ansible.builtin.import_playbook: "./traefik.yml"

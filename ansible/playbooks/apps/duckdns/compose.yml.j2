@@ -1,0 +1,25 @@
+---
+services:
+  duckdns:
+    image: lscr.io/linuxserver/duckdns:version-73f1bc7d
+    container_name: duckdns
+    restart: unless-stopped
+    labels:
+      monitoring.logs.enabled: "true"
+      monitoring.logs.app_name: "duckdns"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Paris
+      - SUBDOMAINS={{ duckdns_subdomains }}
+      - TOKEN={{ duckdns_token }}
+      - LOG_FILE=true
+    healthcheck:
+      # duck.sh runs every 5 min (+ up to ~290s random delay). Its failure message is multi-line, so
+      # tail -1 can land on a blank/response line instead of the actual error - check for the success
+      # markers instead of the absence of a failure one.
+      test: ["CMD-SHELL", "find /config/duck.log -mmin -15 | grep -q . && tail -n 5 /config/duck.log | grep -Eq 'successful|was updated'"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 600s
