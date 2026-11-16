@@ -44,7 +44,7 @@
           ansible.builtin.template:
             src: "{{ playbooks_root }}/resources/adguard/config.yaml.j2"
             dest: "{{ home_dir }}/conf/AdGuardHome.yaml"
-            mode: "0644"
+            mode: "0600" # as AdGuard writes it back: it holds the password hash
             backup: true
   handlers:
     - name: Restart systemd-resolved
