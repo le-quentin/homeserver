@@ -85,12 +85,17 @@ tofu apply
 
 ## Deployment
 
-Then, install the dependencies and run the overall playbook, i.e. in staging:
+Then, install the dependencies and run the overall playbook:
 ```sh
 cd ansible
 ansible-galaxy install -r requirements.yaml
-./run-playbook -i inventories/staging playbooks/all.yaml
+ansible-playbook -i inventories/prod playbooks/all.yaml --check --diff # optional dry run
+ansible-playbook -i inventories/prod playbooks/all.yaml
 ```
+
+A single app can be deployed the same way with its own playbook, e.g. `playbooks/apps/qbittorrent/main.yaml`.
+Shared variables come from the inventory (`group_vars/all/shared.yaml`, a symlink to `playbooks/group_vars/all.yaml`):
+don't pass that file with `-e`, extra vars would override host vars such as `apps_root`.
 
 If there are errors, debug will be easier with the -v(erbose) option.
 
