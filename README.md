@@ -110,5 +110,11 @@ If there are errors, debug will be easier with the -v(erbose) option.
 - [ ] Use Packer to produce base linux image with Docker and initial setup => save a lot of time on deploy from scratch
 - [ ] Host a docker registry somewhere? Would save some more time on deploys from scratch
 - [ ] Logstash for log aggregation and Kibana for reading logs in web UI
+- [ ] Delete `ansible/playbooks/slsk_batchdl.yaml` (and its import in `apps_host.yaml`) once it has removed slsk-batchdl from apps_vm
+- [ ] slskd reads `vpn_countries` from the `torrent` group: give each VPN app its own variable (hidden cross-group coupling, like the shared VPN key had)
+- [ ] qbittorrent's compose mounts an unused `{{ homelab_app_target_root_dir }}/wg0.conf`
+- [ ] `apps_root` means the local playbooks path in `group_vars/all` and `/srv/apps` on apps_vm (`host_vars`): rename the remote one (e.g. `apps_target_root`) and update its uses (z2m, home-assistant, qbittorrent)
+- [ ] The Vagrant `test` inventory used by `test/run_all.sh` is stale (old group names, `apps_vm` without `ansible_host`): it deploys nearly nothing
+- [ ] Remove the obsolete `version` attribute from Traefik's compose
 - And many more things I'll list soon
 
