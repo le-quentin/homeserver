@@ -20,3 +20,13 @@ if ansible-playbook -i inventories/prod test/check_vpn_keys.yaml \
   exit 1
 fi
 echo "OK: shared key rejected"
+
+echo "== a key without a valid expiry date is rejected"
+for bad_date in "" "16/11/2027" "TODO"; do
+  if ansible-playbook -i inventories/prod test/check_vpn_keys.yaml \
+      -e "{\"slskd_vpn_key_expires\": \"$bad_date\"}" > /dev/null; then
+    echo "FAIL: expiry date '$bad_date' was not rejected"
+    exit 1
+  fi
+done
+echo "OK: invalid expiry dates rejected"

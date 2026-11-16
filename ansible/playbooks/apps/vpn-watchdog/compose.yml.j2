@@ -1,0 +1,26 @@
+---
+# VPN watchdog: stops a gluetun container stuck in a reconnection loop, warns before WireGuard keys
+# expire. See vpn-watchdog.sh.
+services:
+  vpn-watchdog:
+    image: docker:28-cli
+    container_name: vpn-watchdog
+    restart: always
+    entrypoint: ["/bin/sh", "/watchdog/vpn-watchdog.sh", "loop"]
+    env_file: ./watchdog.env
+    volumes:
+      # Read-write: the breaker stops containers (root-equivalent on the host, accepted like for other apps)
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./vpn-watchdog.sh:/watchdog/vpn-watchdog.sh:ro
+      - ./vpn-keys.conf:/config/vpn-keys.conf:ro
+      - state:/state
+    networks:
+      - {{ traefik_network }} # reaches uptime-kuma by its container name
+    labels:
+      monitoring.logs.enabled: "true"
+      monitoring.logs.app_name: vpn-watchdog
+volumes:
+  state:
+networks:
+  {{ traefik_network }}:
+    external: true

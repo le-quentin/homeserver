@@ -43,6 +43,8 @@
   ansible.builtin.import_playbook: "./apps/slskd/main.yaml"
 - name: slsk-batchdl
   ansible.builtin.import_playbook: "./slsk_batchdl.yaml"
+- name: VPN watchdog (after the VPN apps)
+  ansible.builtin.import_playbook: "./apps/vpn-watchdog/main.yaml"
 
 - name: Homepage
   ansible.builtin.import_playbook: "./apps/homepage/main.yaml"

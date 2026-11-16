@@ -16,3 +16,18 @@
       VPN keys of {{ vpn_key_names | join(', ') }}: each tunnel needs its own WireGuard private key
       (a distinct 44-character base64 key in <app>_vpn_private_key, no shared vpn_private_key).
     quiet: true
+# Proton WireGuard keys expire (one year at most) without any warning from Proton, and an expired key
+# makes gluetun reconnect in a loop. The VPN watchdog warns ahead of time from <app>_vpn_key_expires:
+# every key needs one.
+- name: Check that every VPN key has its expiry date
+  vars:
+    vpn_apps: "{{ query('varnames', '_vpn_private_key$') | map('regex_replace', '_vpn_private_key$', '') | list }}"
+    vpn_expiry_names: "{{ vpn_apps | map('regex_replace', '$', '_vpn_key_expires') | list }}"
+    vpn_expiry_dates: "{{ vpn_expiry_names | map('extract', hostvars[inventory_hostname]) | map('default', '') | map('string') | list }}"
+  ansible.builtin.assert:
+    that:
+      - vpn_expiry_dates | reject('match', '^[0-9]{4}-[0-9]{2}-[0-9]{2}$') | list | length == 0
+    fail_msg: >-
+      Each of {{ vpn_expiry_names | join(', ') }} must be the expiry date (YYYY-MM-DD, quoted) of its
+      WireGuard key, as shown in the Proton dashboard.
+    quiet: true

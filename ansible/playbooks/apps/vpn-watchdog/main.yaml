@@ -1,0 +1,67 @@
+---
+- name: "Deploy the VPN watchdog (circuit breaker for gluetun, WireGuard key expiry alerts)"
+  hosts: vpn-watchdog
+  vars:
+    vpn_watchdog_dir: /srv/apps/vpn-watchdog
+  tasks:
+    - name: Check VPN keys and their expiry dates
+      ansible.builtin.include_role:
+        name: homelab-app
+        tasks_from: assert_vpn_keys.yml
+    - name: Check the Uptime Kuma push tokens are set
+      ansible.builtin.assert:
+        that:
+          - vpn_watchdog_kuma_breaker_token is match('^[A-Za-z0-9]+$')
+          - vpn_watchdog_kuma_expiry_token is match('^[A-Za-z0-9]+$')
+          - vpn_watchdog_kuma_breaker_token != 'TODO' and vpn_watchdog_kuma_expiry_token != 'TODO'
+        fail_msg: >-
+          Create the two Uptime Kuma push monitors (see playbooks/apps/vpn-watchdog/README.md) and put their
+          tokens in group_vars/vpn-watchdog/secrets.yaml.
+        quiet: true
+    - name: "ensure the watchdog dir exists"
+      become: true
+      ansible.builtin.file:
+        path: "{{ vpn_watchdog_dir }}"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_dir_mode }}"
+    - name: "copy the watchdog script"
+      become: true
+      ansible.builtin.copy:
+        src: "{{ playbooks_root }}/apps/vpn-watchdog/vpn-watchdog.sh"
+        dest: "{{ vpn_watchdog_dir }}/vpn-watchdog.sh"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_script_mode }}"
+      notify: Restart vpn-watchdog
+    - name: "render the Uptime Kuma push URLs (secret)"
+      become: true
+      ansible.builtin.template:
+        src: "{{ playbooks_root }}/apps/vpn-watchdog/watchdog.env.j2"
+        dest: "{{ vpn_watchdog_dir }}/watchdog.env"
+        owner: "{{ ansible_user }}"
+        group: "{{ default_admin_group }}"
+        mode: "0640"
+      notify: Restart vpn-watchdog
+    - name: "render the WireGuard key expiry dates"
+      become: true
+      ansible.builtin.template:
+        src: "{{ playbooks_root }}/apps/vpn-watchdog/vpn-keys.conf.j2"
+        dest: "{{ vpn_watchdog_dir }}/vpn-keys.conf"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
+      notify: Restart vpn-watchdog
+    - name: "render compose template"
+      become: true
+      ansible.builtin.template:
+        src: "{{ playbooks_root }}/apps/vpn-watchdog/compose.yml.j2"
+        dest: "{{ vpn_watchdog_dir }}/compose.yml"
+        group: "{{ default_admin_group }}"
+        mode: "{{ default_admin_file_mode }}"
+      notify: Restart vpn-watchdog
+  handlers:
+    - name: Restart vpn-watchdog
+      community.docker.docker_compose_v2:
+        project_src: "{{ vpn_watchdog_dir }}"
+        state: present
+        recreate: always

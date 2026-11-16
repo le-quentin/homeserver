@@ -1,0 +1,4 @@
+# <app> <expiry date of its WireGuard key>, from the <app>_vpn_key_expires inventory variables
+{% for name in query('varnames', '_vpn_key_expires$') | sort %}
+{{ name | regex_replace('_vpn_key_expires$', '') }} {{ lookup('vars', name) }}
+{% endfor %}

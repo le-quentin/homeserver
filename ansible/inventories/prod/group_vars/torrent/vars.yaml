@@ -1,0 +1,4 @@
+---
+# Expiry date of qbittorrent_vpn_private_key, as shown in the Proton dashboard (Downloads > WireGuard configuration).
+# The VPN watchdog warns 28 days before. Once extended in the dashboard, update this date.
+qbittorrent_vpn_key_expires: "2027-11-16"
