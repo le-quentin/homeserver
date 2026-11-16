@@ -1,4 +1,0 @@
----
-# Expiry date of slsk_batchdl_vpn_private_key, as shown in the Proton dashboard (Downloads > WireGuard configuration).
-# The VPN watchdog warns 28 days before. Once extended in the dashboard, update this date.
-slsk_batchdl_vpn_key_expires: "2027-11-16"

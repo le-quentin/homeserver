@@ -1,39 +1,38 @@
-- name: "Install slsk-batchdl"
-  hosts: servarr
+---
+# slsk-batchdl was removed (it downloaded Spotify playlists from Soulseek, done long ago). This play removes
+# what it left on the host; delete it once it has run on apps_vm.
+# Its downloads are kept if there are any: check /srv/tools/slsk-batchdl/data and delete it by hand.
+- name: "Remove slsk-batchdl"
+  hosts: apps_vm
+  vars:
+    slsk_batchdl_dir: /srv/tools/slsk-batchdl
   tasks:
-    - name: Check VPN keys
-      ansible.builtin.include_role:
-        name: homelab-app
-        tasks_from: assert_vpn_keys.yml
-    - name: "ensure config dir exists"
+    - name: "check whether slsk-batchdl is still deployed"
+      ansible.builtin.stat:
+        path: "{{ slsk_batchdl_dir }}/compose.yml"
+      register: slsk_batchdl_compose
+    - name: "remove its containers and network"
+      community.docker.docker_compose_v2:
+        project_src: "{{ slsk_batchdl_dir }}"
+        state: absent
+      when: slsk_batchdl_compose.stat.exists
+    - name: "remove its image"
+      community.docker.docker_image:
+        name: lequentindckr/slsk-batchdl
+        tag: v2.4.7
+        state: absent
+    - name: "look for downloads left in its data dir"
+      ansible.builtin.find:
+        paths: "{{ slsk_batchdl_dir }}/data"
+        file_type: any
+      register: slsk_batchdl_data
+    - name: "remove its files (compose, config with the Soulseek and Spotify credentials)"
       become: true
       ansible.builtin.file:
-        path: /srv/tools/slsk-batchdl/config
-        state: directory
-        owner: "{{ ansible_user }}"
-        group: "{{ default_admin_group }}"
-        mode: "{{ default_admin_dir_mode }}"
-    - name: "render config template"
-      become: true
-      ansible.builtin.template:
-        src: "{{ playbooks_root }}/apps/slskd/batchdl/sldl.conf.j2"
-        dest: "/srv/tools/slsk-batchdl/config/sldl.conf"
-        group: "{{ default_admin_group }}"
-        mode: "{{ default_admin_file_mode }}"
-      notify: Stop slsk-batchdl
-    - name: "render compose template"
-      become: true
-      ansible.builtin.template:
-        src: "{{ playbooks_root }}/apps/slskd/batchdl/compose.yml.j2"
-        dest: "/srv/tools/slsk-batchdl/compose.yml"
-        group: "{{ default_admin_group }}"
-        mode: "{{ default_admin_file_mode }}"
-      notify: Stop slsk-batchdl
-  handlers:
-    # slsk-batchdl is stopped by default: a config change takes it down instead of restarting it.
-    # Start it by hand when needed: docker compose -f /srv/tools/slsk-batchdl/compose.yml up -d
-    # and take it down afterwards:   docker compose -f /srv/tools/slsk-batchdl/compose.yml down
-    - name: Stop slsk-batchdl
-      community.docker.docker_compose_v2:
-        project_src: /srv/tools/slsk-batchdl
+        path: "{{ item }}"
         state: absent
+      loop: "{{ [slsk_batchdl_dir] if slsk_batchdl_data.matched == 0 else [slsk_batchdl_dir + '/compose.yml', slsk_batchdl_dir + '/config'] }}"
+    - name: "report downloads left behind"
+      ansible.builtin.debug:
+        msg: "{{ slsk_batchdl_data.matched }} entries left in {{ slsk_batchdl_dir }}/data: check them, then delete the directory by hand"
+      when: slsk_batchdl_data.matched > 0

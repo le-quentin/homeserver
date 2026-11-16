@@ -131,14 +131,14 @@ expect_stopped slskd-vpn-client-1
 expect_push breaker down "internet down"
 
 new_case "a container restarting in a loop is caught too (its logs survive the restarts)"
-container slsk-batchdl-vpn-client-1 qmcgaw/gluetun:v3.41.3 restarting
+container tool-vpn-client-1 qmcgaw/gluetun:v3.41.3 restarting
 run_watchdog
 expect_not_stopped # not running right now: checked on the next run
-container_line="slsk-batchdl-vpn-client-1 qmcgaw/gluetun:v3.41.3 running"
+container_line="tool-vpn-client-1 qmcgaw/gluetun:v3.41.3 running"
 echo "$container_line" > "$FAKE/ps"
-connections slsk-batchdl-vpn-client-1 25 3000 100
+connections tool-vpn-client-1 25 3000 100
 run_watchdog
-expect_stopped slsk-batchdl-vpn-client-1
+expect_stopped tool-vpn-client-1
 
 new_case "a tripped container stays reported while it is down"
 container slskd-vpn-client-1 qmcgaw/gluetun:v3.41.3 exited
@@ -146,8 +146,8 @@ echo "slskd-vpn-client-1 $((NOW - 600)) tripped" > "$FAKE/state"
 run_watchdog
 expect_push breaker down "slskd-vpn-client-1 stopped by the breaker, restart it by hand"
 
-new_case "a container stopped on purpose (slsk-batchdl) is not a problem"
-container slsk-batchdl-vpn-client-1 qmcgaw/gluetun:v3.41.3 exited
+new_case "a container stopped on purpose is not a problem"
+container tool-vpn-client-1 qmcgaw/gluetun:v3.41.3 exited
 run_watchdog
 expect_push breaker up
 

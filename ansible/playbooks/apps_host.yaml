@@ -41,7 +41,7 @@
   ansible.builtin.import_playbook: "./apps/picard/main.yaml"
 - name: slskd
   ansible.builtin.import_playbook: "./apps/slskd/main.yaml"
-- name: slsk-batchdl
+- name: Remove slsk-batchdl (one-off cleanup, delete once run)
   ansible.builtin.import_playbook: "./slsk_batchdl.yaml"
 - name: VPN watchdog (after the VPN apps)
   ansible.builtin.import_playbook: "./apps/vpn-watchdog/main.yaml"

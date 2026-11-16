@@ -25,9 +25,6 @@ apps_vm
 [torrent]
 apps_vm
 
-[slsk-batchdl]
-apps_vm
-
 [duckdns]
 apps_vm
 

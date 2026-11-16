@@ -109,7 +109,7 @@ check_tunnels() {
     previous="$(state_get "$name")"
     trip_time="${previous%% *}"; trip_time="${trip_time:-0}"
     if [ "$state" != "running" ]; then
-      # Not running on purpose (slsk-batchdl is stopped by default) unless the breaker did it
+      # A stopped tunnel is not a problem (it may be stopped on purpose) unless the breaker did it
       [ "${previous##* }" = "tripped" ] && echo "$name stopped by the breaker, restart it by hand once fixed"
       continue
     fi
