@@ -7,6 +7,7 @@ cd "$SCRIPT_DIR"
 
 set -e
 ansible-playbook -i "$PROJECT_DIR/inventories/prod" --syntax-check "$PROJECT_DIR/playbooks/all.yaml"
+"$SCRIPT_DIR/check_vpn_keys.sh"
 set +e
 
 vagrant destroy -f --no-tty

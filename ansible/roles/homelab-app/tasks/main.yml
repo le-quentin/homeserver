@@ -1,5 +1,13 @@
 # SPDX-License-Identifier: MIT-0
 ---
+- name: Check VPN keys
+  tags: [always]
+  when: homelab_app_vpn_enabled
+  include_tasks:
+    file: assert_vpn_keys.yml
+    apply:
+      tags: [always]
+
 - name: Remove app
   tags: [remove, never]
   include_tasks:

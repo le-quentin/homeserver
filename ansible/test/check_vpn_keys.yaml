@@ -1,0 +1,11 @@
+# Runs the VPN keys check of an inventory on the controller, without connecting to the hosts.
+# Usage: ansible-playbook -i ../inventories/prod check_vpn_keys.yaml
+- name: Check VPN keys
+  hosts: torrent:servarr
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Check VPN keys
+      ansible.builtin.include_role:
+        name: homelab-app
+        tasks_from: assert_vpn_keys.yml

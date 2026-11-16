@@ -1,6 +1,10 @@
 - name: "Install slsk-batchdl"
   hosts: servarr
   tasks:
+    - name: Check VPN keys
+      ansible.builtin.include_role:
+        name: homelab-app
+        tasks_from: assert_vpn_keys.yml
     - name: "ensure config dir exists"
       become: true
       ansible.builtin.file:

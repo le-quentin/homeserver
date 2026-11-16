@@ -1,0 +1,18 @@
+# Every VPN tunnel must have its own WireGuard key. Proton sees a shared key as one device
+# connecting from several places at once: the tunnels kick each other out and reconnect in a loop
+# (thousands of sessions a day), which got the Proton account banned for abuse.
+# Convention: each app's key lives in a variable named <app>_vpn_private_key. All the apps of a host
+# see each other's group vars, so this compares every tunnel key of the host.
+- name: Check that every VPN tunnel of the host has its own WireGuard key
+  vars:
+    vpn_key_names: "{{ query('varnames', '_vpn_private_key$') }}"
+    vpn_keys: "{{ query('vars', *vpn_key_names) }}"
+  ansible.builtin.assert:
+    that:
+      - vpn_private_key is not defined
+      - vpn_keys | length == vpn_keys | unique | length
+      - vpn_keys | reject('match', '^[A-Za-z0-9+/]{42}[AEIMQUYcgkosw048]=$') | list | length == 0
+    fail_msg: >-
+      VPN keys of {{ vpn_key_names | join(', ') }}: each tunnel needs its own WireGuard private key
+      (a distinct 44-character base64 key in <app>_vpn_private_key, no shared vpn_private_key).
+    quiet: true
