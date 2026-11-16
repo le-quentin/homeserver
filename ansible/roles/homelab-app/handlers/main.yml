@@ -5,3 +5,7 @@
     project_src: "{{ homelab_app_target_root_dir }}"
     state: present
     recreate: always
+  # In check mode, compose's dry run cannot start anything: an app whose vpn-client must be healthy
+  # (depends_on: service_healthy) fails when that container is stopped, which stopped the whole check
+  # run. Report it and go on.
+  ignore_errors: "{{ ansible_check_mode }}"
