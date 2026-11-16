@@ -11,7 +11,7 @@
         state: directory
         owner: "{{ ansible_user }}"
         group: "{{ default_admin_group }}"
-        mode: "{{ default_admin_dir_mode }}"
+        mode: "{{ '0755' if item == '/srv' else default_admin_dir_mode }}" # /srv is 0755 on the host
       loop:
         - /srv
         - /srv/apps
