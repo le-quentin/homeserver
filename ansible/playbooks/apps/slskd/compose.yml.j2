@@ -5,8 +5,6 @@ services:
     restart: unless-stopped
     networks:
       - servarr
-    ports:
-      - "50300:50300"
     cap_add:
       - NET_ADMIN
     devices:
@@ -17,9 +15,14 @@ services:
       - WIREGUARD_PRIVATE_KEY="{{ slskd_vpn_private_key }}"
       - SERVER_COUNTRIES="{{ vpn_countries }}"
       - PORT_FORWARD_ONLY=on
-      - FIREWALL_VPN_INPUT_PORTS=50300
+      # Proton forwards one random port (NAT-PMP, enabled in this key's Proton config); gluetun opens its
+      # firewall to it, and slskd reads it from the control server to listen on it (see SLSKD_VPN_*).
+      - VPN_PORT_FORWARDING=on
+      # Every route of the control server requires the API key (some are public by default, including
+      # PUT /v1/vpn/status, and will require auth in a future gluetun release anyway)
+      - 'HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE={"auth":"apikey","apikey":"{{ slskd_gluetun_api_key }}"}'
   slskd:
-    image: slskd/slskd:0.23.1
+    image: slskd/slskd:0.26.2
     container_name: slskd
     restart: unless-stopped
     network_mode: "service:vpn-client"
@@ -27,6 +30,13 @@ services:
     environment:
       - TZ=Europe/Paris
       - SLSKD_REMOTE_CONFIGURATION=true # Allow configuring from the Web UI
+      # slskd polls gluetun (same network namespace) for the VPN status and the forwarded port, listens on
+      # that port and announces it to the Soulseek server, and stays disconnected while the VPN is down.
+      # Don't set a listen port here: the forwarded one overrides any other configuration.
+      - SLSKD_VPN=true
+      - SLSKD_VPN_PORT_FORWARDING=true
+      - SLSKD_VPN_GLUETUN_URL=http://localhost:8000
+      - SLSKD_VPN_GLUETUN_API_KEY={{ slskd_gluetun_api_key }}
     volumes:
       - slskd-app-data:/app
       - /mnt/media/Musique:/data
