@@ -13,22 +13,23 @@
       notify: Restart systemd-resolved
     - name: Restart systemd-resolved immediately if needed to free the TCP port
       ansible.builtin.meta: flush_handlers
+    # Not recursive: AdGuard sets the modes of its own files (its config holds the password hash)
     - name: Ensure work and conf folders exist
       become: true
       ansible.builtin.file:
-        path: "{{ item }}"
+        path: "{{ item.path }}"
         state: directory
-        mode: "0755"
-        recurse: true
+        mode: "{{ item.mode }}"
       loop:
-        - "{{ home_dir }}/work"
-        - "{{ home_dir }}/conf"
+        - path: "{{ home_dir }}/work"
+          mode: "0700"
+        - path: "{{ home_dir }}/conf"
+          mode: "0755"
     - name: Ensure config folder exists
       ansible.builtin.file:
         path: "{{ ansible_files_root }}/adguard"
         state: directory
         mode: "0755"
-        recurse: true
     - name: Copy files
       notify:
         - Run AdGuard-Home

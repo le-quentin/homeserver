@@ -154,13 +154,13 @@ filtering:
       answer: {{ dns_ip }}
     - domain: adguard.staging.home
       answer: 10.142.1.2
-    - domain: '{{ nas_address }}'
+    - domain: {{ nas_address }}
       answer: 192.168.50.101
     - domain: '*.{{ homeserver_domain }}'
       answer: 10.42.10.10
     - domain: '*.staging.home'
       answer: 10.142.10.10
-    - domain: 'vps-staging.home'
+    - domain: vps-staging.home
       answer: 10.150.1.10
     - domain: '*.vps-staging.home'
       answer: 10.150.1.10
