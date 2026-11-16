@@ -30,6 +30,10 @@
         path: "{{ ansible_files_root }}/adguard"
         state: directory
         mode: "0755"
+    - name: Keep the user rules set in AdGuard's UI
+      ansible.builtin.include_tasks: "tasks/adguard-user-rules.yaml"
+      vars:
+        adguard_config_path: "{{ home_dir }}/conf/AdGuardHome.yaml"
     - name: Copy files
       notify:
         - Run AdGuard-Home

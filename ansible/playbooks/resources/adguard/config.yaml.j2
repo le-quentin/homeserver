@@ -111,7 +111,12 @@ filters:
     name: OISD Blocklist Small
     id: 1732579950
 whitelist_filters: []
+{# Kept from the running config (managed in AdGuard's UI, see adguard.yaml), in the format AdGuard writes #}
+{% if adguard_user_rules %}
+user_rules:
+{{ adguard_user_rules | to_nice_yaml(indent=2) | indent(2, first=true) }}{% else %}
 user_rules: []
+{% endif %}
 dhcp:
   enabled: false
   interface_name: ""

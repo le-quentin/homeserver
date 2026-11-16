@@ -1,0 +1,70 @@
+# AdGuard's user rules are managed in its UI: a deploy must keep those of the running config, in the
+# format AdGuard writes (else every deploy would see a change and restart AdGuard).
+# Usage: see check_adguard_user_rules.sh
+- name: Check that deploying AdGuard keeps the user rules set in its UI
+  hosts: adguard
+  connection: local
+  gather_facts: false
+  vars:
+    workdir: "{{ lookup('env', 'ADGUARD_TEST_DIR') }}"
+    adguard_config_become: false
+    sample_rules: ["@@||example.org^", "||ads.example.com^", "plain.example.net"]
+    adguard_template: "{{ playbook_dir }}/../playbooks/resources/adguard/config.yaml.j2"
+  tasks:
+    - name: A running config with user rules, as AdGuard writes it
+      ansible.builtin.copy:
+        dest: "{{ workdir }}/with-rules.yaml"
+        mode: "0600"
+        content: |
+          http:
+            address: 0.0.0.0:80
+          user_rules:
+            - '@@||example.org^'
+            - '||ads.example.com^'
+            - plain.example.net
+          dhcp:
+            enabled: false
+    - name: Read its user rules
+      ansible.builtin.include_tasks: "{{ playbook_dir }}/../playbooks/tasks/adguard-user-rules.yaml"
+      vars:
+        adguard_config_path: "{{ workdir }}/with-rules.yaml"
+    - name: Render the deployed config
+      ansible.builtin.set_fact:
+        rendered: "{{ lookup('template', adguard_template) }}"
+    - name: The deployed config keeps them, in AdGuard's format
+      ansible.builtin.assert:
+        that:
+          - adguard_user_rules == sample_rules
+          - (rendered | from_yaml).user_rules == sample_rules
+          - >-
+            "\nuser_rules:\n  - '@@||example.org^'\n  - '||ads.example.com^'\n  - plain.example.net\ndhcp:\n" in rendered
+        quiet: true
+
+    - name: A running config without user rules
+      ansible.builtin.copy:
+        dest: "{{ workdir }}/no-rules.yaml"
+        mode: "0600"
+        content: |
+          user_rules: []
+          dhcp:
+            enabled: false
+    - name: Read its user rules
+      ansible.builtin.include_tasks: "{{ playbook_dir }}/../playbooks/tasks/adguard-user-rules.yaml"
+      vars:
+        adguard_config_path: "{{ workdir }}/no-rules.yaml"
+    - name: The deployed config has none
+      ansible.builtin.assert:
+        that:
+          - adguard_user_rules == []
+          - "'\nuser_rules: []\ndhcp:\n' in lookup('template', adguard_template)"
+        quiet: true
+
+    - name: First install, no running config yet
+      ansible.builtin.include_tasks: "{{ playbook_dir }}/../playbooks/tasks/adguard-user-rules.yaml"
+      vars:
+        adguard_config_path: "{{ workdir }}/missing.yaml"
+    - name: The deployed config has none
+      ansible.builtin.assert:
+        that:
+          - adguard_user_rules == []
+        quiet: true

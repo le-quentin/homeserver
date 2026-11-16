@@ -1,0 +1,21 @@
+---
+# Sets adguard_user_rules to the user rules of AdGuard's running config ([] on a first install).
+# They are managed in AdGuard's UI, not in this repository (they are personal, and it is public): the
+# deployed config keeps them. Parameter: adguard_config_path. Test: test/check_adguard_user_rules.sh.
+- name: Check for AdGuard's current configuration
+  become: "{{ adguard_config_become | default(true) }}"
+  ansible.builtin.stat:
+    path: "{{ adguard_config_path }}"
+  register: adguard_current_config_file
+- name: Read AdGuard's current configuration
+  become: "{{ adguard_config_become | default(true) }}"
+  ansible.builtin.slurp:
+    src: "{{ adguard_config_path }}"
+  register: adguard_current_config
+  when: adguard_current_config_file.stat.exists
+- name: Keep its user rules
+  ansible.builtin.set_fact:
+    adguard_user_rules: >-
+      {{ (adguard_current_config.content | b64decode | from_yaml).user_rules | default([], true)
+         if adguard_current_config_file.stat.exists else [] }}
+  no_log: true # personal: keep them out of the deploy output
