@@ -14,7 +14,7 @@ services:
     environment:
       - VPN_SERVICE_PROVIDER=protonvpn
       - VPN_TYPE=wireguard
-      - WIREGUARD_PRIVATE_KEY="{{ vpn_private_key }}"
+      - WIREGUARD_PRIVATE_KEY="{{ qbittorrent_vpn_private_key }}"
       - SERVER_COUNTRIES="{{ vpn_countries }}"
       - PORT_FORWARD_ONLY=on
       - VPN_PORT_FORWARDING=on
