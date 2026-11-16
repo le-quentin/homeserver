@@ -65,3 +65,5 @@
         project_src: "{{ vpn_watchdog_dir }}"
         state: present
         recreate: always
+      # In check mode the directory may not exist yet (first deploy): report it and go on
+      ignore_errors: "{{ ansible_check_mode }}"
