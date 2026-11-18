@@ -19,6 +19,11 @@ to both monitors.
 
 ## When it trips
 
+The breaker stops a tunnel at 50 connection attempts in an hour made while internet was reachable (dead,
+expired or shared key: a real loop is stopped in ~6 minutes), or at 300 attempts in 3 hours whatever the
+internet check says. An ISP outage alone does not trip it, unless it lasts more than ~30 minutes
+(gluetun retries ~10 times a minute): then there is nothing to fix, only to restart.
+
 The stopped `*-vpn-client-*` container stays down, with its app. Find the cause in its logs
 (`docker logs`), fix it, then restart the app's compose project. The monitor goes back up on the next run.
 
