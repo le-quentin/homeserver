@@ -12,6 +12,8 @@
     homelab_app_backups:
       - volume: data
         cron: "35 5 * * *"
+        exclude:
+          - log
       - volume: mqtt-data
         cron: "45 5 * * *"
   pre_tasks:

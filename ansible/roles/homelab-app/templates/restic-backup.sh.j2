@@ -32,7 +32,7 @@ if ! docker run --rm \
   -e RESTIC_PASSWORD \
   -e RESTIC_HOST \
   homelab-restic-rclone:latest \
-  backup /data; then
+  backup /data{% for excluded in item.exclude | default([]) %} --exclude '/data/{{ excluded }}'{% endfor %}; then
   echo "[restic] ERROR: backup failed for {{ homelab_app_name }}/{{ item.volume }}"
 {% if homelab_app_backups_webhook_url is defined and homelab_app_backups_webhook_url %}
   curl -X POST "{{ homelab_app_backups_webhook_url }}" \

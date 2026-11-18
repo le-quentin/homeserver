@@ -1,0 +1,41 @@
+# Renders the backup script of each backed up volume of the given apps, from the backups declared in
+# their playbooks, without connecting to the hosts.
+# Usage: see check_backup_excludes.sh
+- name: Render the restic backup scripts
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    workdir: "{{ lookup('env', 'BACKUP_TEST_DIR') }}"
+    apps: "{{ lookup('env', 'BACKUP_TEST_APPS').split(' ') }}"
+    # Nothing of the real backups is reachable from the rendered scripts
+    homelab_app_backups_rclone_remote: "test:/backups"
+    homelab_app_backups_restic_password: test
+    homelab_app_backups_webhook_url: ""
+    homelab_app_backups_restic_cache_dir: "{{ workdir }}/cache"
+    homelab_app_backups_rclone_conf_target_dir: "{{ workdir }}/rclone"
+    homelab_app_restic_stats_directory: "{{ workdir }}/stats"
+    homelab_app_backups_retention_daily: 7
+    homelab_app_backups_retention_weekly: 4
+    homelab_app_backups_retention_monthly: 3
+    homelab_app_backups_retention_yearly: 1
+  tasks:
+    - name: Read the backups declared in the playbook of each app
+      ansible.builtin.set_fact:
+        declared_backups: >-
+          {{ declared_backups | default([])
+             + ((lookup('file', playbook_dir ~ '/../playbooks/apps/' ~ app ~ '/main.yaml') | from_yaml)[0].vars.homelab_app_backups
+                | map('combine', {'app': app}) | list) }}
+      loop: "{{ apps }}"
+      loop_control:
+        loop_var: app
+    - name: Render the backup script of each volume
+      ansible.builtin.template:
+        src: "{{ playbook_dir }}/../roles/homelab-app/templates/restic-backup.sh.j2"
+        dest: "{{ workdir }}/scripts/{{ item.app }}-{{ item.volume }}.sh"
+        mode: "0700"
+      vars:
+        homelab_app_name: "{{ item.app }}"
+      loop: "{{ declared_backups }}"
+      loop_control:
+        label: "{{ item.app }}/{{ item.volume }}"

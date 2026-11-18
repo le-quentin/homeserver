@@ -35,6 +35,9 @@ Example Playbook
         homelab_app_backups:
           - volume: config
             cron: "35 6 * * *"
+            # Optional: paths not to back up, relative to the root of the volume
+            exclude:
+              - logs
 
 License
 -------

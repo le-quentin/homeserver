@@ -12,6 +12,10 @@
     homelab_app_backups:
       - volume: config
         cron: "45 6 * * *"
+        exclude:
+          - MediaCover # artist and album images, downloaded again by Lidarr when it refreshes the artists
+          - Backups # Lidarr's own zipped backups of what is already backed up here
+          - logs
   pre_tasks:
     - name: Servarr stack setup
       ansible.builtin.include_tasks: "{{ playbooks_root }}/tasks/servarr-setup.yaml"

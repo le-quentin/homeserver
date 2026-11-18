@@ -10,6 +10,7 @@ ansible-playbook -i "$PROJECT_DIR/inventories/prod" --syntax-check "$PROJECT_DIR
 "$SCRIPT_DIR/check_vpn_keys.sh"
 "$SCRIPT_DIR/check_vpn_watchdog.sh"
 "$SCRIPT_DIR/check_adguard_user_rules.sh"
+"$SCRIPT_DIR/check_backup_excludes.sh"
 set +e
 
 vagrant destroy -f --no-tty
