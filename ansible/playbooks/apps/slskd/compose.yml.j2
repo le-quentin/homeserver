@@ -21,6 +21,9 @@ services:
       # Every route of the control server requires the API key (some are public by default, including
       # PUT /v1/vpn/status, and will require auth in a future gluetun release anyway)
       - 'HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE={"auth":"apikey","apikey":"{{ slskd_gluetun_api_key }}"}'
+      # slskd polls /v1/publicip/ip and /v1/portforward every ~2.5s: logging each request wrote ~70,000
+      # lines a day (~19 MB). VPN events (connections, port forwarding, healthcheck) are still logged.
+      - HTTP_CONTROL_SERVER_LOG=off
   slskd:
     image: slskd/slskd:0.26.2
     container_name: slskd
